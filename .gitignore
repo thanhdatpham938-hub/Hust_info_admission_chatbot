@@ -1,0 +1,12 @@
+# Bí mật — không bao giờ đưa lên git
+.env
+
+__pycache__/
+*.pyc
+
+# Dữ liệu nguồn + chunk RAG: nặng (data/raw ~166M) hoặc chưa chốt nơi lưu trữ lâu dài.
+# Chỉ đưa lên git phần CSV đã xử lý trong data/processed/ — bảng số nhỏ, không có ảnh/PDF scan.
+data/*
+!data/processed
+data/processed/*
+!data/processed/*.csv

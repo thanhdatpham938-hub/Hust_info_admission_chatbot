@@ -1,0 +1,175 @@
+alias,entity_type,entity_code,alias_type,resolution,year,note,dataset_version
+TEEP,program,TE-EP,code_variant,unique,2026,Ảnh điểm chuẩn 2026 và ma_nganh_truong.md ghi TEEP,2026.1
+TEE2,program,TE-E2,code_variant,unique,2026,Ảnh điểm chuẩn 2026 và ma_nganh_truong.md ghi TEE2,2026.1
+CH -E20,program,CH-E20,code_variant,unique,2026,HTML đề án 2026 thừa dấu cách trước gạch nối,2026.1
+MI -E22,program,MI-E22,code_variant,unique,2026,HTML đề án 2026 thừa dấu cách trước gạch nối,2026.1
+Computer Science,program,IT1,en,clarify,,Trùng với TROY-IT — hỏi lại chương trình của HUST hay ĐH Troy,2026.1
+Computer Science,program,TROY-IT,en,clarify,,Trùng với IT1 — hỏi lại chương trình của HUST hay ĐH Troy,2026.1
+Computer Engineering,program,IT2,en,unique,,,2026.1
+Data Science and Artificial Intelligence,program,IT-E10,en,unique,,,2026.1
+Cyber Security,program,IT-E15,en,unique,,Tên tiếng Anh đã nằm sẵn trong tên ngành tiếng Việt,2026.1
+Global ICT,program,IT-E7,en,unique,,Tên tiếng Anh đã nằm sẵn trong tên ngành tiếng Việt,2026.1
+Information Technology (Vietnam-France Program / PFIEV),program,IT-EP,en,unique,,,2026.1
+Information Technology (Vietnam-Japan Program / HEDSPI),program,IT-E6,en,unique,,,2026.1
+Information Technology,program,IT1,en,clarify,,Gõ trống không nên hỏi lại hệ nào,2026.1
+Information Technology,program,IT2,en,clarify,,Gõ trống không nên hỏi lại hệ nào,2026.1
+Information Technology,program,IT-E7,en,clarify,,Gõ trống không nên hỏi lại hệ nào,2026.1
+Information Technology,program,IT-EP,en,clarify,,Gõ trống không nên hỏi lại hệ nào,2026.1
+Information Technology,program,IT-E6,en,clarify,,Gõ trống không nên hỏi lại hệ nào,2026.1
+Electrical Engineering,program,EE1,en,unique,,,2026.1
+Control Engineering and Automation,program,EE2,en,clarify,,Trùng tên với chương trình tiên tiến EE-E8,2026.1
+Control Engineering and Automation,program,EE-E8,en,clarify,,Trùng tên với chương trình chuẩn EE2,2026.1
+Control Engineering and Automation (Advanced Program),program,EE-E8,en,unique,,,2026.1
+Electronics and Telecommunications Engineering,program,ET1,en,clarify,,Trùng tên với chương trình tiên tiến ET-E4,2026.1
+Electronics and Telecommunications Engineering,program,ET-E4,en,clarify,,Trùng tên với chương trình chuẩn ET1,2026.1
+Electronics and Telecommunications Engineering (Advanced Program),program,ET-E4,en,unique,,,2026.1
+Smart Embedded Systems and IoT,program,ET-E9,en,unique,,,2026.1
+Digital Communications and Multimedia Engineering,program,ET-E16,en,unique,,,2026.1
+Electronics and Telecommunications (Leibniz University Hannover Joint Program),program,ET-LUH,en,unique,,,2026.1
+Electric Power Systems and Renewable Energy,program,EE-E18,en,unique,,,2026.1
+Industrial Informatics and Automation (Vietnam-France PFIEV),program,EE-EP,en,unique,,,2026.1
+Biomedical Engineering,program,ET2,en,clarify,,Trùng tên với chương trình tiên tiến ET-E5,2026.1
+Biomedical Engineering,program,ET-E5,en,clarify,,Trùng tên với chương trình chuẩn ET2,2026.1
+Biomedical Engineering (Advanced Program),program,ET-E5,en,unique,,,2026.1
+Mechatronics Engineering,program,ME1,en,clarify,,Trùng tên với chương trình tiên tiến ME-E1,2026.1
+Mechatronics Engineering,program,ME-E1,en,clarify,,Trùng tên với chương trình chuẩn ME1,2026.1
+Mechatronics Engineering (Advanced Program),program,ME-E1,en,unique,,,2026.1
+Mechanical Engineering,program,ME2,en,unique,,,2026.1
+Automotive Engineering,program,TE1,en,clarify,,Trùng tên với chương trình tiên tiến TE-E2,2026.1
+Automotive Engineering,program,TE-E2,en,clarify,,Trùng tên với chương trình chuẩn TE1,2026.1
+Automotive Engineering (Advanced Program),program,TE-E2,en,unique,,,2026.1
+Power Mechanical Engineering,program,TE2,en,unique,,Tên anh chốt thay cho bản dịch nháp Transportation Mechanical,2026.1
+Aerospace Engineering,program,TE3,en,unique,,Anh chốt dùng Aerospace vì rộng hơn Aeronautical,2026.1
+Aeronautical Engineering (Vietnam-France PFIEV),program,TE-EP,en,unique,,Hệ PFIEV ngành này dịch là Aeronautical,2026.1
+Thermal Engineering,program,HE1,en,unique,,Anh chốt Thermal thay cho Heat Engineering,2026.1
+Mechatronics (Leibniz University Hannover Joint Program),program,ME-LUH,en,unique,,,2026.1
+Mechatronics (Nagaoka University of Technology Joint Program),program,ME-NUT,en,unique,,,2026.1
+Mechanical Engineering - Manufacturing (Griffith University Joint Program),program,ME-GU,en,unique,,,2026.1
+Chemical Engineering,program,CH1,en,unique,,,2026.1
+Chemistry,program,CH2,en,unique,,,2026.1
+Pharmaceutical Engineering (Advanced Program),program,CH-E11,en,unique,,Anh chốt rút gọn từ Chemical and Pharmaceutical Engineering,2026.1
+Cosmetic Chemistry (Advanced Program),program,CH-E20,en,unique,2026,Ngành mới mở 2026,2026.1
+Biological Engineering,program,BF1,en,clarify,,Trùng tên với chương trình tiên tiến BF-E19,2026.1
+Biological Engineering,program,BF-E19,en,clarify,,Trùng tên với chương trình chuẩn BF1,2026.1
+Biological Engineering (Advanced Program),program,BF-E19,en,unique,,,2026.1
+Food Engineering,program,BF2,en,clarify,,Trùng tên với chương trình tiên tiến BF-E12,2026.1
+Food Engineering,program,BF-E12,en,clarify,,Trùng tên với chương trình chuẩn BF2,2026.1
+Food Engineering (Advanced Program),program,BF-E12,en,unique,,,2026.1
+Environmental Engineering,program,EV1,en,unique,,,2026.1
+Environmental and Resource Management,program,EV2,en,unique,,,2026.1
+Materials Engineering,program,MS1,en,unique,,Phân biệt với MS-E3 là Materials Science,2026.1
+Materials Science and Engineering (Advanced Program),program,MS-E3,en,unique,,,2026.1
+Microelectronics and Nanotechnology Engineering,program,MS2,en,unique,,,2026.1
+Polymer and Composite Materials Technology,program,MS3,en,unique,,,2026.1
+Printing Engineering,program,MS5,en,unique,,Đã xác minh: trang ngành ts.hust.edu.vn ghi rõ PRINTING ENGINEERING,2026.1
+Graphic Communication and Printing Technology,program,MS5,en,unique,,Tên gọi hiện đại hơn anh nêu thêm,2026.1
+Textile and Garment Technology,program,TX1,en,unique,,,2026.1
+Energy Management,program,EM1,en,unique,,,2026.1
+Industrial Management,program,EM2,en,unique,,,2026.1
+Business Administration,program,EM3,en,clarify,,Trùng với TROY-BA là ngành chỉ tuyển đến 2025,2026.1
+Business Administration,program,TROY-BA,en,clarify,2025,Ngành hợp tác ĐH Troy — không có trong danh mục 2026,2026.1
+Finance and Banking,program,EM5,en,unique,,,2026.1
+Business Analytics,program,EM-E13,en,unique,,,2026.1
+Logistics and Supply Chain Management,program,EM-E14,en,unique,,,2026.1
+Accounting (Advanced Program),program,EM-E17,en,unique,2026,Ngành mới mở 2026,2026.1
+Accounting,program,EM4,en,unique,2025,Ngành Kế toán hệ chuẩn chỉ có đến 2025,2026.1
+Mathematics and Informatics,program,MI1,en,unique,,,2026.1
+Management Information Systems,program,MI2,en,unique,,,2026.1
+Computational Science for Intelligent Systems,program,MI-E22,en,unique,2026,Ngành mới mở 2026,2026.1
+Computer Science (Troy University Joint Program),program,TROY-IT,en,unique,,,2026.1
+Engineering Physics,program,PH1,en,unique,,,2026.1
+Nuclear Engineering,program,PH2,en,unique,,,2026.1
+Medical Physics,program,PH3,en,unique,,,2026.1
+Educational Technology,program,ED2,en,unique,,,2026.1
+Educational Management,program,ED3,en,unique,,,2026.1
+Industrial and Organizational Psychology,program,ED5,en,unique,2026,Ngành mới mở 2026,2026.1
+English for Science and Technology,program,FL1,en,unique,,,2026.1
+Professional and International English,program,FL2,en,unique,,,2026.1
+International Professional English,program,FL2,en,unique,,Tên gốc của Khoa Ngoại ngữ,2026.1
+IPE,program,FL2,abbrev,unique,,Viết tắt của International Professional English,2026.1
+Chinese for Science and Technology,program,FL3,en,unique,,,2026.1
+Korean for Science and Technology,program,FL4,en,unique,2026,Ngành mới mở 2026,2026.1
+Bách khoa CNTT,program,IT1,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+Bách khoa CNTT,program,IT2,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+Bách khoa CNTT,program,IT-E10,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+Bách khoa CNTT,program,IT-E15,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+Bách khoa CNTT,program,IT-E7,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+Bách khoa CNTT,program,IT-E6,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+Bách khoa CNTT,program,IT-EP,colloquial,clarify,,Trỏ về nhóm CNTT rồi hỏi lại,2026.1
+BK CNTT,program,IT1,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+BK CNTT,program,IT2,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+BK CNTT,program,IT-E10,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+BK CNTT,program,IT-E15,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+BK CNTT,program,IT-E7,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+BK CNTT,program,IT-E6,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+BK CNTT,program,IT-EP,colloquial,clarify,,Viết tắt của Bách khoa CNTT,2026.1
+Điện tự động,program,EE2,colloquial,clarify,,Hỏi rõ hệ chuẩn hay tiên tiến hay Việt-Pháp,2026.1
+Điện tự động,program,EE-E8,colloquial,clarify,,Hỏi rõ hệ chuẩn hay tiên tiến hay Việt-Pháp,2026.1
+Điện tự động,program,EE-EP,colloquial,clarify,,Hỏi rõ hệ chuẩn hay tiên tiến hay Việt-Pháp,2026.1
+Tự động hóa,program,EE2,colloquial,clarify,,Hỏi rõ hệ chuẩn hay tiên tiến hay Việt-Pháp,2026.1
+Tự động hóa,program,EE-E8,colloquial,clarify,,Hỏi rõ hệ chuẩn hay tiên tiến hay Việt-Pháp,2026.1
+Tự động hóa,program,EE-EP,colloquial,clarify,,Hỏi rõ hệ chuẩn hay tiên tiến hay Việt-Pháp,2026.1
+Cơ điện tử tiên tiến,program,ME-E1,colloquial,unique,,,2026.1
+Việt Nhật,program,IT-E6,colloquial,unique,,,2026.1
+HEDSPI,program,IT-E6,abbrev,unique,,Thương hiệu quen thuộc của chương trình Việt-Nhật,2026.1
+Việt Pháp CNTT,program,IT-EP,colloquial,unique,,,2026.1
+Việt Pháp,program,IT-EP,colloquial,clarify,,Có 3 chương trình Việt-Pháp nên phải hỏi lại ngành nào,2026.1
+Việt Pháp,program,EE-EP,colloquial,clarify,,Có 3 chương trình Việt-Pháp nên phải hỏi lại ngành nào,2026.1
+Việt Pháp,program,TE-EP,colloquial,clarify,,Có 3 chương trình Việt-Pháp nên phải hỏi lại ngành nào,2026.1
+PFIEV,program,EE-EP,abbrev,clarify,,Đề án 2026 xếp chính thức vào nhóm CHƯƠNG TRÌNH VIỆT - PHÁP (PFIEV),2026.1
+PFIEV,program,TE-EP,abbrev,clarify,,Đề án 2026 xếp chính thức vào nhóm CHƯƠNG TRÌNH VIỆT - PHÁP (PFIEV),2026.1
+PFIEV,program,IT-EP,abbrev,clarify,,Anh chốt gộp vào — lưu ý đề án 2026 xếp IT-EP vào nhóm ELITECH chứ không phải PFIEV,2026.1
+kỹ sư chất lượng cao,program,EE-EP,colloquial,clarify,,Cách gọi cũ của hệ PFIEV,2026.1
+kỹ sư chất lượng cao,program,TE-EP,colloquial,clarify,,Cách gọi cũ của hệ PFIEV,2026.1
+kỹ sư chất lượng cao,program,IT-EP,colloquial,clarify,,Cách gọi cũ của hệ PFIEV,2026.1
+Troy,program,TROY-IT,colloquial,clarify,,Hỏi lại là CNTT hay Quản trị kinh doanh,2026.1
+Troy,program,TROY-BA,colloquial,clarify,2025,Ngành QTKD hợp tác Troy không có trong danh mục 2026,2026.1
+Vi mạch,program,MS2,colloquial,clarify,,Nhu cầu tìm ngành vi mạch bán dẫn rất cao; HUST đào tạo sâu ở MS2 và nhóm ET,2026.1
+Vi mạch,program,ET1,colloquial,clarify,,Hướng thiết kế vi mạch nằm trong Điện tử - Viễn thông,2026.1
+Vi mạch,program,ET-E4,colloquial,clarify,,Hướng thiết kế vi mạch nằm trong Điện tử - Viễn thông hệ tiên tiến,2026.1
+Vi mạch,program,ET-E9,colloquial,clarify,,Hệ thống nhúng liên quan trực tiếp tới thiết kế chip,2026.1
+bán dẫn,program,MS2,colloquial,clarify,,,2026.1
+bán dẫn,program,ET1,colloquial,clarify,,,2026.1
+bán dẫn,program,ET-E4,colloquial,clarify,,,2026.1
+bán dẫn,program,ET-E9,colloquial,clarify,,,2026.1
+chip,program,MS2,colloquial,clarify,,,2026.1
+chip,program,ET1,colloquial,clarify,,,2026.1
+chip,program,ET-E4,colloquial,clarify,,,2026.1
+chip,program,ET-E9,colloquial,clarify,,,2026.1
+Đa phương tiện,program,ET-E16,colloquial,unique,,,2026.1
+Hóa dược,program,CH-E11,colloquial,unique,,,2026.1
+Logistics,program,EM-E14,colloquial,unique,,,2026.1
+Phân tích kinh doanh,program,EM-E13,colloquial,unique,,,2026.1
+BA,program,EM-E13,abbrev,unique,,Viết tắt Business Analytics — chỉ 2 ký tự nên phải khớp theo token nguyên vẹn để không trùng Business Administration,2026.1
+Liên kết quốc tế,program,TROY-IT,colloquial,clarify,,Đề án 2026 chỉ xếp FL2 và TROY-IT vào nhóm này nhưng sinh viên hiểu rộng gồm cả LUH NUT GU,2026.1
+Liên kết quốc tế,program,FL2,colloquial,clarify,,Thuộc nhóm LIÊN KẾT ĐÀO TẠO QUỐC TẾ theo đề án 2026,2026.1
+Liên kết quốc tế,program,ET-LUH,colloquial,clarify,,Đề án 2026 xếp vào nhóm ELITECH nhưng thực chất là hợp tác quốc tế,2026.1
+Liên kết quốc tế,program,ME-LUH,colloquial,clarify,,Đề án 2026 xếp vào nhóm ELITECH nhưng thực chất là hợp tác quốc tế,2026.1
+Liên kết quốc tế,program,ME-NUT,colloquial,clarify,,Đề án 2026 xếp vào nhóm ELITECH nhưng thực chất là hợp tác quốc tế,2026.1
+Liên kết quốc tế,program,ME-GU,colloquial,clarify,,Đề án 2026 xếp vào nhóm ELITECH nhưng thực chất là hợp tác quốc tế,2026.1
+Hợp tác quốc tế,program,TROY-IT,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
+Hợp tác quốc tế,program,FL2,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
+Hợp tác quốc tế,program,ET-LUH,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
+Hợp tác quốc tế,program,ME-LUH,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
+Hợp tác quốc tế,program,ME-NUT,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
+Hợp tác quốc tế,program,ME-GU,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
+SIE,program_group,CHƯƠNG TRÌNH LIÊN KẾT ĐÀO TẠO QUỐC TẾ,abbrev,group,2026,Viện Đào tạo Quốc tế quản lý các chương trình liên kết,2026.1
+Elitech,program_group,CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI),colloquial,group,2026,Lọc theo cột program_group trong quotas_2026.csv gồm 26 ngành,2026.1
+CTTT,program_group,CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI),abbrev,group,2026,Viết tắt chương trình tiên tiến,2026.1
+Chương trình tiên tiến,program_group,CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI),colloquial,group,2026,,2026.1
+Chương trình chuẩn,program_group,CHƯƠNG TRÌNH CHUẨN,colloquial,group,2026,38 ngành hệ chuẩn,2026.1
+Hệ chuẩn,program_group,CHƯƠNG TRÌNH CHUẨN,colloquial,group,2026,,2026.1
+Kỹ thuật Điều khiển - Tự động hoá,program,EE2,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Điều khiển - Tự động hoá,program,EE-E8,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Điện tử - Viễn thông,program,ET1,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Điện tử - Viễn thông,program,ET-E4,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Y sinh,program,ET2,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Y sinh,program,ET-E5,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Cơ điện tử,program,ME1,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Cơ điện tử,program,ME-E1,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Ô tô,program,TE1,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Ô tô,program,TE-E2,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Sinh học,program,BF1,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Sinh học,program,BF-E19,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Thực phẩm,program,BF2,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Kỹ thuật Thực phẩm,program,BF-E12,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1

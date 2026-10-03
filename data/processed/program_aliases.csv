@@ -1,0 +1,5 @@
+alias,canonical_code,year,note,dataset_version
+TEEP,TE-EP,2026,Ảnh điểm chuẩn 2026 và ma_nganh_truong.md ghi TEEP; đề án tuyển sinh cả 2024-2026 và điểm chuẩn 2024-2025 đều ghi TE-EP -> chọn TE-EP làm canonical,2026.1
+TEE2,TE-E2,2026,Ảnh điểm chuẩn 2026 và ma_nganh_truong.md ghi TEE2; các nguồn còn lại ghi TE-E2 -> chọn TE-E2 làm canonical,2026.1
+CH -E20,CH-E20,2026,HTML đề án 2026 thừa dấu cách trước gạch nối,2026.1
+MI -E22,MI-E22,2026,HTML đề án 2026 thừa dấu cách trước gạch nối,2026.1

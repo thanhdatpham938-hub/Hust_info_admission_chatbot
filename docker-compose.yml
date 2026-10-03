@@ -1,0 +1,20 @@
+# Qdrant cho HUST Info & Admission Assistant (PRD muc 16).
+# Chay: docker compose up -d      Dung: docker compose down      (du lieu van con trong volume)
+services:
+  qdrant:
+    # Ghim phien ban khop voi thu vien qdrant-client 1.19 dang cai — client va server lech
+    # minor version co the bao loi API. Doi phien ban thi doi ca hai.
+    image: qdrant/qdrant:v1.19.1
+    container_name: hust-qdrant
+    restart: unless-stopped
+    ports:
+      # Chi mo cho may nay (127.0.0.1), khong mo ra mang LAN: Qdrant local khong bat API key.
+      - "127.0.0.1:6333:6333"   # REST + dashboard http://localhost:6333/dashboard
+      - "127.0.0.1:6334:6334"   # gRPC
+    volumes:
+      # Volume cua Docker, KHONG phai thu muc trong du an: du an nam trong OneDrive, de du lieu
+      # Qdrant o day thi OneDrive se dong bo lien tuc hang nghin file nho va co the lam hong index.
+      - hust_qdrant_data:/qdrant/storage
+
+volumes:
+  hust_qdrant_data:
