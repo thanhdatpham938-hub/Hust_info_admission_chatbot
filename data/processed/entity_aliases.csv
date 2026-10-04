@@ -153,12 +153,12 @@ Hợp tác quốc tế,program,ET-LUH,colloquial,clarify,,Cùng nghĩa với Li�
 Hợp tác quốc tế,program,ME-LUH,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
 Hợp tác quốc tế,program,ME-NUT,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
 Hợp tác quốc tế,program,ME-GU,colloquial,clarify,,Cùng nghĩa với Liên kết quốc tế,2026.1
-SIE,program_group,CHƯƠNG TRÌNH LIÊN KẾT ĐÀO TẠO QUỐC TẾ,abbrev,group,2026,Viện Đào tạo Quốc tế quản lý các chương trình liên kết,2026.1
-Elitech,program_group,CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI),colloquial,group,2026,Lọc theo cột program_group trong quotas_2026.csv gồm 26 ngành,2026.1
-CTTT,program_group,CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI),abbrev,group,2026,Viết tắt chương trình tiên tiến,2026.1
-Chương trình tiên tiến,program_group,CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI),colloquial,group,2026,,2026.1
-Chương trình chuẩn,program_group,CHƯƠNG TRÌNH CHUẨN,colloquial,group,2026,38 ngành hệ chuẩn,2026.1
-Hệ chuẩn,program_group,CHƯƠNG TRÌNH CHUẨN,colloquial,group,2026,,2026.1
+SIE,program_group,lien_ket,abbrev,group,2026,Viện Đào tạo Quốc tế quản lý các chương trình liên kết,2026.1
+Elitech,program_group,elitech,colloquial,group,2026,Lọc theo cột program_group trong quotas_2026.csv gồm 26 ngành,2026.1
+CTTT,program_group,elitech,abbrev,group,2026,Viết tắt chương trình tiên tiến,2026.1
+Chương trình tiên tiến,program_group,elitech,colloquial,group,2026,,2026.1
+Chương trình chuẩn,program_group,chuan,colloquial,group,2026,38 ngành hệ chuẩn,2026.1
+Hệ chuẩn,program_group,chuan,colloquial,group,2026,,2026.1
 Kỹ thuật Điều khiển - Tự động hoá,program,EE2,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
 Kỹ thuật Điều khiển - Tự động hoá,program,EE-E8,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
 Kỹ thuật Điện tử - Viễn thông,program,ET1,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
@@ -173,3 +173,82 @@ Kỹ thuật Sinh học,program,BF1,colloquial,clarify,,Tên chuẩn và tên ti
 Kỹ thuật Sinh học,program,BF-E19,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
 Kỹ thuật Thực phẩm,program,BF2,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
 Kỹ thuật Thực phẩm,program,BF-E12,colloquial,clarify,,Tên chuẩn và tên tiên tiến trùng nhau nên phải khai báo tường minh — nếu không quy tắc khớp chính xác sẽ chỉ ra mã hệ chuẩn và bỏ qua bước hỏi lại,2026.1
+Hoá học Mỹ phẩm (CT tiên tiến),program,CH-E20,name_variant,unique,2026,Tên ngành trong admission_scores_2026.csv,2026.1
+Kế toán (CT tiên tiến),program,EM-E17,name_variant,unique,2026,Tên ngành trong admission_scores_2026.csv,2026.1
+Khoa học tính toán cho các hệ thống thông minh (CT tiên tiến),program,MI-E22,name_variant,unique,2026,Tên ngành trong admission_scores_2026.csv,2026.1
+Tâm lý học công nghiệp và tổ chức,program,ED5,name_variant,unique,2026,Tên ngành trong admission_scores_2026.csv,2026.1
+Tiếng Hàn Khoa học và Công nghệ,program,FL4,name_variant,unique,2026,Tên ngành trong admission_scores_2026.csv,2026.1
+Kỹ thuật Thực phẩm (Chương trình tiên tiến),program,BF-E12,name_variant,unique,2026,Tên ngành trong program_overview_2026.csv,2026.1
+Kỹ thuật sinh học (Chương trình tiên tiến),program,BF-E19,name_variant,unique,2026,Tên ngành trong program_overview_2026.csv,2026.1
+Tiếng Trung KH & KT,program,FL3,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Kỹ thuật Hóa dược,program,CH-E11,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Hệ thống điện và năng lượng tái tạo,program,EE-E18,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Logistics và Quản lý chuỗi cung ứng,program,EM-E14,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Truyền thông số và Kỹ thuật đa phương tiện,program,ET-E16,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Khoa học Dữ liệu và Trí tuệ nhân tạo,program,IT-E10,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+An toàn không gian số - Cyber Security,program,IT-E15,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Khoa học và Kỹ thuật Vật liệu,program,MS-E3,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Hệ thống nhúng thông minh và IoT (tăng cường tiếng Nhật),program,ET-E9,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Công nghệ Thông tin Việt – Nhật (tăng cường tiếng Nhật),program,IT-E6,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Công nghệ Thông tin Việt-Pháp (tăng cường tiếng Pháp),program,IT-EP,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Điện tử - Viễn thông - ĐH Leibniz Hannover (CHLB Đức),program,ET-LUH,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Cơ điện tử - hợp tác với ĐH Leibniz Hannover (CHLB Đức),program,ME-LUH,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Cơ điện tử - hợp tác với ĐHCN Nagaoka (Nhật Bản),program,ME-NUT,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Cơ khí Chế tạo máy – hợp tác với trường ĐH Griffith (Australia),program,ME-GU,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Tin học công nghiệp và Tự động hóa,program,EE-EP,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Cơ khí Hàng không,program,TE-EP,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Quản trị Kinh doanh - ĐH Troy (Hoa Kỳ) (do ĐH Troy cấp bằng),program,TROY-BA,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Khoa học Máy tính - ĐH Troy (Hoa Kỳ) (do ĐH Troy cấp bằng),program,TROY-IT,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Tiếng Anh chuyên nghiệp quốc tế (do ĐHBK Hà Nội và ĐH Plymouth Marjon-Vương quốc Anh cấp bằng),program,FL2,name_variant,unique,2025,Tên ngành trong quotas_2025.csv,2026.1
+Tiếng Trung KH & CN,program,FL3,name_variant,unique,2026,Tên ngành trong quotas_2026.csv,2026.1
+Tiếng Hàn KH&CN,program,FL4,name_variant,unique,2026,Tên ngành trong quotas_2026.csv,2026.1
+Hóa học Mỹ phẩm,program,CH-E20,name_variant,unique,2026,Tên ngành trong quotas_2026.csv,2026.1
+Khoa học tính toán cho các hệ thống thông minh,program,MI-E22,name_variant,unique,2026,Tên ngành trong quotas_2026.csv,2026.1
+Cơ khí Chế tạo máy - hợp tác với trường ĐH Griffith (Úc),program,ME-GU,name_variant,unique,2026,Tên ngành trong quotas_2026.csv,2026.1
+SoICT,faculty,SOICT,abbrev,unique,2026,,2026.1
+Trường Công nghệ Thông tin và Truyền thông,faculty,SOICT,colloquial,unique,2026,Tên đầy đủ,2026.1
+Trường CNTT và TT,faculty,SOICT,colloquial,unique,2026,Tên trong data/faculty/soict/info.json,2026.1
+Viện Công nghệ Thông tin và Truyền thông,faculty,SOICT,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+SEEE,faculty,SEEE,abbrev,unique,2026,,2026.1
+Viện Điện,faculty,SEEE,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+Viện Điện tử - Viễn thông,faculty,SEEE,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+SME,faculty,SME,abbrev,unique,2026,,2026.1
+Viện Cơ khí,faculty,SME,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+Viện Cơ khí động lực,faculty,SME,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+Viện Khoa học và Công nghệ Nhiệt Lạnh,faculty,SME,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+SCLS,faculty,SCLS,abbrev,unique,2026,,2026.1
+Trường Hóa và Khoa học sự sống,faculty,SCLS,colloquial,unique,2026,Tên trong data/faculty/scls/info.json,2026.1
+Viện Kỹ thuật Hóa học,faculty,SCLS,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+Viện Công nghệ Sinh học và Công nghệ Thực phẩm,faculty,SCLS,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+Viện Khoa học và Công nghệ Môi trường,faculty,SCLS,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+SMSE,faculty,SMSE,abbrev,unique,2026,,2026.1
+Viện Khoa học và Kỹ thuật Vật liệu,faculty,SMSE,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+Viện Dệt may - Da giầy và Thời trang,faculty,SMSE,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+SEM,faculty,SEM,abbrev,unique,2026,,2026.1
+Viện Kinh tế và Quản lý,faculty,SEM,old_name,unique,2026,"Tên cũ, có trong giới thiệu Trường",2026.1
+FAMI,faculty,FAMI,abbrev,unique,2026,,2026.1
+SEP,faculty,SEP,abbrev,unique,2026,,2026.1
+Viện Vật lý Kỹ thuật,faculty,SEP,old_name,unique,2026,"Tên cũ, có trong giới thiệu Khoa",2026.1
+Viện Kỹ thuật hạt nhân và Vật lý môi trường,faculty,SEP,old_name,unique,2026,"Tên cũ, sáp nhập vào Khoa Vật lý Kỹ thuật",2026.1
+SOFL,faculty,SOFL,abbrev,unique,2026,,2026.1
+FED,faculty,FED,abbrev,unique,2026,,2026.1
+Khoa Khoa học và Công nghệ Giáo dục,faculty,FED,colloquial,unique,2026,"Tên đầy đủ, trong data/faculty/fed/info.json",2026.1
+Viện Sư phạm Kỹ thuật,faculty,FED,old_name,unique,2026,"Tên cũ, có trong giới thiệu Khoa",2026.1
+IELTS,certificate,IELTS_ACADEMIC,colloquial,unique,2026,,2026.1
+TOEFL,certificate,TOEFL_IBT,colloquial,clarify,2026,,2026.1
+TOEFL,certificate,TOEFL_ITP,colloquial,clarify,2026,,2026.1
+TOEIC,certificate,TOEIC_LISTENING,colloquial,group,2026,TOEIC tính trung bình 4 kỹ năng,2026.1
+TOEIC,certificate,TOEIC_SPEAKING,colloquial,group,2026,TOEIC tính trung bình 4 kỹ năng,2026.1
+TOEIC,certificate,TOEIC_READING,colloquial,group,2026,TOEIC tính trung bình 4 kỹ năng,2026.1
+TOEIC,certificate,TOEIC_WRITING,colloquial,group,2026,TOEIC tính trung bình 4 kỹ năng,2026.1
+Aptis,certificate,APTIS_ESOL,colloquial,unique,2026,,2026.1
+PTE,certificate,PTE_ACADEMIC,colloquial,unique,2026,,2026.1
+Cambridge,certificate,CAMBRIDGE_ASSESSMENT,colloquial,clarify,2026,,2026.1
+Cambridge,certificate,CAMBRIDGE_TESTS,colloquial,clarify,2026,,2026.1
+DELF,certificate,DELF_DALF,colloquial,unique,2026,,2026.1
+DALF,certificate,DELF_DALF,colloquial,unique,2026,,2026.1
+Goethe,certificate,GOETHE,colloquial,unique,2026,,2026.1
+HSK,certificate,HSK_HSKK,colloquial,unique,2026,,2026.1
+HSKK,certificate,HSK_HSKK,colloquial,unique,2026,,2026.1
+LanguageCert,certificate,LANGUAGECERT_ACADEMIC,colloquial,unique,2026,,2026.1
+Oxford Test of English,certificate,OTE,colloquial,unique,2026,,2026.1

@@ -24,6 +24,13 @@ ROOT = Path(__file__).resolve().parent.parent
 FACULTY_DIR = ROOT / "data" / "faculty"
 OUT_DIR = ROOT / "data" / "programs"
 PROGRAMS_CSV = ROOT / "data" / "processed" / "programs_2026.csv"
+# Ma Khoa lay theo faculty_name cua danh muc nganh, KHONG theo trang Khoa nao co link toi nganh:
+# cach cu gan TE1 -> FED (trang FED co link trung ten) va bo trong TROY-IT (khong trang Khoa nao
+# link toi). Sua 2026-10-04, PLAN - Data Linking L1.
+FACULTY_CODE = {
+    r["faculty_name"]: r["faculty_code"]
+    for r in csv.DictReader((ROOT / "data" / "processed" / "linking" / "faculties.csv").open(encoding="utf-8"))
+}
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; HUST-chatbot-data-collector/1.0)"}
 SPAM = re.compile(r"789win|98win|99ok|b52|kubet|nohu|sunwin|go88|bk8|sv388|m88|okvip", re.I)
@@ -137,7 +144,7 @@ if __name__ == "__main__":
                 {
                     "program_code": code,
                     "program_name": by_code[code]["program_name"],
-                    "faculty_code": link["faculty_code"],
+                    "faculty_code": FACULTY_CODE[by_code[code]["faculty_name"]],
                     "faculty_name": by_code[code]["faculty_name"],
                     "short_description": desc,
                     "curriculum_url": link["url"],

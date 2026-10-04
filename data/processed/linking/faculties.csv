@@ -1,0 +1,11 @@
+faculty_code,faculty_name,website_url,source,source_url,collection_date,verification_status,dataset_version
+SOICT,Trường CNTT&TT,https://soict.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/soict/info.json,https://soict.hust.edu.vn/,2026-09-21,html_parsed,2026.1
+SEEE,Trường Điện - Điện tử,https://seee.hust.edu.vn/vi/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/seee/info.json,https://seee.hust.edu.vn/vi/,2026-09-21,html_parsed,2026.1
+SME,Trường Cơ khí,https://sme.hust.edu.vn/vi/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/sme/info.json,https://sme.hust.edu.vn/vi/,2026-09-21,html_parsed,2026.1
+SCLS,Trường Hóa & KHSS,https://scls.hust.edu.vn/vi/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/scls/info.json,https://scls.hust.edu.vn/vi/,2026-09-21,html_parsed,2026.1
+SMSE,Trường Vật liệu,https://smse.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/smse/info.json,https://smse.hust.edu.vn/,2026-09-21,html_parsed,2026.1
+SEM,Trường Kinh tế,https://sem.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/sem/info.json,https://sem.hust.edu.vn/,2026-09-21,html_parsed,2026.1
+FAMI,Khoa Toán - Tin,https://fami.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/fami/info.json,https://fami.hust.edu.vn/,2026-09-21,html_parsed,2026.1
+SEP,Khoa Vật lý Kỹ thuật,https://sep.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/sep/info.json,https://sep.hust.edu.vn/,2026-09-21,html_parsed,2026.1
+SOFL,Khoa Ngoại ngữ,https://sofl.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/sofl/info.json,https://sofl.hust.edu.vn/,2026-09-21,html_parsed,2026.1
+FED,Khoa KH&CN Giáo dục,https://fed.hust.edu.vn/,Tên theo danh mục ngành đề án 2026 (programs_2026.faculty_name); web từ data/faculty/fed/info.json,https://fed.hust.edu.vn/,2026-09-21,html_parsed,2026.1

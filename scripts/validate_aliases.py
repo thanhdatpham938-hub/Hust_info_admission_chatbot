@@ -21,10 +21,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PROCESSED = ROOT / "data" / "processed"
+LINKING = PROCESSED / "linking"
 ALIAS_CSV = PROCESSED / "entity_aliases.csv"
 
-VALID_TYPES = {"program", "program_group"}
-VALID_ALIAS_TYPES = {"en", "colloquial", "abbrev", "code_variant"}
+# faculty / certificate them 2026-10-04 (PLAN - Data Linking L7): ma tro toi nam o
+# data/processed/linking/faculties.csv va certificates.csv
+VALID_TYPES = {"program", "program_group", "faculty", "certificate"}
+# name_variant: ten nganh o bang khac (quotas, trang nganh...) khac ten chuan;
+# old_name: ten cu truoc tai cau truc (vd "Vien Dien" -> SEEE)
+VALID_ALIAS_TYPES = {"en", "colloquial", "abbrev", "code_variant", "name_variant", "old_name"}
 VALID_RESOLUTIONS = {"unique", "clarify", "group"}
 MIN_ALIAS_LEN = 2
 
@@ -47,11 +52,15 @@ def load_known() -> tuple[dict[str, str], set[str]]:
         for row in csv.DictReader(path.open(encoding="utf-8", newline="")):
             codes.setdefault(row["program_code"], year)
             codes[row["program_code"]] = max(codes[row["program_code"]], year)
-    for path in sorted(PROCESSED.glob("quotas_*.csv")):
-        for row in csv.DictReader(path.open(encoding="utf-8", newline="")):
-            if row.get("program_group"):
-                groups.add(row["program_group"])
+    # Nhom nganh tro bang MA (chuan/elitech/pfiev/lien_ket) tu 2026-10-04, khong con tro
+    # bang chuoi chu hoa dai trong quotas_*.csv (PLAN - Data Linking R8)
+    groups = {r["program_group_code"] for r in csv.DictReader(
+        (LINKING / "program_groups.csv").open(encoding="utf-8", newline=""))}
     return codes, groups
+
+
+def load_linking_codes(name: str, key: str) -> set[str]:
+    return {r[key] for r in csv.DictReader((LINKING / name).open(encoding="utf-8", newline=""))}
 
 
 def load_program_names() -> dict[str, str]:
@@ -137,6 +146,8 @@ def main() -> int:
     # crash o chuoi None — phat hien khi thu nguoc 2026-09-27)
     rows = [r for r in rows if None not in r and all(v is not None for v in r.values())]
     known_codes, known_groups = load_known()
+    known_faculties = load_linking_codes("faculties.csv", "faculty_code")
+    known_certs = load_linking_codes("certificates.csv", "cert_code")
     program_names = load_program_names()
 
     errors, warnings = list(shape_errors), []
@@ -166,7 +177,11 @@ def main() -> int:
         if etype == "program" and code not in known_codes:
             errors.append(f"dòng {i}: alias '{alias}' trỏ tới mã ngành '{code}' không tồn tại ở năm nào")
         if etype == "program_group" and code not in known_groups:
-            errors.append(f"dòng {i}: alias '{alias}' trỏ tới nhóm '{code}' không có trong quotas_*.csv")
+            errors.append(f"dòng {i}: alias '{alias}' trỏ tới nhóm '{code}' không có trong linking/program_groups.csv")
+        if etype == "faculty" and code not in known_faculties:
+            errors.append(f"dòng {i}: alias '{alias}' trỏ tới mã Khoa '{code}' không có trong linking/faculties.csv")
+        if etype == "certificate" and code not in known_certs:
+            errors.append(f"dòng {i}: alias '{alias}' trỏ tới chứng chỉ '{code}' không có trong linking/certificates.csv")
 
         if (normalize(alias), code) in seen_pairs:
             errors.append(f"dòng {i}: trùng dòng ({alias}, {code})")

@@ -45,6 +45,12 @@ CURRICULUM_OVERRIDE = {
 RAG = ROOT / "data" / "rag" / "raw_chunks"
 PROCESSED = ROOT / "data" / "processed"
 PROGRAMS_DIR = ROOT / "data" / "programs"
+# faculty_name -> ma Khoa, tu bang danh muc (PLAN - Data Linking L1, 2026-10-04). Truoc day file
+# JSON tao moi o day de faculty_code rong (TROY-IT).
+FACULTY_CODE = {
+    r["faculty_name"]: r["faculty_code"]
+    for r in csv.DictReader((ROOT / "data" / "processed" / "linking" / "faculties.csv").open(encoding="utf-8"))
+}
 YEAR = 2026
 
 # Cac muc trong div.wrap_view: nhan -> ten cot trong CSV thong tin nhanh
@@ -247,7 +253,7 @@ def update_program_json(entry: dict, page: dict, faculty_name: str) -> None:
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {
         "program_code": entry["program_code"],
         "program_name": entry["program_name"],
-        "faculty_code": "",
+        "faculty_code": FACULTY_CODE.get(faculty_name, ""),
         "faculty_name": faculty_name,
         "curriculum_url": "",
         "source_title": "",

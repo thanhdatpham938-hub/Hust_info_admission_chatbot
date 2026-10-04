@@ -1,0 +1,28 @@
+cert_code,cert_name,language,source_names,dataset_version
+IELTS_ACADEMIC,IELTS Academic,Tiếng Anh,IELTS Academic,2026.1
+VSTEP,VSTEP,Tiếng Anh,VSTEP,2026.1
+APTIS_ESOL,Aptis ESOL,Tiếng Anh,Aptis Esol|Aptis ESOL|APTIS ESOL,2026.1
+PEIC,PEIC,Tiếng Anh,PEIC,2026.1
+PTE_ACADEMIC,PTE Academic,Tiếng Anh,PTE Academic,2026.1
+LINGUASKILL,Linguaskill,Tiếng Anh,Linguaskill,2026.1
+CAMBRIDGE_ASSESSMENT,Cambridge Assessment English,Tiếng Anh,Cambridge Assessment English,2026.1
+CAMBRIDGE_TESTS,Cambridge English Tests,Tiếng Anh,Cambridge English Tests,2026.1
+TOEIC_LISTENING,TOEIC Nghe,Tiếng Anh,TOEIC Nghe,2026.1
+TOEIC_SPEAKING,TOEIC Nói,Tiếng Anh,TOEIC Nói,2026.1
+TOEIC_READING,TOEIC Đọc,Tiếng Anh,TOEIC Đọc,2026.1
+TOEIC_WRITING,TOEIC Viết,Tiếng Anh,TOEIC Viết,2026.1
+TOEFL_IBT,TOEFL iBT,Tiếng Anh,TOEFL iBT,2026.1
+TOEFL_ITP,TOEFL ITP,Tiếng Anh,TOEFL ITP,2026.1
+LANGUAGECERT_ACADEMIC,LanguageCert Academic,Tiếng Anh,LanguageCert Academic,2026.1
+OTE,Oxford Test of English (OTE),Tiếng Anh,Oxford Test of English (OTE),2026.1
+VEPT,VEPT,Tiếng Anh,VEPT,2026.1
+CEFR,Khung tham chiếu CEFR,Chung,CEFR,2026.1
+DELF_DALF,DELF/DALF,Tiếng Pháp,DELF/DALF,2026.1
+TCF,TCF,Tiếng Pháp,TCF,2026.1
+TESTDAF,TestDaF,Tiếng Đức,TestDaF,2026.1
+GOETHE,Goethe/ÖSD/telc/ECL,Tiếng Đức,Goethe/OSD/telc/ECL,2026.1
+DSH,DSH,Tiếng Đức,DSH,2026.1
+DSD,DSD,Tiếng Đức,DSD,2026.1
+JLPT,JLPT,Tiếng Nhật,JLPT,2026.1
+HSK_HSKK,HSK + HSKK,Tiếng Trung,HSK+HSKK,2026.1
+TOPIK,TOPIK,Tiếng Hàn,TOPIK,2026.1

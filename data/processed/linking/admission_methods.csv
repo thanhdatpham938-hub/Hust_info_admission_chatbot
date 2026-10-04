@@ -1,0 +1,7 @@
+method_code,method_name,parent_method,scale,note,dataset_version
+THPT,Xét tuyển theo điểm thi tốt nghiệp THPT,,30,,2026.1
+DGTD,Xét tuyển theo điểm thi Đánh giá tư duy (TSA),,100,,2026.1
+XTTN,Xét tuyển tài năng,,100,Cấp cha của 3 diện; program_methods ghi ở cấp này,2026.1
+XTTN_1.1,Xét tuyển thẳng theo quy định của Bộ GD&ĐT,XTTN,,Không có điểm chuẩn,2026.1
+XTTN_1.2,Xét tuyển theo chứng chỉ quốc tế,XTTN,100,admission_scores ghi ở cấp này,2026.1
+XTTN_1.3,Xét tuyển theo hồ sơ năng lực kết hợp phỏng vấn,XTTN,100,admission_scores ghi ở cấp này,2026.1
