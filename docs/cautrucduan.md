@@ -37,17 +37,19 @@ hust_chatbot/
 │   ├── faculty/                           ✅ <mã_khoa>/info.json + gioi_thieu.md (10 đơn vị)
 │   ├── rag/
 │   │   ├── raw_chunks/                    ✅ 622 chunk gốc (14 file .chunks.jsonl + bản .md để đọc)
-│   │   └── normalized/                    ✅ 637 chunk đã chuẩn hoá metadata -> ĐEM ĐI EMBED
+│   │   └── normalized/                    ✅ 641 chunk đã chuẩn hoá metadata -> ĐEM ĐI EMBED
 │   ├── link.md                            ✅ danh sách link nguồn do anh lập (đầu vào thu thập)
 │   └── link_dao_tao_nganh.md              ✅ link 68 trang ngành (đầu vào của crawl_program_pages.py)
 │
-├── scripts/                               ✅ 31 script xử lý dữ liệu (chạy theo lô, không phải service)
+├── scripts/                               ✅ 33 script xử lý dữ liệu (chạy theo lô, không phải service)
 │   ├── crawl_*.py, extract_departments.py         # thu thập
 │   ├── build_*.py, fix_*.py, add_main_subject.py, verify_subject_combinations.py, aliases.py   # dựng bảng CSV
 │   ├── pdf_to_rag_md.py, sotay_to_rag.py, de_an_to_rag.py, scan_md_to_rag.py, faculty_to_rag.py # sinh chunk
 │   ├── normalize_chunks.py, normalize_csv_meta.py # chuẩn hoá metadata
 │   ├── validate_*.py, check_dangling_refs.py, coverage_report.py, probe_questions.py            # kiểm tra
 │   ├── check_setup.py                             # kiểm tra .env + Qdrant + OpenAI
+│   ├── embed_chunks.py, search_chunks.py          # nhúng vào Qdrant + tìm thử/đo retrieval
+│   ├── Dockerfile, requirements-ingest.txt        # image cho service "ingest" (docker-compose.yml)
 │   └── build_source_list.py                       # sinh docs/nguon_du_lieu.md
 │
 ├── docs/                                  ✅
@@ -56,11 +58,12 @@ hust_chatbot/
 │   ├── PLAN - Metadata Design (v1).md     # lịch sử; bản hiện hành là v2
 │   ├── PLAN - Metadata Design (v2).md
 │   ├── PLAN - Data Linking (v1).md        # chưa thực hiện
+│   ├── PLAN - Embedding (v1).md           # đã thực hiện — 641 chunk trong Qdrant
 │   ├── nguon_du_lieu.md                   # tổng hợp link nguồn (sinh tự động)
 │   ├── cautrucduan.md                     # file này
 │   └── ghi_chu/                           # ghi chú theo ngày
 │
-├── docker-compose.yml                     ✅ Qdrant (sẽ thêm postgres + backend + frontend)
+├── docker-compose.yml                     ✅ Qdrant + service "ingest" (sẽ thêm postgres + backend + frontend)
 ├── .env.example                           ✅
 ├── .gitignore                             ✅
 └── README.md                              ✅
@@ -96,4 +99,6 @@ python scripts/normalize_csv_meta.py            # bù 6 cột chuẩn cho CSV
 python scripts/normalize_chunks.py              # -> data/rag/normalized/
 python scripts/validate_metadata.py             # phải 0 lỗi
 python scripts/build_source_list.py             # cập nhật docs/nguon_du_lieu.md
+docker compose run --rm ingest python scripts/embed_chunks.py --recreate   # nhúng lại vào Qdrant
+docker compose run --rm ingest python scripts/search_chunks.py --eval     # đo lại retrieval
 ```

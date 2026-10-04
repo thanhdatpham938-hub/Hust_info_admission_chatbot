@@ -568,7 +568,7 @@ Router + Context: program=IT1, year=2025
 
 ## 16. Vector Database
 
-Sử dụng Qdrant hoặc Pinecone. Embedding: `text-embedding-3-small`. Vector record chứa: embedding, chunk\_text, metadata (phục vụ citation và filtering).
+Sử dụng Qdrant hoặc Pinecone. Embedding: `text-embedding-3-large` (3072 chiều; đổi từ `-small` ngày 2026-10-04, xem `PLAN - Embedding (v1).md` mục 6.3). Vector record chứa: embedding, chunk\_text, metadata (phục vụ citation và filtering).
 
 ## 17. LLM
 
@@ -769,7 +769,7 @@ và hệ thống có khả năng từ chối hoặc fallback khi không có đ�
 | Backend | FastAPI + Python 3.11+ |
 | Agent Framework | LangGraph |
 | LLM | OpenAI GPT-4o-mini |
-| Embedding | text-embedding-3-small |
+| Embedding | text-embedding-3-large (đổi từ -small ngày 2026-10-04, xem `PLAN - Embedding (v1).md` mục 6.3) |
 | Structured DB | PostgreSQL |
 | Vector DB | Qdrant / Pinecone |
 | Observability | Langfuse |
