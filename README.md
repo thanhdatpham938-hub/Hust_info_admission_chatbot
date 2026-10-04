@@ -3,13 +3,13 @@
 Chatbot tra cứu thông tin tuyển sinh và học vụ Đại học Bách khoa Hà Nội (LangGraph, tiếng Việt).
 Hai tầng dữ liệu: **bảng số** (PostgreSQL) cho điểm chuẩn, chỉ tiêu, học phí… và **văn bản** (RAG trên Qdrant) cho quy chế, đề án, sổ tay, giới thiệu ngành.
 
-## Trạng thái (2026-10-04)
+## Trạng thái (2026-10-05)
 
 | Hạng mục | Trạng thái |
 |---|---|
 | Thu thập dữ liệu | Xong — 14 nguồn văn bản, 24 bảng CSV |
 | Chuẩn hoá metadata | Xong — 641 chunk trong `data/rag/normalized/`, `dataset_version = 2026.1` |
-| Nối bảng dữ liệu | Xong — SQLite `data/db/hust.sqlite` (22 bảng, 0 khoá ngoại mồ côi) dựng từ CSV bằng `build_db.py`. Chi tiết: `docs/PLAN - Data Linking (v1).md` |
+| Nối bảng dữ liệu | Xong — SQLite `data/db/hust.sqlite` (23 bảng, 0 khoá ngoại mồ côi, gồm cả liên hệ 10 Trường/Khoa), dựng từ CSV bằng `build_db.py`. Chi tiết: `docs/PLAN - Data Linking (v1).md` |
 | Embedding | Xong — 641 chunk trong Qdrant (`hust_rag_2026_1`, `text-embedding-3-large`); retrieval hit@5 81% (bỏ câu đã biết thiếu dữ liệu). Chi tiết: `docs/PLAN - Embedding (v1).md` |
 | Backend / Frontend | Chưa bắt đầu (mới có khung thư mục) |
 

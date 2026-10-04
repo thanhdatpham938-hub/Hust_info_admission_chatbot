@@ -165,6 +165,7 @@ CSV hiện chưa có cột `id`, và **không cần thêm cho mọi bảng**. Kh
 ```mermaid
 erDiagram
   FACULTIES ||--o{ PROGRAMS : "faculty_code"
+  FACULTIES ||--o{ FACULTY_UNITS : "faculty_code"
   PROGRAM_GROUPS ||--o{ PROGRAMS : "program_group_code"
   PROGRAMS ||--o{ PROGRAM_YEARS : "program_code"
   PROGRAM_YEARS ||--o{ ADMISSION_SCORES : "program_code, year"
@@ -323,4 +324,21 @@ python scripts/validate_links.py            # 0 lỗi
 - Chuyển SQLite → PostgreSQL (service `postgres` trong `docker-compose.yml`, cổng máy 5433) khi bắt đầu Admission SQL Tool (Tuần 3).
 - `cert_value` dạng nhiều khoảng ("6.0-6.5 / 7.0-7.5 / 8.0" của VSTEP 2025) chưa tách được thành số.
 - Bảng tổ hợp theo ngành vẫn chỉ có 2026 (L9).
+
+## Bổ sung 2026-10-05: liên hệ và đơn vị trực thuộc của Trường/Khoa (khép Tuần 1)
+
+PRD mục 15.1 yêu cầu `faculties` có `address`, `contact_info`, `departments`, `official_channel_url`; bản 2026-10-04 mới có mã, tên, website.
+
+| Việc | Cách làm | Vì sao |
+|---|---|---|
+| Thêm `phone`, `email`, `address` vào `linking/faculties.csv` | Đối chiếu 2 nguồn: `data/link.md` (người dùng bổ sung) và mục "Đơn vị quản lý" trên trang ngành ts.hust.edu.vn. 6/10 khớp; 4 chỗ lệch (SEEE, SCLS, SMSE, SME) do **người dùng chốt**: lấy theo trang ngành, riêng SME ghi cả hai số | Không tự chọn giữa hai nguồn khi không biết nguồn nào mới hơn. Lý do từng Khoa ghi ở cột `contact_note`, link nguồn ở `contact_source_url` |
+| SEM lấy địa chỉ theo trang ngành (P403-404 C9) thay vì `link.md` (P406-407) | Áp cùng quy tắc người dùng chốt cho 3 chỗ lệch kia; ghi "cần người dùng xác nhận" trong `contact_note` | Chỗ lệch này phát hiện sau khi đã hỏi |
+| Giữ đủ các hotline khi nguồn ghi nhiều số (SEEE, SME, SEP, FAMI, SEM) | Nhiều số cách nhau bằng `;`, ghi chú trong ngoặc (vd "riêng chương trình TROY") | Người dùng chọn "ghi cả hai" cho SME; một đơn vị có hai hotline là bình thường |
+| FAMI "04 3869 2137" → "024 3869 2137" | — | Mã vùng Hà Nội đổi từ 04 sang 024 năm 2017; trang ngành đã ghi 024 |
+| Email SME lấy `sme@hust.edu.vn` (link.md) | — | Trang ngành ghi sai thành "sme.hust.edu.vn" (thiếu @) |
+| Đổi cột `website_url` → `official_channel_url` | — | Trùng tên PRD mục 15.1 (phục vụ ANNOUNCEMENT_QUERY) |
+| `departments` → bảng mới `faculty_units` (34 dòng, `unit_type` = khoa / bo_mon / trung_tam) | Lọc từ `data/faculty/*/info.json`: bỏ "Ban Giám hiệu", "Văn phòng", tên bị cắt cụt ("Khoa Khoa học &"), gộp dòng trùng | Danh sách gốc lẫn đơn vị hành chính và rác; nạp nguyên thì "Trường X có những khoa nào" trả lời sai. SEM, SOFL không có đơn vị chuyên môn nào trong dữ liệu thu được → để trống, `validate_links` cảnh báo W6 |
+| Luật mới trong `validate_links.py`: E7 định dạng số/email, W5 thiếu liên hệ, W6 thiếu đơn vị | Số di động 10 chữ số (03/05/07/08/09), số bàn 11 chữ số (02x) | Bắt đúng 2 lỗi đã gặp trong nguồn (mã vùng cũ, email thiếu @); tự thử ngược **16/16** |
+
+Kết quả: DB 23 bảng, 0 trùng khoá, 0 khoá ngoại mồ côi; `validate_links` 0 lỗi, 7 cảnh báo (5 cũ + W6 cho SEM, SOFL). Truy vấn "Viện Cơ khí động lực ở đâu, hotline?" → alias tên cũ → Trường Cơ khí, VP C7-614M, 086 804 0770; 024 3869 6165.
 

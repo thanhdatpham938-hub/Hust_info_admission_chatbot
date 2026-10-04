@@ -595,17 +595,18 @@ Sử dụng Langfuse để theo dõi: request, router decision, tool call, SQL l
 
 **Tuần 1 — Data Foundation:** thiết kế PostgreSQL schema (`programs`, `admission_methods`, `admission_scores`, `entity_aliases`, `faculties`, cùng các bảng bổ sung ở mục 15.1); thu thập & chuẩn hóa dữ liệu tuyển sinh 2024–2026; thu thập PDF, chuyển sang Markdown, gán metadata; chuẩn bị tài liệu Khoa/Viện. Deliverable: PostgreSQL database + cleaned Markdown documents.
 
-*Trạng thái 2026-09-23 — phần thu thập đã xong, phần nạp DB chưa:*
+*Trạng thái 2026-10-05 — Tuần 1 xong (thay bảng ngày 2026-09-23; bảng cũ còn trong lịch sử git):*
 
 | Hạng mục | Trạng thái |
 | --- | --- |
-| Thu thập & chuẩn hoá dữ liệu tuyển sinh | ✔ 20 bảng CSV, có script validate tự động |
-| PDF → Markdown + gán metadata | ✔ 573 chunk / 11 tài liệu |
-| Từ điển alias | ✔ 174 dòng, phủ 68/68 ngành |
-| Nạp vào PostgreSQL (DDL + import) | ✖ **chưa làm** — đang ở dạng CSV |
-| `faculties`: bổ sung `address` + `contact_info` | ✖ chưa — dữ liệu đã có sẵn trong chunk "Đơn vị quản lý", chỉ cần script rút ra |
-| Chuẩn hoá schema chunk theo mục 11.3 (thêm `dataset_version`, `collection_date`) | ✖ **phải xong trước khi embed ở Tuần 2**, nếu không phải nhúng lại toàn bộ |
-| Bổ sung `page_no` cho 80 chunk nguồn PDF/scan | ✖ chưa — ảnh hưởng trực tiếp AC4 |
+| Thu thập & chuẩn hoá dữ liệu tuyển sinh | ✔ 24 bảng CSV, có script validate tự động |
+| PDF → Markdown + gán metadata | ✔ 641 chunk / 14 tài liệu, đủ `dataset_version`, `collection_date`, `page_no` (xem `PLAN - Metadata Design (v2).md`) |
+| Từ điển alias | ✔ 253 dòng: ngành (68/68), nhóm ngành, Trường/Khoa, chứng chỉ |
+| Thiết kế schema + nạp DB | ✔ 23 bảng trong **SQLite** `data/db/hust.sqlite`, dựng lại từ CSV bằng `build_db.py`; 0 trùng khoá, 0 khoá ngoại mồ côi (xem `PLAN - Data Linking (v1).md`). **Lệch so với deliverable:** chưa phải PostgreSQL — chuyển ở Tuần 3 cùng LangGraph checkpointer, vì checkpointer mới là phần cần ghi đồng thời; schema và câu SQL giữ nguyên |
+| `faculties`: `address`, `contact_info`, `departments`, `official_channel_url` | ✔ 10/10 Trường/Khoa có số điện thoại, email, địa chỉ (từ mục "Đơn vị quản lý" trên trang ngành + `data/link.md`; chỗ lệch do người dùng chốt). `departments` thành bảng `faculty_units` (34 đơn vị chuyên môn); SEM, SOFL chưa có trong dữ liệu thu thập |
+| Chuẩn hoá schema chunk theo mục 11.3 | ✔ xong trước khi embed (2026-09-27) |
+| Bổ sung `page_no` cho chunk nguồn PDF/scan | ✔ 404/404 chunk PDF có trang |
+| Gắn `manual_verified` cho bảng điểm chuẩn + học phí (mục 26) | ✖ **chưa** — người phải soát tay; bắt buộc trước production, không chặn Tuần 2–3 |
 
 **Bộ test đánh giá (mục 25) chuyển từ Tuần 6 lên Tuần 2, làm song song với RAG pipeline.** Lý do: cả 9 tiêu chí AC1–AC9 đều đo trên test set, nên nếu viết ở Tuần 6 thì suốt 4 tuần trước đó không có cách nào biết hệ thống đang đúng hay sai. Viết sớm khi còn nắm rõ dữ liệu có gì/thiếu gì thì bộ test còn có tác dụng phát hiện lỗ hổng lúc kịp vá; viết ở Tuần 6 thì chỉ còn tác dụng chấm điểm. Tuần 6 giữ nguyên phần **chạy đánh giá và viết báo cáo**.
 
