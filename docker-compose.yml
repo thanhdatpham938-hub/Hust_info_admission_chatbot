@@ -1,5 +1,7 @@
-# Qdrant cho HUST Info & Admission Assistant (PRD muc 16).
-# Chay: docker compose up -d      Dung: docker compose down      (du lieu van con trong volume)
+# Qdrant + container chay viec nhung/tim thu cho HUST Info & Admission Assistant (PRD muc 16).
+# Chay: docker compose up -d                    bat Qdrant (dich vu thuong truc)
+#       docker compose run --rm ingest <lenh>    chay 1 lan viec nhung/tim thu (xem PLAN - Embedding v1)
+# Dung: docker compose down                      du lieu Qdrant van con trong volume
 services:
   qdrant:
     # Ghim phien ban khop voi thu vien qdrant-client 1.19 dang cai — client va server lech
@@ -15,6 +17,42 @@ services:
       # Volume cua Docker, KHONG phai thu muc trong du an: du an nam trong OneDrive, de du lieu
       # Qdrant o day thi OneDrive se dong bo lien tuc hang nghin file nho va co the lam hong index.
       - hust_qdrant_data:/qdrant/storage
+    healthcheck:
+      # Image Qdrant (Debian slim) khong co curl/wget; dung thu thuat /dev/tcp cua bash de kiem
+      # tra cong 6333 da mo chua. Dich vu ingest cho "service_healthy" roi moi chay, thay vi
+      # doi mot khoang thoi gian co dinh bang tay.
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  ingest:
+    # Chay viec nhung/tim thu (embed_chunks.py, search_chunks.py) trong mot moi truong co san
+    # dung phien ban thu vien da ghim — khong phai dich vu thuong truc.
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile
+    profiles: ["tools"]    # "docker compose up -d" KHONG tu bat dich vu nay
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      # Trong container, "localhost" la chinh container do, khong phai may chay Docker —
+      # cac container goi nhau bang ten dich vu. .env giu nguyen "localhost" cho luc chay
+      # script truc tiep tren may (ngoai Docker).
+      QDRANT_URL: http://qdrant:6333
+      # Container mac dinh chay UTC; search_chunks.py --eval dat ten file bao cao theo
+      # date.today() - khong dat TZ thi bao cao sinh sau 17h (gio VN) se mang ngay hom truoc
+      # (da gap: chay 01:11 4/10 gio VN nhung container tinh la 3/10).
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      # Chi doc: viec nhung chi can doc du lieu, khong duoc sua nham file chunk/CSV.
+      - ./:/app:ro
+      # Rieng thu muc ghi_chu duoc ghi — noi luu bao cao do retrieval (muc 7, PLAN Embedding).
+      - ./docs/ghi_chu:/app/docs/ghi_chu:rw
+    working_dir: /app
 
 volumes:
   hust_qdrant_data:

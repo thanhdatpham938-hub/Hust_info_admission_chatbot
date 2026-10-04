@@ -43,7 +43,7 @@ def main() -> int:
         ok(f"OPENAI_API_KEY có ({len(key)} ký tự, kết thúc ...{key[-4:]})")
     url = os.getenv("QDRANT_URL", "http://localhost:6333")
     collection = os.getenv("QDRANT_COLLECTION", "hust_rag_2026_1")
-    model = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+    model = os.getenv("EMBEDDING_MODEL", "text-embedding-3-large")
     ok(f"QDRANT_URL={url}  QDRANT_COLLECTION={collection}  EMBEDDING_MODEL={model}")
 
     print("2. Qdrant")

@@ -129,6 +129,9 @@ FIELD_ORDER = ["chunk_id", "document_title", "document_type", "source_kind", "so
                "collection_date", "dataset_version", "text"]
 
 MUC_RE = re.compile(r"^\s*((?:[IVX]+|\d+(?:\.\d+)*[a-z]?))\.\s")
+# Muc "(2) Xet tuyen..."/"(3) Xet tuyen..." (de an 2024/25/26, sua trong de_an_to_rag.py
+# 2026-10-04): danh so kieu ngoac don, khong co dau cham sau so nen MUC_RE tren khong khop.
+MUC_PAREN_RE = re.compile(r"^\((\d+)\)\s")
 BREAK_RE = re.compile(r"^\s*(\d+\.|[a-zđ]\)|[-+•]\s|\|)")
 
 
@@ -268,7 +271,7 @@ def normalize_source(name: str, cfg: dict, fac_by_prog: dict, overrides: set[int
     if cfg["locator"] == "muc":
         for c in raw:
             c["heading"] = re.sub(r"\(phan (\d+)\)", r"(phần \1)", c["heading"])
-            m = MUC_RE.match(c["heading"])
+            m = MUC_RE.match(c["heading"]) or MUC_PAREN_RE.match(c["heading"])
             c["muc_no"] = m.group(1) if m else ""
 
     # 4a. chunk_id sinh TRUOC khi tach: manh tach chi them -<n> sau ID goc (neu sinh sau thi
@@ -314,6 +317,10 @@ def normalize_source(name: str, cfg: dict, fac_by_prog: dict, overrides: set[int
             stats["bù faculty_code"] += 1
         # year: so nguyen o moi chunk (de an sinh int, cac nguon khac sinh chuoi)
         c["year"] = int(c["year"]) if str(c.get("year", "")).strip() else ""
+        # page_no: thong nhat kieu chuoi (mot so nguon sinh int, PAGE_BY_DIEU/pdf_page_ranges
+        # sinh chuoi vd "3-4") -> validator va embed_chunks.py chi can xu ly mot kieu
+        if c.get("page_no") not in ("", None):
+            c["page_no"] = str(c["page_no"])
         for k in list(c):
             c[k] = nfc(c[k])
 

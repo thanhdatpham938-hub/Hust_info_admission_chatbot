@@ -3,14 +3,14 @@
 Chatbot tra cứu thông tin tuyển sinh và học vụ Đại học Bách khoa Hà Nội (LangGraph, tiếng Việt).
 Hai tầng dữ liệu: **bảng số** (PostgreSQL) cho điểm chuẩn, chỉ tiêu, học phí… và **văn bản** (RAG trên Qdrant) cho quy chế, đề án, sổ tay, giới thiệu ngành.
 
-## Trạng thái (2026-09-30)
+## Trạng thái (2026-10-04)
 
 | Hạng mục | Trạng thái |
 |---|---|
 | Thu thập dữ liệu | Xong — 14 nguồn văn bản, 24 bảng CSV |
-| Chuẩn hoá metadata | Xong — 637 chunk trong `data/rag/normalized/`, `dataset_version = 2026.1` |
+| Chuẩn hoá metadata | Xong — 641 chunk trong `data/rag/normalized/`, `dataset_version = 2026.1` |
 | Nối bảng dữ liệu | Chưa làm — xem `docs/PLAN - Data Linking (v1).md` |
-| Embedding | Đang chuẩn bị — Qdrant chạy Docker |
+| Embedding | Xong — 641 chunk trong Qdrant (`hust_rag_2026_1`, `text-embedding-3-large`); retrieval hit@5 81% (bỏ câu đã biết thiếu dữ liệu). Chi tiết: `docs/PLAN - Embedding (v1).md` |
 | Backend / Frontend | Chưa bắt đầu (mới có khung thư mục) |
 
 ## Bố cục
@@ -30,8 +30,19 @@ Chi tiết: [docs/cautrucduan.md](docs/cautrucduan.md) · Yêu cầu sản phẩ
 ```powershell
 Copy-Item .env.example .env          # rồi điền OPENAI_API_KEY vào .env
 docker compose up -d                 # khởi động Qdrant
-python scripts/check_setup.py --openai
+docker compose build ingest          # image chạy việc nhúng/tìm thử (1 lần, hoặc khi đổi requirements)
+docker compose run --rm ingest python scripts/check_setup.py --openai
 ```
+
+## Nhúng dữ liệu vào Qdrant (RAG)
+
+```powershell
+docker compose run --rm ingest python scripts/embed_chunks.py --recreate
+docker compose run --rm ingest python scripts/search_chunks.py "điều kiện cảnh báo học tập"
+docker compose run --rm ingest python scripts/search_chunks.py --eval   # đo hit@5 trên bộ 120 câu hỏi
+```
+
+Chi tiết và lý do từng lựa chọn: `docs/PLAN - Embedding (v1).md`.
 
 ## Kiểm tra dữ liệu
 

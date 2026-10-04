@@ -1,0 +1,5 @@
+# Thu vien cho dich vu "ingest" (docker-compose.yml) - chi viec nhung/tim thu, ghim dung
+# phien ban dang dung tren may phat trien de tranh lech API voi Qdrant server v1.19.1.
+openai==1.109.1
+qdrant-client==1.19.0
+python-dotenv==1.2.3
