@@ -33,7 +33,13 @@ PROV_DDL = ", ".join(f"{c} TEXT" for c in PROV)
 
 DDL = f"""
 CREATE TABLE faculties (
-  faculty_code TEXT PRIMARY KEY, faculty_name TEXT NOT NULL UNIQUE, website_url TEXT, {PROV_DDL});
+  faculty_code TEXT PRIMARY KEY, faculty_name TEXT NOT NULL UNIQUE, official_channel_url TEXT,
+  phone TEXT, email TEXT, address TEXT, contact_source_url TEXT, contact_note TEXT, {PROV_DDL});
+CREATE TABLE faculty_units (
+  faculty_code TEXT NOT NULL REFERENCES faculties(faculty_code), unit_name TEXT NOT NULL,
+  unit_type TEXT NOT NULL CHECK (unit_type IN ('khoa', 'bo_mon', 'trung_tam')), note TEXT,
+  source_url TEXT, verification_status TEXT, dataset_version TEXT,
+  PRIMARY KEY (faculty_code, unit_name));
 CREATE TABLE program_groups (
   program_group_code TEXT PRIMARY KEY, group_name TEXT NOT NULL);
 CREATE TABLE programs (
@@ -128,7 +134,8 @@ CREATE TABLE entity_aliases (
 
 # Cot khoa chinh cua tung bang — dung de bao TRUNG KHOA truoc khi nap (sqlite chi bao dong dau)
 PK = {
-    "faculties": ["faculty_code"], "program_groups": ["program_group_code"],
+    "faculties": ["faculty_code"], "faculty_units": ["faculty_code", "unit_name"],
+    "program_groups": ["program_group_code"],
     "programs": ["program_code"], "program_years": ["program_code", "year"],
     "admission_methods": ["method_code"],
     "program_methods": ["program_code", "year", "method_code"],
@@ -204,9 +211,15 @@ def build_rows() -> dict[str, list[dict]]:
 
     # ---------------------------------------------------------------- danh muc
     fac = read(LINKING / "faculties.csv")
-    T["faculties"] = [{"faculty_code": r["faculty_code"], "faculty_name": r["faculty_name"],
-                       "website_url": r["website_url"], **prov(r)} for r in fac]
+    # Lien he (PRD 15.1): tu muc "Don vi quan ly" tren trang nganh + data/link.md, cho lech da
+    # duoc nguoi dung chot (2026-10-05) — ly do tung Khoa o cot contact_note
+    T["faculties"] = [{k: r[k] for k in ("faculty_code", "faculty_name", "official_channel_url", "phone",
+                                         "email", "address", "contact_source_url", "contact_note")}
+                      | prov(r) for r in fac]
     fac_by_name = {r["faculty_name"]: r["faculty_code"] for r in fac}
+    T["faculty_units"] = [{k: r[k] for k in ("faculty_code", "unit_name", "unit_type", "note", "source_url",
+                                             "verification_status", "dataset_version")}
+                          for r in read(LINKING / "faculty_units.csv")]
 
     groups = read(LINKING / "program_groups.csv")
     T["program_groups"] = [{"program_group_code": r["program_group_code"], "group_name": r["group_name"]}

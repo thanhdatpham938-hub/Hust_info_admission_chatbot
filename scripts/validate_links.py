@@ -83,6 +83,27 @@ def check(con: sqlite3.Connection, chunks: list[dict]) -> list[tuple[str, str, s
         if year in years_with_methods:
             add("E", "E6 điểm chuẩn có phương thức mà ngành không xét", f"{code} {year} {method}")
 
+    # E7 lien he Truong/Khoa dung dinh dang (PRD 15.1). So VN: di dong 10 chu so (03/05/07/08/09),
+    # so ban 11 chu so (02x — ma vung moi tu 2017; "04 3869 2137" la ma vung cu -> sai). Nhieu so
+    # cach nhau bang ';', phan trong ngoac la ghi chu ("(rieng chuong trinh TROY)")
+    for code, phone, email in q("SELECT faculty_code, phone, email FROM faculties"):
+        for part in filter(None, (p.strip() for p in (phone or "").split(";"))):
+            digits = "".join(ch for ch in part.split("(")[0] if ch.isdigit())
+            mobile = len(digits) == 10 and digits[:2] in ("03", "05", "07", "08", "09")
+            landline = len(digits) == 11 and digits.startswith("02")
+            if not (mobile or landline):
+                add("E", "E7 liên hệ Trường/Khoa sai định dạng", f"{code}: số {part!r}")
+        if email and (email.count("@") != 1 or "." not in email.split("@")[-1]):
+            add("E", "E7 liên hệ Trường/Khoa sai định dạng", f"{code}: email {email!r}")
+
+    # W5 Truong/Khoa thieu lien he; W6 khong co don vi chuyen mon truc thuoc
+    for code, phone, email, address in q("SELECT faculty_code, phone, email, address FROM faculties"):
+        missing = [n for n, v in (("số điện thoại", phone), ("email", email), ("địa chỉ", address)) if not v]
+        if missing:
+            add("W", "W5 Trường/Khoa thiếu liên hệ", f"{code}: {', '.join(missing)}")
+    for (code,) in q("SELECT faculty_code FROM faculties WHERE faculty_code NOT IN (SELECT faculty_code FROM faculty_units)"):
+        add("W", "W6 Trường/Khoa chưa có đơn vị trực thuộc", code)
+
     # W1 du lieu thung theo (nganh, nam)
     for table, label in (("quotas", "chỉ tiêu"), ("admission_scores", "điểm chuẩn"), ("program_methods", "phương thức")):
         miss = defaultdict(list)
@@ -148,6 +169,10 @@ def selftest(src: sqlite3.Connection, chunks: list[dict]) -> bool:
         ("bỏ dòng K00 của FL1 (L8)", "DELETE FROM program_combinations WHERE program_code = 'FL1' AND method_code = 'DGTD'", None, "W2 có phương thức mà không có tổ hợp"),
         ("Khoa mất hết alias", "DELETE FROM entity_aliases WHERE entity_type = 'faculty' AND entity_code = 'SEP'", None, "W3 không có alias"),
         ("ngành rơi khỏi bảng cầu ngoại ngữ", "DELETE FROM language_req_members WHERE program_code = 'IT1'", None, "W4 ngành chưa gán vào bảng cầu"),
+        ("số điện thoại mã vùng cũ (lỗi FAMI)", "UPDATE faculties SET phone = '04 3869 2137' WHERE faculty_code = 'FAMI'", None, "E7 liên hệ Trường/Khoa sai định dạng"),
+        ("email gõ thiếu @ (lỗi trang SME)", "UPDATE faculties SET email = 'sme.hust.edu.vn' WHERE faculty_code = 'SME'", None, "E7 liên hệ Trường/Khoa sai định dạng"),
+        ("Khoa mất địa chỉ", "UPDATE faculties SET address = '' WHERE faculty_code = 'SEP'", None, "W5 Trường/Khoa thiếu liên hệ"),
+        ("Khoa mất hết đơn vị trực thuộc", "DELETE FROM faculty_units WHERE faculty_code = 'SOICT'", None, "W6 Trường/Khoa chưa có đơn vị trực thuộc"),
     ]
     ok = True
     for desc, sql, mutate_chunks, rule in cases:
