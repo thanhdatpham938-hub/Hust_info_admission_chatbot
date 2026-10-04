@@ -32,6 +32,15 @@ SOURCES = {
 
 # Tieu de muc: "I. ...", "1. ...", "1.4. ..." co chu tieng Viet theo sau
 HEADING_RE = re.compile(r"^\s*((?:[IVX]+|\d+(?:\.\d+)?)\.)\s+([A-ZĐÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĨŨƠƯẠ-ỹ].{4,110})$")
+# Phuong thuc (2) TSA va (3) THPT: ca 3 nam deu danh so kieu "(2) Xet tuyen..." / "(3) Xet
+# tuyen..." (ngoac don) thay vi "2." / "3." (dau cham) nhu (1.1)/(1.2)/(1.3) - HEADING_RE o tren
+# KHONG bat duoc -> hai muc nay bi gop lam duoi cua muc "1.3" truoc do (phat hien 2026-10-04,
+# vd dean2026::m1.3-2 chua nguyen van cong thuc K01/8 to hop nhung heading van ghi "1.3 Ho so
+# nang luc"). Loc theo tu khoa (khong loc theo so thu tu) de KHONG bat nham cac dong liet ke
+# khac cung dang "(N) Xet tuyen..." (vd "(3) Xet tuyen va xac nhan nhap hoc" trong de an 2024).
+TOP_METHOD_RE = re.compile(
+    r"^\((\d)\)\s+(Xét tuyển.{10,110}(?:Đánh giá tư duy|tốt nghiệp THPT).{0,40})$"
+)
 TABLE_START_RE = re.compile(r"^\s*Bảng\s+\d+\s*[-–.]")
 MIN_CHUNK = 200
 TARGET = 1400
@@ -118,6 +127,15 @@ def build_chunks(lines: list[str], year: int) -> list[dict]:
                 sections.append(current)
             current = {**meta, "chuong": "", "dieu_no": "", "khoan_no": "",
                        "heading": f"{m.group(1)} {m.group(2)}".strip(), "page_no": "",
+                       "lines": []}
+            continue
+        m2 = TOP_METHOD_RE.match(text)
+        if m2 and not looks_like_table_row(m2.group(2)):
+            in_table = False
+            if current:
+                sections.append(current)
+            current = {**meta, "chuong": "", "dieu_no": "", "khoan_no": "",
+                       "heading": f"({m2.group(1)}) {m2.group(2)}".strip(), "page_no": "",
                        "lines": []}
             continue
         if in_table and is_prose(line, text):
