@@ -32,7 +32,9 @@ hust_chatbot/
 │   │   ├── tsa_quyche/, kkht_2022/        # ảnh từng trang + bản chép tay (scan)
 │   │   ├── sotay_pages/, sotay_overrides/ # ảnh trang Sổ tay + 22 trang chép tay
 │   │   └── mon_chinh/                     # trang bên thứ ba dùng đối chiếu môn chính
-│   ├── processed/                         ✅ 24 bảng CSV -> PostgreSQL (PRD mục 15.1)
+│   ├── processed/                         ✅ 24 bảng CSV (nguồn bóc từ văn bản) -> DB
+│   │   └── linking/                       ✅ bảng nối do người gán: danh mục Trường/Khoa, mã chứng chỉ, bảng cầu
+│   ├── db/hust.sqlite                     ⚙ sinh ra bằng build_db.py, không lên git
 │   ├── programs/                          ✅ <mã_ngành>.json (68 ngành)
 │   ├── faculty/                           ✅ <mã_khoa>/info.json + gioi_thieu.md (10 đơn vị)
 │   ├── rag/
@@ -41,7 +43,7 @@ hust_chatbot/
 │   ├── link.md                            ✅ danh sách link nguồn do anh lập (đầu vào thu thập)
 │   └── link_dao_tao_nganh.md              ✅ link 68 trang ngành (đầu vào của crawl_program_pages.py)
 │
-├── scripts/                               ✅ 33 script xử lý dữ liệu (chạy theo lô, không phải service)
+├── scripts/                               ✅ 35 script xử lý dữ liệu (chạy theo lô, không phải service)
 │   ├── crawl_*.py, extract_departments.py         # thu thập
 │   ├── build_*.py, fix_*.py, add_main_subject.py, verify_subject_combinations.py, aliases.py   # dựng bảng CSV
 │   ├── pdf_to_rag_md.py, sotay_to_rag.py, de_an_to_rag.py, scan_md_to_rag.py, faculty_to_rag.py # sinh chunk
@@ -49,6 +51,7 @@ hust_chatbot/
 │   ├── validate_*.py, check_dangling_refs.py, coverage_report.py, probe_questions.py            # kiểm tra
 │   ├── check_setup.py                             # kiểm tra .env + Qdrant + OpenAI
 │   ├── embed_chunks.py, search_chunks.py          # nhúng vào Qdrant + tìm thử/đo retrieval
+│   ├── build_db.py, validate_links.py             # CSV -> SQLite + kiểm liên kết bảng/chunk
 │   ├── Dockerfile, requirements-ingest.txt        # image cho service "ingest" (docker-compose.yml)
 │   └── build_source_list.py                       # sinh docs/nguon_du_lieu.md
 │
@@ -98,6 +101,8 @@ python scripts/add_main_subject.py              # chỉ khi chạy lại verify_
 python scripts/normalize_csv_meta.py            # bù 6 cột chuẩn cho CSV
 python scripts/normalize_chunks.py              # -> data/rag/normalized/
 python scripts/validate_metadata.py             # phải 0 lỗi
+python scripts/build_db.py                      # -> data/db/hust.sqlite
+python scripts/validate_links.py                # phải 0 lỗi
 python scripts/build_source_list.py             # cập nhật docs/nguon_du_lieu.md
 docker compose run --rm ingest python scripts/embed_chunks.py --recreate   # nhúng lại vào Qdrant
 docker compose run --rm ingest python scripts/search_chunks.py --eval     # đo lại retrieval

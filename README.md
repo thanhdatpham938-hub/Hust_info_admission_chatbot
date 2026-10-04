@@ -9,7 +9,7 @@ Hai tầng dữ liệu: **bảng số** (PostgreSQL) cho điểm chuẩn, chỉ 
 |---|---|
 | Thu thập dữ liệu | Xong — 14 nguồn văn bản, 24 bảng CSV |
 | Chuẩn hoá metadata | Xong — 641 chunk trong `data/rag/normalized/`, `dataset_version = 2026.1` |
-| Nối bảng dữ liệu | Chưa làm — xem `docs/PLAN - Data Linking (v1).md` |
+| Nối bảng dữ liệu | Xong — SQLite `data/db/hust.sqlite` (22 bảng, 0 khoá ngoại mồ côi) dựng từ CSV bằng `build_db.py`. Chi tiết: `docs/PLAN - Data Linking (v1).md` |
 | Embedding | Xong — 641 chunk trong Qdrant (`hust_rag_2026_1`, `text-embedding-3-large`); retrieval hit@5 81% (bỏ câu đã biết thiếu dữ liệu). Chi tiết: `docs/PLAN - Embedding (v1).md` |
 | Backend / Frontend | Chưa bắt đầu (mới có khung thư mục) |
 
@@ -51,6 +51,9 @@ python scripts/validate_metadata.py            # metadata chunk + CSV, phải 0 
 python scripts/validate_metadata.py --selftest # cài lỗi cố ý, validator phải bắt được
 python scripts/validate_aliases.py
 python scripts/validate_admission_csv.py
+python scripts/build_db.py                     # CSV -> data/db/hust.sqlite (0 trùng khoá, 0 mồ côi)
+python scripts/validate_links.py               # liên kết bảng + chunk RAG, phải 0 lỗi
+python scripts/validate_links.py --selftest
 ```
 
 Bước embed đọc `data/rag/normalized/`, **không** đọc `data/rag/raw_chunks/`.
