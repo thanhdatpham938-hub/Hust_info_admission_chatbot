@@ -1,0 +1,12 @@
+# Chi cau hinh pytest. Chay tu thu muc goc du an: pytest backend   (hoac trong backend/: pytest)
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+# Test async (pool psycopg) khong can gan @pytest.mark.asyncio tung ham
+asyncio_mode = "auto"
+# Mot event loop cho ca phien test: pool mo mot lan o conftest.py va gan voi loop do
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+markers = [
+    "db: can PostgreSQL dang chay va da nap (docker compose up -d postgres; python scripts/build_db.py --postgres)",
+]

@@ -1,0 +1,11 @@
+# Thu vien backend — ghim dung phien ban dang chay tren may phat trien (2026-10-06).
+# Cai: pip install -r backend/requirements.txt
+# FastAPI/uvicorn, langgraph-checkpoint-postgres them o Tuan 4 khi co API va checkpointer.
+psycopg[binary]==3.3.6
+psycopg-pool==3.3.3
+pydantic==2.13.4
+pydantic-settings==2.15.0
+
+# test
+pytest==9.1.1
+pytest-asyncio==1.4.0
