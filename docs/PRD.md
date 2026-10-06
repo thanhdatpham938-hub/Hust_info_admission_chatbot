@@ -602,11 +602,11 @@ Sử dụng Langfuse để theo dõi: request, router decision, tool call, SQL l
 | Thu thập & chuẩn hoá dữ liệu tuyển sinh | ✔ 24 bảng CSV, có script validate tự động |
 | PDF → Markdown + gán metadata | ✔ 641 chunk / 14 tài liệu, đủ `dataset_version`, `collection_date`, `page_no` (xem `PLAN - Metadata Design (v2).md`) |
 | Từ điển alias | ✔ 253 dòng: ngành (68/68), nhóm ngành, Trường/Khoa, chứng chỉ |
-| Thiết kế schema + nạp DB | ✔ 23 bảng trong **SQLite** `data/db/hust.sqlite`, dựng lại từ CSV bằng `build_db.py`; 0 trùng khoá, 0 khoá ngoại mồ côi (xem `PLAN - Data Linking (v1).md`). **Lệch so với deliverable:** chưa phải PostgreSQL — chuyển ở Tuần 3 cùng LangGraph checkpointer, vì checkpointer mới là phần cần ghi đồng thời; schema và câu SQL giữ nguyên |
+| Thiết kế schema + nạp DB | ✔ 23 bảng trong **SQLite** `data/db/hust.sqlite`, dựng lại từ CSV bằng `build_db.py`; 0 trùng khoá, 0 khoá ngoại mồ côi (xem `PLAN - Data Linking (v1).md`). Lệch "chưa phải PostgreSQL" **đã khép 2026-10-06**: `build_db.py --postgres` nạp cùng dữ liệu vào PostgreSQL (schema `hust`), SQLite giữ làm bước kiểm tra trước khi nạp (xem `PLAN - Backend PostgreSQL (v1).md`) |
 | `faculties`: `address`, `contact_info`, `departments`, `official_channel_url` | ✔ 10/10 Trường/Khoa có số điện thoại, email, địa chỉ (từ mục "Đơn vị quản lý" trên trang ngành + `data/link.md`; chỗ lệch do người dùng chốt). `departments` thành bảng `faculty_units` (34 đơn vị chuyên môn); SEM, SOFL chưa có trong dữ liệu thu thập |
 | Chuẩn hoá schema chunk theo mục 11.3 | ✔ xong trước khi embed (2026-09-27) |
 | Bổ sung `page_no` cho chunk nguồn PDF/scan | ✔ 404/404 chunk PDF có trang |
-| Gắn `manual_verified` cho bảng điểm chuẩn + học phí (mục 26) | ✖ **chưa** — người phải soát tay; bắt buộc trước production, không chặn Tuần 2–3 |
+| Gắn `manual_verified` cho bảng điểm chuẩn + học phí (mục 26) | ✔ 2026-10-05 người dùng soát tay: điểm chuẩn 2024–2026 (660 dòng; 27 dòng tính theo luật lệch 0,5 điểm giữ `rule_derived`), học phí 2026 (68), học phí 2024–2025 (41), liên hệ 10 Trường/Khoa |
 
 **Bộ test đánh giá (mục 25) chuyển từ Tuần 6 lên Tuần 2, làm song song với RAG pipeline.** Lý do: cả 9 tiêu chí AC1–AC9 đều đo trên test set, nên nếu viết ở Tuần 6 thì suốt 4 tuần trước đó không có cách nào biết hệ thống đang đúng hay sai. Viết sớm khi còn nắm rõ dữ liệu có gì/thiếu gì thì bộ test còn có tác dụng phát hiện lỗ hổng lúc kịp vá; viết ở Tuần 6 thì chỉ còn tác dụng chấm điểm. Tuần 6 giữ nguyên phần **chạy đánh giá và viết báo cáo**.
 
@@ -712,7 +712,7 @@ Giá trị `verification_status` đang dùng, xếp theo độ tin tăng dần:
 | `vision_extracted` | Một lần đọc từ ảnh/scan |
 | `html_parsed`, `web_extracted`, `pdf_text` | Bóc từ văn bản có sẵn, không qua ảnh |
 | `vision_double_read` | Hai lần đọc **độc lập** từ ảnh, so từng ô khớp nhau; ô bất đồng đã phân xử bằng ảnh phóng to |
-| `manual_verified` | **Người** đã mở nguồn gốc so tận mắt — chỉ người gắn được nhãn này | **Hiện chưa có bản ghi nào đạt `manual_verified`** — cần soát tay ít nhất bảng điểm chuẩn 3 năm và bảng học phí trước khi đưa lên production, vì đây là 2 nhóm số liệu người dùng dễ đối chiếu ngược với nguồn gốc nhất. Điều này giúp xác định chính xác chatbot đang dùng bộ dữ liệu nào — áp dụng cho cả bảng `faculties` mới (mục 15).
+| `manual_verified` | **Người** đã mở nguồn gốc so tận mắt — chỉ người gắn được nhãn này | **Từ 2026-10-05:** điểm chuẩn 2024–2026, học phí (2026 theo ngành và 2024–2025 theo nhóm) và liên hệ 10 Trường/Khoa đạt `manual_verified` sau khi người dùng soát tay — đây là các nhóm số liệu người dùng dễ đối chiếu ngược với nguồn gốc nhất. Các bảng còn lại giữ nhãn theo cách bóc. Dữ liệu sửa sau ngày soát phải hạ nhãn về cách bóc mới cho tới khi soát lại.
 
 ## 27. Definition of Done
 

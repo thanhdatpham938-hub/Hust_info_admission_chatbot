@@ -6,7 +6,7 @@ Ký hiệu: ✅ đã có nội dung · ⬜ mới có khung thư mục, chưa có
 
 ```
 hust_chatbot/
-├── backend/                               ⬜ (khung, chưa có code)
+├── backend/                               ✅ nền DB (2026-10-06); tool, API, graph chưa có code
 │   ├── app/
 │   │   ├── api/                           # chat.py (POST /api/chat, /api/chat/stream), health.py
 │   │   ├── graph/                         # LangGraph: state, router, checkpointer, synthesizer
@@ -15,10 +15,12 @@ hust_chatbot/
 │   │   │                                  # clarification_node, announcement_node
 │   │   ├── entity_resolution/             # normalize.py, alias_lookup.py (4 quy tắc, PRD mục 10.3)
 │   │   ├── rag/                           # retriever.py (đọc Qdrant)
-│   │   ├── db/                            # models.py, session.py, migrations/ (Alembic)
+│   │   ├── db/                            ✅ pool.py (psycopg3 async, chỉ đọc, search_path=hust) — không ORM/Alembic
 │   │   ├── schemas/                       # Pydantic request/response
-│   │   └── core/                          # config.py (env), logging.py (Langfuse)
+│   │   └── core/                          ✅ config.py (Settings đọc .env); logging.py (Langfuse) — Tuần 4
+│   ├── requirements.txt, pyproject.toml   ✅ thư viện backend (ghim phiên bản) + cấu hình pytest
 │   └── tests/
+│       ├── conftest.py, test_db.py        ✅ test nền lớp DB (marker db)
 │       └── eval/                          ✅ 120_question_check_data.md (bộ câu hỏi đánh giá)
 │
 ├── frontend/                              ⬜ (khung: app/, components/{Chat,Citation,ClarificationPrompt}/, lib/)
@@ -51,7 +53,7 @@ hust_chatbot/
 │   ├── validate_*.py, check_dangling_refs.py, coverage_report.py, probe_questions.py            # kiểm tra
 │   ├── check_setup.py                             # kiểm tra .env + Qdrant + OpenAI
 │   ├── embed_chunks.py, search_chunks.py          # nhúng vào Qdrant + tìm thử/đo retrieval
-│   ├── build_db.py, validate_links.py             # CSV -> SQLite + kiểm liên kết bảng/chunk
+│   ├── build_db.py, validate_links.py             # CSV -> SQLite (+ Postgres với --postgres) + kiểm liên kết
 │   ├── Dockerfile, requirements-ingest.txt        # image cho service "ingest" (docker-compose.yml)
 │   └── build_source_list.py                       # sinh docs/nguon_du_lieu.md
 │
@@ -60,13 +62,14 @@ hust_chatbot/
 │   ├── PLAN - Data Collection (v1).md
 │   ├── PLAN - Metadata Design (v1).md     # lịch sử; bản hiện hành là v2
 │   ├── PLAN - Metadata Design (v2).md
-│   ├── PLAN - Data Linking (v1).md        # chưa thực hiện
+│   ├── PLAN - Data Linking (v1).md        # đã thực hiện — SQLite 23 bảng
+│   ├── PLAN - Backend PostgreSQL (v1).md  # đã thực hiện — Postgres + pool + test nền
 │   ├── PLAN - Embedding (v1).md           # đã thực hiện — 641 chunk trong Qdrant
 │   ├── nguon_du_lieu.md                   # tổng hợp link nguồn (sinh tự động)
 │   ├── cautrucduan.md                     # file này
 │   └── ghi_chu/                           # ghi chú theo ngày
 │
-├── docker-compose.yml                     ✅ Qdrant + service "ingest" (sẽ thêm postgres + backend + frontend)
+├── docker-compose.yml                     ✅ Qdrant + Postgres (127.0.0.1:5432) + service "ingest" (sẽ thêm backend + frontend)
 ├── .env.example                           ✅
 ├── .gitignore                             ✅
 └── README.md                              ✅
@@ -85,7 +88,8 @@ hust_chatbot/
 | `backend/app/entity_resolution/validate_aliases.py` | Chỉ có ở `scripts/validate_aliases.py` | Đây là phép kiểm dữ liệu chạy theo lô, không phải code service. Để hai nơi sẽ lệch nhau. |
 | `backend/app/rag/ingestion.py`, `chunking.py` | Không tạo; việc này do `scripts/` làm | Trích xuất và cắt chunk đã làm xong bằng script (mỗi nguồn một cách cắt riêng, không phải "header-based" chung). Backend chỉ cần `retriever.py`; bước embed sẽ là một script. Viết lại trong backend là có hai bộ cắt chunk cho cùng dữ liệu. |
 | `docs/evaluation_report.md` | Chưa có | Tạo khi có kết quả đánh giá (Tuần 2 trở đi). |
-| `docker-compose.yml`: postgres + qdrant + backend + frontend | Mới có Qdrant | Thêm từng dịch vụ khi tới bước đó. Lưu ý cổng 5432 trên máy đang bị Postgres của dự án khác chiếm. |
+| `docker-compose.yml`: postgres + qdrant + backend + frontend | Qdrant + Postgres (2026-10-06) | Thêm từng dịch vụ khi tới bước đó. Postgres dùng cổng 5432 (dự án khác đã giải phóng); bị chiếm lại thì đổi `POSTGRES_PORT` + `DATABASE_URL` trong `.env`. |
+| `backend/app/db/models.py`, `migrations/` (Alembic) | Chỉ có `pool.py`, SQL viết tay | DB sinh lại từ CSV mỗi lần build nên không có gì cần migration; thêm ORM model thì schema khai hai nơi (`PLAN - Backend PostgreSQL (v1)` D2). |
 
 ## Ranh giới dữ liệu (PRD mục 3.C)
 
@@ -101,7 +105,8 @@ python scripts/add_main_subject.py              # chỉ khi chạy lại verify_
 python scripts/normalize_csv_meta.py            # bù 6 cột chuẩn cho CSV
 python scripts/normalize_chunks.py              # -> data/rag/normalized/
 python scripts/validate_metadata.py             # phải 0 lỗi
-python scripts/build_db.py                      # -> data/db/hust.sqlite
+python scripts/build_db.py --postgres           # -> data/db/hust.sqlite + Postgres schema hust
+pytest backend                                  # test nền: DB khớp CSV, chỉ đọc
 python scripts/validate_links.py                # phải 0 lỗi
 python scripts/build_source_list.py             # cập nhật docs/nguon_du_lieu.md
 docker compose run --rm ingest python scripts/embed_chunks.py --recreate   # nhúng lại vào Qdrant
