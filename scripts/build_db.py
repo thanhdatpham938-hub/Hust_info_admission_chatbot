@@ -13,20 +13,31 @@ Kiem tra ngay trong luc nap:
   - ten chung chi / ten nhom nganh / ten Khoa khong doi duoc sang ma -> dung
 Kiem tra lien ket logic (alias, chunk RAG, bang cau...) nam o validate_links.py.
 
-Dung: python scripts/build_db.py          -> data/db/hust.sqlite
+PostgreSQL (PLAN - Backend PostgreSQL (v1)): SQLite van dung truoc lam cong kiem tra (D5); qua het
+kiem tra moi nap cung cac dong do vao schema "hust" cua DATABASE_URL, trong MOT transaction (D4):
+loi giua chung thi rollback, du lieu cu con nguyen. Schema "langgraph" (checkpointer) khong bi dung toi.
+
+Dung: python scripts/build_db.py              -> data/db/hust.sqlite
+      python scripts/build_db.py --postgres   -> data/db/hust.sqlite + Postgres (schema hust)
 """
 
+import argparse
 import csv
+import hashlib
+import os
 import re
 import sqlite3
+import subprocess
 import sys
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PROCESSED = ROOT / "data" / "processed"
 LINKING = PROCESSED / "linking"
 DB_PATH = ROOT / "data" / "db" / "hust.sqlite"
+PG_SCHEMA = "hust"
 
 PROV = ["source", "source_url", "collection_date", "verification_status", "dataset_version"]
 PROV_DDL = ", ".join(f"{c} TEXT" for c in PROV)
@@ -131,6 +142,20 @@ CREATE TABLE entity_aliases (
   alias_type TEXT, resolution TEXT, year INTEGER, note TEXT, dataset_version TEXT,
   PRIMARY KEY (alias, entity_type, entity_code));
 """
+
+# Chi co o Postgres: de test biet DB co cu hon CSV khong (D10). SQLite khong can — luon dung lai ngay.
+BUILD_INFO_DDL = """
+CREATE TABLE build_info (
+  built_at TEXT NOT NULL, git_commit TEXT, csv_sha256 TEXT NOT NULL, dataset_version TEXT);
+"""
+
+
+def pg_ddl(ddl: str) -> str:
+    """DDL SQLite -> Postgres (D6). REAL cua Postgres la so thuc 4 byte (82.10 -> 82.0999985): sai khi so
+    bang/tinh chenh lech diem -> NUMERIC. Khoa ngoai kiem luc COMMIT de thu tu nap khong quan trong
+    (admission_methods.parent_method tro vao chinh bang do)."""
+    ddl = re.sub(r"\bREAL\b", "NUMERIC", ddl)
+    return re.sub(r"(REFERENCES \w+\([^)]*\))", r"\1 DEFERRABLE INITIALLY DEFERRED", ddl)
 
 # Cot khoa chinh cua tung bang — dung de bao TRUNG KHOA truoc khi nap (sqlite chi bao dong dau)
 PK = {
@@ -394,7 +419,66 @@ def orphan_report(con: sqlite3.Connection) -> list[str]:
     return out
 
 
+def csv_fingerprint() -> str:
+    """SHA-256 cua moi CSV nguon (data/processed/*.csv + linking/*.csv). Bo khac biet CRLF/LF: git tren
+    Windows tu doi xuong dong khi checkout, khong phai du lieu doi. backend/tests goi lai ham nay."""
+    h = hashlib.sha256()
+    for p in sorted([*PROCESSED.glob("*.csv"), *LINKING.glob("*.csv")]):
+        h.update(p.relative_to(PROCESSED).as_posix().encode())
+        h.update(p.read_bytes().replace(b"\r\n", b"\n"))
+    return h.hexdigest()
+
+
+def build_info(T: dict[str, list[dict]]) -> dict:
+    def git(*args: str) -> str:
+        try:
+            return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        except (OSError, subprocess.CalledProcessError):
+            return ""
+    commit = git("rev-parse", "--short", "HEAD")
+    if commit and git("status", "--porcelain", "--", "data/processed"):
+        commit += "-dirty"                      # CSV dang sua chua commit: commit tren khong khop du lieu da nap
+    versions = sorted({r["dataset_version"] for rows in T.values() for r in rows if r.get("dataset_version")})
+    return {"built_at": datetime.now().astimezone().isoformat(timespec="seconds"), "git_commit": commit,
+            "csv_sha256": csv_fingerprint(), "dataset_version": ",".join(versions)}
+
+
+def load_env(path: Path = ROOT / ".env") -> None:
+    """Doc .env vao os.environ (khong de bien da co). Khong dung python-dotenv de script khong them phu thuoc."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if "=" in line and not line.lstrip().startswith("#"):
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip())
+
+
+def create_pg(T: dict[str, list[dict]], url: str) -> dict[str, int]:
+    """Nap vao schema hust trong mot transaction (D4); tra so dong tung bang doc lai tu Postgres."""
+    import psycopg     # chi can khi --postgres: build SQLite khong phu thuoc thu vien nay
+
+    with psycopg.connect(url) as con:
+        with con.transaction():
+            con.execute(f"DROP SCHEMA IF EXISTS {PG_SCHEMA} CASCADE")
+            con.execute(f"CREATE SCHEMA {PG_SCHEMA}")
+            con.execute(f"SET LOCAL search_path TO {PG_SCHEMA}")
+            con.execute(pg_ddl(DDL) + BUILD_INFO_DDL)
+            with con.cursor() as cur:
+                for table, rows in [*T.items(), ("build_info", [build_info(T)])]:
+                    if not rows:
+                        continue
+                    cols = list(rows[0])
+                    cur.executemany(f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(['%s'] * len(cols))})",
+                                    [tuple(r[c] for c in cols) for r in rows])
+        # COMMIT xong (khoa ngoai DEFERRED da duoc kiem) moi dem lai
+        return {t: con.execute(f"SELECT COUNT(*) FROM {PG_SCHEMA}.{t}").fetchone()[0] for t in T}
+
+
 def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--postgres", action="store_true",
+                    help="nap them vao Postgres (DATABASE_URL trong .env) sau khi SQLite qua kiem tra")
+    args = ap.parse_args()
     try:
         T = build_rows()
     except BuildError as e:
@@ -410,12 +494,31 @@ def main() -> int:
     for o in orphans:
         print(f"[LỖI] khoá ngoại mồ côi: {o}")
     print(f"{DB_PATH.relative_to(ROOT)}")
-    for table in T:
-        n = con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+    counts = {t: con.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in T}
+    for table, n in counts.items():
         print(f"  {table:24s} {n:5d}")
     con.close()
     print(f"\n{len(orphans)} khoá ngoại mồ côi")
-    return 1 if orphans else 0
+    if orphans or not args.postgres:
+        return 1 if orphans else 0
+
+    # ---------------------------------------------------------------- Postgres (chi khi SQLite sach)
+    load_env()
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        print("[LỖI] thiếu DATABASE_URL (xem .env.example)")
+        return 1
+    try:
+        pg_counts = create_pg(T, url)
+    except Exception as e:      # loi ket noi / rang buoc: transaction da rollback, du lieu cu con nguyen
+        print(f"[LỖI] nạp Postgres thất bại, đã rollback: {type(e).__name__}: {e}")
+        return 1
+    diff = [f"{t}: SQLite {counts[t]} ≠ Postgres {pg_counts[t]}" for t in T if counts[t] != pg_counts[t]]
+    for d in diff:
+        print(f"[LỖI] {d}")
+    print(f"Postgres schema {PG_SCHEMA}: {len(T)} bảng + build_info, "
+          f"{sum(pg_counts.values())} dòng, {'khớp' if not diff else 'LỆCH'} SQLite")
+    return 1 if diff else 0
 
 
 if __name__ == "__main__":

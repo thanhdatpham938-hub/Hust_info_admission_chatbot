@@ -1,5 +1,5 @@
-# Qdrant + container chay viec nhung/tim thu cho HUST Info & Admission Assistant (PRD muc 16).
-# Chay: docker compose up -d                    bat Qdrant (dich vu thuong truc)
+# Qdrant + PostgreSQL + container chay viec nhung/tim thu cho HUST Info & Admission Assistant (PRD muc 15, 16).
+# Chay: docker compose up -d                    bat Qdrant + Postgres (dich vu thuong truc)
 #       docker compose run --rm ingest <lenh>    chay 1 lan viec nhung/tim thu (xem PLAN - Embedding v1)
 # Dung: docker compose down                      du lieu Qdrant van con trong volume
 services:
@@ -22,6 +22,32 @@ services:
       # tra cong 6333 da mo chua. Dich vu ingest cho "service_healthy" roi moi chay, thay vi
       # doi mot khoang thoi gian co dinh bang tay.
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  postgres:
+    # Bang so lieu tuyen sinh (schema "hust", nap bang scripts/build_db.py --postgres) va
+    # checkpointer hoi thoai LangGraph (schema "langgraph", Tuan 4) — PLAN - Backend PostgreSQL (v1).
+    # Ban 17: on dinh, moi thu vien ho tro; ban 18 doi duong dan thu muc du lieu trong image, de gan nham volume.
+    image: postgres:17-alpine
+    container_name: hust-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hust
+      POSTGRES_DB: hust
+      # Lay tu .env; thieu thi "docker compose up" dung ngay va bao loi, khong chay voi mat khau rong
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?dat POSTGRES_PASSWORD trong .env}
+    ports:
+      # Chi mo cho may nay. Cong may doi duoc qua POSTGRES_PORT trong .env (mac dinh 5432) — phong khi
+      # Postgres cua du an khac bat lai cung cong; nho doi ca DATABASE_URL.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Volume cua Docker, khong phai thu muc trong du an — cung ly do nhu Qdrant (OneDrive dong bo file DB).
+      - hust_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hust -d hust"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -56,3 +82,4 @@ services:
 
 volumes:
   hust_qdrant_data:
+  hust_pg_data:
