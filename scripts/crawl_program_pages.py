@@ -434,6 +434,9 @@ if __name__ == "__main__":
             "tuition_text": page["facts"].get("tuition_text", ""),
             "admission_time": page["facts"].get("admission_time", ""),
             "curriculum_url": page.get("curriculum_url", ""),
+            # Mo ta ngan -> bang programs (PRD 3.1.D, 15.1; PLAN - Tools (v1) S7). Cung doan voi JSON;
+            # data/programs/ khong len git nen phai di qua CSV nay thi build_db.py moi co.
+            "short_description": desc.get("short_description", ""),
             "year": YEAR,
             "source_url": e["url"],
             "collection_date": os.environ.get("COLLECTION_DATE") or time.strftime("%Y-%m-%d"),
