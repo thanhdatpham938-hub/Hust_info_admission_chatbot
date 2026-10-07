@@ -13,35 +13,32 @@ Dung: python scripts/validate_aliases.py
 """
 
 import csv
-import re
 import sys
-import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Dung chung chuan hoa + resolver voi backend (mot ban code duy nhat) va logic dung bang cua build_db
+sys.path[:0] = [str(ROOT / "backend"), str(ROOT / "scripts")]
+import build_db  # noqa: E402
+from app.entity_resolution.index import AliasIndex  # noqa: E402
+from app.entity_resolution.normalize import normalize  # noqa: E402
+from app.entity_resolution.resolver import resolve  # noqa: E402
+
 PROCESSED = ROOT / "data" / "processed"
 LINKING = PROCESSED / "linking"
 ALIAS_CSV = PROCESSED / "entity_aliases.csv"
 
 # faculty / certificate them 2026-10-04 (PLAN - Data Linking L7): ma tro toi nam o
 # data/processed/linking/faculties.csv va certificates.csv
-VALID_TYPES = {"program", "program_group", "faculty", "certificate"}
+# method them 2026-10-07 (PLAN - Entity Resolution + Admission Tool (v1), muc 2.5): ma o linking/admission_methods.csv
+VALID_TYPES = {"program", "program_group", "faculty", "certificate", "method"}
 # name_variant: ten nganh o bang khac (quotas, trang nganh...) khac ten chuan;
 # old_name: ten cu truoc tai cau truc (vd "Vien Dien" -> SEEE)
 VALID_ALIAS_TYPES = {"en", "colloquial", "abbrev", "code_variant", "name_variant", "old_name"}
 VALID_RESOLUTIONS = {"unique", "clarify", "group"}
 MIN_ALIAS_LEN = 2
 
-
-def normalize(text: str) -> str:
-    """Bo dau, ve chu thuong, gop khoang trang — dung de bat alias trung nhau."""
-    # "đ" khong phai to hop dau nen NFD khong tach; khong doi sang "d" truoc thi
-    # buoc loc [^a-z0-9] se XOA han: "diem" -> "iem", "dang ky" -> "ang ky".
-    # Nguoi dung go khong dau se khong khop duoc ten nganh — dung pham vi PRD 3.B.
-    text = unicodedata.normalize("NFD", text.lower().replace("đ", "d"))
-    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
-    return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
 
 def load_known() -> tuple[dict[str, str], set[str]]:
@@ -72,50 +69,40 @@ def load_program_names() -> dict[str, str]:
 
 
 def simulate_lookup(rows: list[dict]) -> list[str]:
-    """Go thu tung alias vao dung thuat toan tra cuu cua bot, xem co ra dung khong.
+    """Go thu tung alias vao DUNG resolver cua bot (backend/app/entity_resolution), xem co ra dung khong.
 
     Bat loai loi ma cac phep kiem o tren khong thay: alias dung cu phap, tro dung ma,
-    nhung khi TRA CUU THAT lai ra thua hoac thieu ma vi bi ten ngành/alias khac nuot.
+    nhung khi TRA CUU THAT lai ra thua hoac thieu ma vi bi ten nganh/alias khac nuot.
     Vi du da gap: 'Chemistry' bi 'Cosmetic Chemistry' nuot; 'Ky thuat O to' chi ra TE1
     vi khop chinh xac dung lai truoc khi kip goi y TE-E2.
 
-    Ba quy tac khop (phai cai dat y het o tang tra cuu cua bot):
-      1) khop chinh xac tren chuoi da chuan hoa -> tra ve ngay
-      2) khong co thi moi lui ve khop chuoi con
-      3) alias_type='abbrev' CHI tham gia buoc 1 (viet tat 2-3 ky tu nhu 'BA' neu cho
-         khop chuoi con se dinh hang chuc nganh)
+    Tu 2026-10-07 khong con ban mo phong rieng (PLAN - Entity Resolution + Admission Tool (v1),
+    muc 2.6): giu hai ban thi validator bao xanh tren mot thuat toan khac voi thuat toan bot chay.
+    Moi alias tra voi `years` = cac nam ma ma no khai bao co tuyen; khong truyen nam thi resolver
+    lay nam moi nhat va 'Accounting' (EM4, chi den 2025) se bi bao sai.
     """
-    program_names = {}
-    for path in sorted(PROCESSED.glob("programs_*.csv")):
-        for row in csv.DictReader(path.open(encoding="utf-8", newline="")):
-            program_names.setdefault(normalize(row["program_name"]), set()).add(row["program_code"])
+    try:
+        T = build_db.build_rows()
+    except build_db.BuildError as e:
+        return [f"không dựng được bảng để giả lập tra cứu: {e}"]
+    idx = AliasIndex.from_tables(T)
 
-    declared, exact, substring = defaultdict(set), defaultdict(set), defaultdict(set)
+    declared: dict[tuple[str, str], set[str]] = defaultdict(set)
+    shown: dict[tuple[str, str], str] = {}
     for row in rows:
-        if row["entity_type"].strip() != "program":
-            continue
-        key = normalize(row["alias"])
-        declared[key].add(row["entity_code"].strip())
-        exact[key].add(row["entity_code"].strip())
-        if row["alias_type"].strip() != "abbrev":
-            substring[key].add(row["entity_code"].strip())
-    for name, codes in program_names.items():
-        exact[name] |= codes
-        substring[name] |= codes
-
-    def resolve(query: str) -> set[str]:
-        key = normalize(query)
-        if key in exact:
-            return exact[key]
-        return {c for k, codes in substring.items() if key in k for c in codes}
+        k = (normalize(row["alias"]), row["entity_type"].strip())
+        declared[k].add(row["entity_code"].strip())
+        shown.setdefault(k, row["alias"].strip())
 
     out = []
-    for alias, want in sorted(declared.items()):
-        got = resolve(alias)
+    for (key, etype), want in sorted(declared.items()):
+        years = sorted({y for c in want for y in idx.valid_years.get(c, ())}) or None
+        res = resolve(shown[(key, etype)], etype, idx, years)
+        got = {res.group_code} if res.group_code else set(res.codes)   # nhom nganh: so ma nhom
         if got != want:
             out.append(
-                f"gõ '{alias}' sẽ ra {sorted(got) or 'KHÔNG GÌ CẢ'} trong khi file khai "
-                f"báo {sorted(want)} — kiểm tra lại (thừa {sorted(got - want)}, "
+                f"gõ '{shown[(key, etype)]}' ({etype}) sẽ ra {sorted(got) or 'KHÔNG GÌ CẢ'} trong khi file "
+                f"khai báo {sorted(want)} — kiểm tra lại (thừa {sorted(got - want)}, "
                 f"thiếu {sorted(want - got)})"
             )
     return out
@@ -148,6 +135,7 @@ def main() -> int:
     known_codes, known_groups = load_known()
     known_faculties = load_linking_codes("faculties.csv", "faculty_code")
     known_certs = load_linking_codes("certificates.csv", "cert_code")
+    known_methods = load_linking_codes("admission_methods.csv", "method_code")
     program_names = load_program_names()
 
     errors, warnings = list(shape_errors), []
@@ -182,6 +170,8 @@ def main() -> int:
             errors.append(f"dòng {i}: alias '{alias}' trỏ tới mã Khoa '{code}' không có trong linking/faculties.csv")
         if etype == "certificate" and code not in known_certs:
             errors.append(f"dòng {i}: alias '{alias}' trỏ tới chứng chỉ '{code}' không có trong linking/certificates.csv")
+        if etype == "method" and code not in known_methods:
+            errors.append(f"dòng {i}: alias '{alias}' trỏ tới phương thức '{code}' không có trong linking/admission_methods.csv")
 
         if (normalize(alias), code) in seen_pairs:
             errors.append(f"dòng {i}: trùng dòng ({alias}, {code})")

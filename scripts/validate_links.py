@@ -24,7 +24,8 @@ NORM = ROOT / "data" / "rag" / "normalized"
 
 ALIAS_TARGET = {"program": ("programs", "program_code"), "faculty": ("faculties", "faculty_code"),
                 "certificate": ("certificates", "cert_code"),
-                "program_group": ("program_groups", "program_group_code")}
+                "program_group": ("program_groups", "program_group_code"),
+                "method": ("admission_methods", "method_code")}
 
 
 def load_chunks() -> list[dict]:

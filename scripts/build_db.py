@@ -57,7 +57,7 @@ CREATE TABLE programs (
   program_code TEXT PRIMARY KEY, program_name TEXT NOT NULL,
   faculty_code TEXT NOT NULL REFERENCES faculties(faculty_code),
   program_group_code TEXT REFERENCES program_groups(program_group_code),
-  language TEXT, degree TEXT, duration TEXT, curriculum_url TEXT, {PROV_DDL});
+  language TEXT, degree TEXT, duration TEXT, curriculum_url TEXT, short_description TEXT, {PROV_DDL});
 CREATE TABLE program_years (
   program_code TEXT NOT NULL REFERENCES programs(program_code), year INTEGER NOT NULL, {PROV_DDL},
   PRIMARY KEY (program_code, year));
@@ -274,7 +274,8 @@ def build_rows() -> dict[str, list[dict]]:
             "program_code": code, "program_name": strip_new(r["program_name"]),
             "faculty_code": fac_by_name[r["faculty_name"]], "program_group_code": group_of.get(code),
             "language": ov.get("language"), "degree": ov.get("degree"), "duration": ov.get("duration"),
-            "curriculum_url": ov.get("curriculum_url"), **prov(r)})
+            "curriculum_url": ov.get("curriculum_url"), "short_description": ov.get("short_description"),
+            **prov(r)})
     T["program_years"] = [{"program_code": r["program_code"], "year": y, **prov(r)}
                           for y, rows in prog_years for r in rows]
 
@@ -457,7 +458,8 @@ def create_pg(T: dict[str, list[dict]], url: str) -> dict[str, int]:
     """Nap vao schema hust trong mot transaction (D4); tra so dong tung bang doc lai tu Postgres."""
     import psycopg     # chi can khi --postgres: build SQLite khong phu thuoc thu vien nay
 
-    with psycopg.connect(url) as con:
+    # connect_timeout: Docker Desktop tat thi bao loi sau 10 giay thay vi treo (gap 2026-10-07)
+    with psycopg.connect(url, connect_timeout=10) as con:
         with con.transaction():
             con.execute(f"DROP SCHEMA IF EXISTS {PG_SCHEMA} CASCADE")
             con.execute(f"CREATE SCHEMA {PG_SCHEMA}")

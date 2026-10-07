@@ -252,3 +252,16 @@ HSK,certificate,HSK_HSKK,colloquial,unique,2026,,2026.1
 HSKK,certificate,HSK_HSKK,colloquial,unique,2026,,2026.1
 LanguageCert,certificate,LANGUAGECERT_ACADEMIC,colloquial,unique,2026,,2026.1
 Oxford Test of English,certificate,OTE,colloquial,unique,2026,,2026.1
+thi THPT,method,THPT,colloquial,unique,,,2026.1
+điểm thi THPT,method,THPT,colloquial,unique,,,2026.1
+thi tốt nghiệp THPT,method,THPT,colloquial,unique,,,2026.1
+điểm thi tốt nghiệp,method,THPT,colloquial,unique,,,2026.1
+TSA,method,DGTD,abbrev,unique,,Tên kỳ thi Đánh giá tư duy; chỉ khớp chính xác,2026.1
+đánh giá tư duy,method,DGTD,colloquial,unique,,,2026.1
+Thinking Skills Assessment,method,DGTD,en,unique,,,2026.1
+tài năng,method,XTTN,colloquial,unique,,Bảng điểm chuẩn ghi theo mã con XTTN_1.x; tool tự mở qua parent_method,2026.1
+tuyển thẳng,method,XTTN_1.1,colloquial,unique,,Không có điểm chuẩn,2026.1
+diện 1.1,method,XTTN_1.1,colloquial,unique,,,2026.1
+diện 1.2,method,XTTN_1.2,colloquial,unique,,,2026.1
+diện 1.3,method,XTTN_1.3,colloquial,unique,,,2026.1
+hồ sơ năng lực,method,XTTN_1.3,colloquial,unique,,,2026.1
