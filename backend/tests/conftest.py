@@ -4,9 +4,25 @@ import sys
 import pytest
 import pytest_asyncio
 
+from app.core.config import ROOT
 from app.db.pool import close_pool, open_pool
+from app.tools.context import ToolContext
 
 HINT = "docker compose up -d postgres  rồi  python scripts/build_db.py --postgres"
+
+sys.path.insert(0, str(ROOT / "scripts"))
+import build_db  # noqa: E402
+
+
+@pytest.fixture(scope="session")
+def tables() -> dict[str, list[dict]]:
+    """Cac bang dung tu CSV bang dung logic cua build_db — khong can DB."""
+    return build_db.build_rows()
+
+
+@pytest.fixture(scope="session")
+def ctx(tables) -> ToolContext:
+    return ToolContext.from_tables(tables)
 
 
 def pytest_asyncio_loop_factories(config, item):

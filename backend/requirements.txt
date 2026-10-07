@@ -5,6 +5,7 @@ psycopg[binary]==3.3.6
 psycopg-pool==3.3.3
 pydantic==2.13.4
 pydantic-settings==2.15.0
+rapidfuzz==3.14.6          # fuzzy matching cho Entity Resolution (PLAN - Tools (v1) muc 10, anh chot)
 
 # test
 pytest==9.1.1
