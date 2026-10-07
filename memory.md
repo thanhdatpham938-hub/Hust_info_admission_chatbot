@@ -1,6 +1,6 @@
 # memory.md — Đúc kết để tiếp tục ở session mới
 
-> **Session mới: đọc file này trước khi làm bất cứ việc gì.** Cập nhật lần cuối: 2026-10-06.
+> **Session mới: đọc file này trước khi làm bất cứ việc gì.** Cập nhật lần cuối: 2026-10-07.
 > Chi tiết và lý do của từng quyết định nằm trong các file `docs/PLAN - *.md` (mỗi quyết định có dòng "Vì sao"). File này chỉ là bản đồ.
 
 ## 1. Dự án
@@ -31,7 +31,7 @@ Sơ đồ ER (hiện trạng CSV + mô hình đích): https://claude.ai/artifact
 ## 3. Việc đang dở / làm tiếp
 
 1. **Chưa commit** (lúc viết file này): đổi nhãn `manual_verified` ở 7 file CSV + `docs/PRD.md`, toàn bộ phần backend Postgres (docker-compose, build_db, check_setup, backend/, docs), `memory.md`. Hỏi người dùng đã commit chưa (`git status`). Commit CSV xong thì chạy lại `build_db.py --postgres` để `build_info.git_commit` hết đuôi `-dirty`.
-2. **Việc tiếp theo: Entity Resolution.** Cách dùng lớp DB cho từng tool đã thống nhất ở mục 4 của `PLAN - Backend PostgreSQL (v1).md` (nạp alias vào bộ nhớ lúc khởi động; tool gọi `fetch_all` với `= ANY(%(codes)s)`; ép `Decimal` sang `float` ở model đầu ra).
+2. **Tool (2026-10-07): Entity Resolution + T1 `admission_scores` + T2 `list_programs` ĐÃ XONG** (`docs/PLAN - Entity Resolution + Admission Tool (v1).md`, mục "Đã thực hiện"). `pytest backend` 80 passed; T1 quét đủ 687 dòng điểm chuẩn đúng 100%. 13 alias phương thức đã ghi vào CSV; `validate_aliases.py` dùng resolver backend, kiểm mọi loại thực thể: 0/0. **Chờ người dùng:** (a) 4 alias gợi ý ở `docs/ghi_chu/2026-10-07 - Ket qua entity resolution.md`; (b) ai soạn bộ ca có nhãn AC2/AC8. Tiếp theo: T3 `program_info` (bước 4 của `PLAN - Tools (v1)` mục 9).
 3. **Thứ tự Tuần 3** (đã thống nhất): nền backend + Postgres → Entity Resolution (4 quy tắc PRD 10.3; logic khớp đã có trong `scripts/validate_aliases.py` hàm `simulate_lookup`) → Admission SQL Tool → RAG Tool (`backend/app/rag/retriever.py`) → University Info Tool → test từng tool (dùng bộ 120 câu).
 4. **Ghi sẵn cho `retriever.py`:** câu Q10 trượt vì chữ "hệ số" có ở tài liệu sai. Lọc thêm theo cụm từ chuyên ngành có trong câu hỏi ("môn chính") bằng chỉ mục full-text `MatchText` thì ra đúng. Hướng làm: Prefetch dense có lọc + không lọc, gộp bằng RRF (xem `PLAN - Embedding (v1).md` phần "Đã thực hiện").
 5. **Việc nhỏ người dùng tự làm:** bộ 120 câu thiếu Q99–Q104; cột tham chiếu của Q10 nên thêm `trang_tuyen_sinh` (bài điểm chuẩn 2026); link nguồn cho lệ phí TSA 2026.
@@ -76,9 +76,9 @@ docker compose run --rm ingest python scripts/check_setup.py --openai
 python scripts/<script bóc nguồn vừa đổi>.py
 python scripts/normalize_csv_meta.py
 python scripts/normalize_chunks.py ; python scripts/validate_metadata.py     # 0 lỗi
-python scripts/validate_aliases.py                                          # 0 lỗi
+python scripts/validate_aliases.py                                          # 0 lỗi, 0 cảnh báo (dùng resolver backend)
 python scripts/build_db.py --postgres ; python scripts/validate_links.py    # 0 lỗi; Postgres khớp SQLite
-pytest backend                                                              # 6/6
+pytest backend                                                              # 80 passed
 docker compose run --rm ingest python scripts/embed_chunks.py --recreate    # chỉ khi chunk đổi
 docker compose run --rm ingest python scripts/search_chunks.py --eval
 ```
