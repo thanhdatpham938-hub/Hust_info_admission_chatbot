@@ -6,19 +6,23 @@ Ký hiệu: ✅ đã có nội dung · ⬜ mới có khung thư mục, chưa có
 
 ```
 hust_chatbot/
-├── backend/                               ⬜ (khung, chưa có code)
+├── backend/                               ✅ nền DB, Entity Resolution, Admission Tool T1/T2 (2026-10-07); API, graph chưa có
 │   ├── app/
 │   │   ├── api/                           # chat.py (POST /api/chat, /api/chat/stream), health.py
 │   │   ├── graph/                         # LangGraph: state, router, checkpointer, synthesizer
 │   │   │   └── guardrails/                # input_guard.py, llm_judge.py
-│   │   ├── tools/                         # admission_tool, university_info_tool, rag_tool,
-│   │   │                                  # clarification_node, announcement_node
-│   │   ├── entity_resolution/             # normalize.py, alias_lookup.py (4 quy tắc, PRD mục 10.3)
+│   │   ├── tools/                         ✅ context.py (dữ liệu nạp 1 lần), admission.py (T1 admission_scores, T2 list_programs)
+│   │   │                                  # còn: program_info, tuition, certificates, university_info, rag_tool (PLAN - Tools)
+│   │   ├── entity_resolution/             ✅ normalize.py, index.py, resolver.py (4 quy tắc PRD 10.3 + fuzzy), scan.py
 │   │   ├── rag/                           # retriever.py (đọc Qdrant)
-│   │   ├── db/                            # models.py, session.py, migrations/ (Alembic)
-│   │   ├── schemas/                       # Pydantic request/response
-│   │   └── core/                          # config.py (env), logging.py (Langfuse)
+│   │   ├── db/                            ✅ pool.py (psycopg3 async, chỉ đọc, search_path=hust) — không ORM/Alembic
+│   │   ├── schemas/                       ✅ common.py (ToolResult), admission.py; request/response API ở Tuần 4
+│   │   └── core/                          ✅ config.py (Settings đọc .env); logging.py (Langfuse) — Tuần 4
+│   ├── requirements.txt, pyproject.toml   ✅ thư viện backend (ghim phiên bản) + cấu hình pytest
 │   └── tests/
+│       ├── conftest.py, test_db.py        ✅ test nền lớp DB (marker db)
+│       ├── test_entity_resolution.py, test_scan.py   ✅ không cần DB
+│       ├── test_admission_scores.py, test_list_programs.py   ✅ marker db
 │       └── eval/                          ✅ 120_question_check_data.md (bộ câu hỏi đánh giá)
 │
 ├── frontend/                              ⬜ (khung: app/, components/{Chat,Citation,ClarificationPrompt}/, lib/)
@@ -32,7 +36,9 @@ hust_chatbot/
 │   │   ├── tsa_quyche/, kkht_2022/        # ảnh từng trang + bản chép tay (scan)
 │   │   ├── sotay_pages/, sotay_overrides/ # ảnh trang Sổ tay + 22 trang chép tay
 │   │   └── mon_chinh/                     # trang bên thứ ba dùng đối chiếu môn chính
-│   ├── processed/                         ✅ 24 bảng CSV -> PostgreSQL (PRD mục 15.1)
+│   ├── processed/                         ✅ 24 bảng CSV (nguồn bóc từ văn bản) -> DB
+│   │   └── linking/                       ✅ bảng nối do người gán: danh mục Trường/Khoa, mã chứng chỉ, bảng cầu
+│   ├── db/hust.sqlite                     ⚙ sinh ra bằng build_db.py, không lên git
 │   ├── programs/                          ✅ <mã_ngành>.json (68 ngành)
 │   ├── faculty/                           ✅ <mã_khoa>/info.json + gioi_thieu.md (10 đơn vị)
 │   ├── rag/
@@ -41,14 +47,16 @@ hust_chatbot/
 │   ├── link.md                            ✅ danh sách link nguồn do anh lập (đầu vào thu thập)
 │   └── link_dao_tao_nganh.md              ✅ link 68 trang ngành (đầu vào của crawl_program_pages.py)
 │
-├── scripts/                               ✅ 33 script xử lý dữ liệu (chạy theo lô, không phải service)
+├── scripts/                               ✅ 35 script xử lý dữ liệu (chạy theo lô, không phải service)
 │   ├── crawl_*.py, extract_departments.py         # thu thập
 │   ├── build_*.py, fix_*.py, add_main_subject.py, verify_subject_combinations.py, aliases.py   # dựng bảng CSV
 │   ├── pdf_to_rag_md.py, sotay_to_rag.py, de_an_to_rag.py, scan_md_to_rag.py, faculty_to_rag.py # sinh chunk
 │   ├── normalize_chunks.py, normalize_csv_meta.py # chuẩn hoá metadata
 │   ├── validate_*.py, check_dangling_refs.py, coverage_report.py, probe_questions.py            # kiểm tra
+│   ├── eval_entity_scan.py                        # chạy Entity Resolution trên bộ 120 câu -> docs/ghi_chu/
 │   ├── check_setup.py                             # kiểm tra .env + Qdrant + OpenAI
 │   ├── embed_chunks.py, search_chunks.py          # nhúng vào Qdrant + tìm thử/đo retrieval
+│   ├── build_db.py, validate_links.py             # CSV -> SQLite (+ Postgres với --postgres) + kiểm liên kết
 │   ├── Dockerfile, requirements-ingest.txt        # image cho service "ingest" (docker-compose.yml)
 │   └── build_source_list.py                       # sinh docs/nguon_du_lieu.md
 │
@@ -57,13 +65,16 @@ hust_chatbot/
 │   ├── PLAN - Data Collection (v1).md
 │   ├── PLAN - Metadata Design (v1).md     # lịch sử; bản hiện hành là v2
 │   ├── PLAN - Metadata Design (v2).md
-│   ├── PLAN - Data Linking (v1).md        # chưa thực hiện
+│   ├── PLAN - Data Linking (v1).md        # đã thực hiện — SQLite 23 bảng
+│   ├── PLAN - Backend PostgreSQL (v1).md  # đã thực hiện — Postgres + pool + test nền
+│   ├── PLAN - Tools (v1).md               # kế hoạch 7 tool Tuần 3
+│   ├── PLAN - Entity Resolution + Admission Tool (v1).md   # đã thực hiện — chi tiết bước 1–3
 │   ├── PLAN - Embedding (v1).md           # đã thực hiện — 641 chunk trong Qdrant
 │   ├── nguon_du_lieu.md                   # tổng hợp link nguồn (sinh tự động)
 │   ├── cautrucduan.md                     # file này
 │   └── ghi_chu/                           # ghi chú theo ngày
 │
-├── docker-compose.yml                     ✅ Qdrant + service "ingest" (sẽ thêm postgres + backend + frontend)
+├── docker-compose.yml                     ✅ Qdrant + Postgres (127.0.0.1:5432) + service "ingest" (sẽ thêm backend + frontend)
 ├── .env.example                           ✅
 ├── .gitignore                             ✅
 └── README.md                              ✅
@@ -79,10 +90,11 @@ hust_chatbot/
 | `processed/admission_scores.csv`, `quotas.csv` (gộp năm) | Vẫn tách theo năm (`admission_scores_2024/25/26.csv`…) | Gộp bảng là việc của `PLAN - Data Linking` (chưa thực hiện) — gộp bây giờ là làm một nửa kế hoạch đó. |
 | `scripts/` liệt kê 4 file | 31 script, để phẳng | Các script import lẫn nhau (`from crawl_pages import fetch`…); chia thư mục con phải sửa import mà chưa cần. Nhóm theo tiền tố tên là đủ tìm. |
 | `seed_db.py` | Chưa có | Thuộc Data Linking (nạp CSV -> DB). |
-| `backend/app/entity_resolution/validate_aliases.py` | Chỉ có ở `scripts/validate_aliases.py` | Đây là phép kiểm dữ liệu chạy theo lô, không phải code service. Để hai nơi sẽ lệch nhau. |
+| `backend/app/entity_resolution/validate_aliases.py` | Chỉ có ở `scripts/validate_aliases.py`, nhưng **import resolver của backend** (từ 2026-10-07) | Phép kiểm chạy theo lô nằm ở `scripts/`; thuật toán khớp chỉ có một bản trong backend để validator kiểm đúng cái bot chạy. |
 | `backend/app/rag/ingestion.py`, `chunking.py` | Không tạo; việc này do `scripts/` làm | Trích xuất và cắt chunk đã làm xong bằng script (mỗi nguồn một cách cắt riêng, không phải "header-based" chung). Backend chỉ cần `retriever.py`; bước embed sẽ là một script. Viết lại trong backend là có hai bộ cắt chunk cho cùng dữ liệu. |
 | `docs/evaluation_report.md` | Chưa có | Tạo khi có kết quả đánh giá (Tuần 2 trở đi). |
-| `docker-compose.yml`: postgres + qdrant + backend + frontend | Mới có Qdrant | Thêm từng dịch vụ khi tới bước đó. Lưu ý cổng 5432 trên máy đang bị Postgres của dự án khác chiếm. |
+| `docker-compose.yml`: postgres + qdrant + backend + frontend | Qdrant + Postgres (2026-10-06) | Thêm từng dịch vụ khi tới bước đó. Postgres dùng cổng 5432 (dự án khác đã giải phóng); bị chiếm lại thì đổi `POSTGRES_PORT` + `DATABASE_URL` trong `.env`. |
+| `backend/app/db/models.py`, `migrations/` (Alembic) | Chỉ có `pool.py`, SQL viết tay | DB sinh lại từ CSV mỗi lần build nên không có gì cần migration; thêm ORM model thì schema khai hai nơi (`PLAN - Backend PostgreSQL (v1)` D2). |
 
 ## Ranh giới dữ liệu (PRD mục 3.C)
 
@@ -98,6 +110,9 @@ python scripts/add_main_subject.py              # chỉ khi chạy lại verify_
 python scripts/normalize_csv_meta.py            # bù 6 cột chuẩn cho CSV
 python scripts/normalize_chunks.py              # -> data/rag/normalized/
 python scripts/validate_metadata.py             # phải 0 lỗi
+python scripts/build_db.py --postgres           # -> data/db/hust.sqlite + Postgres schema hust
+pytest backend                                  # test nền: DB khớp CSV, chỉ đọc
+python scripts/validate_links.py                # phải 0 lỗi
 python scripts/build_source_list.py             # cập nhật docs/nguon_du_lieu.md
 docker compose run --rm ingest python scripts/embed_chunks.py --recreate   # nhúng lại vào Qdrant
 docker compose run --rm ingest python scripts/search_chunks.py --eval     # đo lại retrieval

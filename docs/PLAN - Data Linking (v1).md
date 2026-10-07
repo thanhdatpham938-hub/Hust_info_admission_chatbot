@@ -1,8 +1,31 @@
 # PLAN — Kết nối các bảng dữ liệu (v1)
 
-**Ngày:** 2026-09-26 · **Trạng thái:** bản nháp để anh đọc và sửa · Gắn với PRD v1.2 mục 10.3 (khớp thực thể), 15.1 (schema) · Đi kèm: `PLAN - Metadata Design (v2).md`
+**Ngày:** 2026-09-26 · **Trạng thái:** đã thực hiện 2026-10-04 (xem mục "Đã thực hiện" cuối file) · Gắn với PRD v1.2 mục 10.3 (khớp thực thể), 15.1 (schema) · Đi kèm: `PLAN - Metadata Design (v2).md`
 
 Mỗi quyết định có dòng **Vì sao**.
+
+## Rà soát lại 2026-10-04 (sau khi xong metadata + embedding)
+
+Đo lại toàn bộ L1–L9 trên dữ liệu hiện tại: **cả 9 vấn đề vẫn đúng y nguyên số liệu** (0 mã mồ côi; 49/68 mã nhiều tên; JSON TE1 → `FED`, TROY-IT trống mã; `XTTN` vs `XTTN_1.2/1.3`; EM4, TROY-BA chỉ 2025; 3 bảng chữ tự do 11 + 30 + 14 = 55 dòng; `Aptis Esol/ESOL/APTIS ESOL`; alias chỉ có ngành; FL1–FL4 thiếu K00). Phần mô hình đích và thứ tự vẫn dùng được. Những chỗ cần sửa/bổ sung:
+
+| # | Chỗ | Sửa thành | Vì sao |
+|---|---|---|---|
+| R1 | Mục 3: "Trang ngành (151) … `faculty_code` (bổ sung)" | 152 chunk, `faculty_code` **đã có** (lấy từ `programs_2026.csv`, 2026-09-27) và đã nằm trong payload Qdrant có chỉ mục, cùng `year`, `cohort`, `is_latest`, `versioned` | Phía RAG của việc nối đã xong; Data Linking giờ chỉ còn phía SQL |
+| R2 | Bước 1 "sửa TE1 → SME, TROY-IT → FAMI" | Chỉ còn sai ở `data/programs/*.json`; chunk và CSV đã đúng | Ảnh hưởng nhỏ hơn plan cũ nghĩ — không phải nhúng lại |
+| R3 | `faculties` lấy từ `data/faculty/*/info.json` | Bước 1 sinh ra `data/processed/faculties.csv` và coi file này là nguồn | `data/faculty/` và `data/programs/` **không lên git** (`.gitignore` chỉ cho `data/processed/*.csv`) → clone repo về chạy `build_db.py` sẽ thiếu nguồn |
+| R4 | `program_aliases` (4 dòng: TEEP → TE-EP, "CH -E20" → CH-E20…) không có trong mô hình | Giữ làm bước chuẩn hoá mã lúc nạp, không đưa vào `entity_aliases` | Đây là lỗi gõ mã trong nguồn, không phải cách người dùng gọi tên ngành |
+| R5 | `program_combinations.main_subject` | Mang theo cột `main_subject_status` (161 dòng `third_party`, 1 dòng `not_found` = TROY-IT/D01) vào DB; khi trả lời môn chính thì trích dẫn bài điểm chuẩn 2026 (công thức), **không** trích dẫn tuyensinh247 | Theo quyết định đã chốt: nguồn bên thứ ba không vào danh sách nguồn, chatbot không trích dẫn |
+| R6 | `scoring_formulas` khoá `formula_type` | Khoá (`formula_type`, `year`) | Hiện chỉ có 2026; năm sau thêm công thức mới sẽ trùng khoá |
+| R7 | `admission_methods` "cố định 6 dòng" | Mã đang có: `THPT`, `DGTD`, `XTTN`, `XTTN_1.2`, `XTTN_1.3` (5) — thêm `XTTN_1.1` (tuyển thẳng, không có điểm chuẩn) thành 6 | Ghi rõ để không đoán |
+| R8 | `programs.program_group` | Cần bảng mã: 4 giá trị dạng chữ hoa dài trong `quotas_2026` ("CHƯƠNG TRÌNH CHẤT LƯỢNG CAO - ELITECH (CỦA ĐHBK HÀ NỘI)"…) → `chuan` / `elitech` / `pfiev` / `lien_ket` | Lọc theo nhóm bằng chuỗi dài dễ sai một dấu cách |
+| R9 | Bước 7 → PostgreSQL | Khi chuyển từ SQLite sang PostgreSQL: thêm service `postgres` vào `docker-compose.yml`, cổng máy **5433** | Cổng 5432 đang bị dự án khác chiếm |
+| R10 | Bước 8 "Chốt trước khi sang metadata bước 3" | Bỏ — metadata và embedding đã xong | Lỗi thời |
+| R11 | `cert_bonus_conversion` | 3 dòng `(HSKK, "HSKK Trung cấp (60-100)", ca_hai, 2026)` trùng khoá nhưng điểm thưởng 2/3/4 — đối chiếu lại ảnh `quydoi-cccnn-2026.png` trước khi nạp | Phát hiện khi kiểm khoá (mục 2.4); nhiều khả năng lúc đọc ảnh đã gộp mất 3 khoảng điểm. Khoá chính sẽ từ chối các dòng này |
+| R12 | `admission_scores.combination_group` rỗng (204/287 dòng năm 2026) | Đổi thành `tat_ca` lúc nạp | Cột thuộc khoá chính không được NULL/rỗng |
+
+Ca kiểm thử thật cho luồng SQL + RAG ở mục 3: **Q10** ("hệ số 2 cho môn chính") — số/công thức lấy từ `program_combinations` ⨝ `scoring_formulas` (`mon_chinh_toan` ≠ `K01`), trích dẫn từ chunk `dean2026::m3-1` + `ts::diem-chuan-2026-3` (xem `PLAN - Embedding (v1).md`).
+
+3 quyết định ở mục 6 vẫn chờ anh chốt.
 
 ## Vì sao cần kế hoạch riêng cho việc nối bảng
 
@@ -43,6 +66,35 @@ Mỗi bảng đúng riêng lẻ vẫn chưa đủ: nếu **khoá nối** giữa 
 | L7 | **Từ điển alias chỉ có ngành** (168 dòng) và nhóm ngành (6); **không có Trường/Khoa, chứng chỉ** | — | "Trường CNTT", "SoICT", "viện điện" không nhận ra được |
 | L8 | FL1–FL4 xét ĐGTD (có trong bảng phương thức và điểm chuẩn TSA) nhưng **thiếu dòng tổ hợp K00** | 4 ngành | Hỏi "FL1 xét ĐGTD không" theo bảng tổ hợp ra "không" — sai |
 | L9 | Tổ hợp theo ngành **chỉ có năm 2026**; 2024–2025 không có | — | Đã biết từ trước (v1); câu hỏi tổ hợp năm cũ phải fallback theo PRD 13.2 |
+
+### Sơ đồ hiện trạng (bổ sung 2026-10-04)
+
+File tách theo năm gộp thành một khối `_YYYY`. Nét liền là cột nối đang khớp, nét đứt là chỗ đang lỗi. Bản có đủ cột ở tab "Hiện trạng CSV" của trang sơ đồ (link ở mục 2.4). So với sơ đồ đích ở mục 2.4 thì thấy Data Linking sửa đúng các nét đứt này.
+
+```mermaid
+erDiagram
+  PROGRAMS_YYYY ||--o{ ADMISSION_SCORES_YYYY : "program_code, khớp"
+  PROGRAMS_YYYY ||--o| QUOTAS_YYYY : "program_code, khớp"
+  PROGRAMS_YYYY ||--o{ PROGRAM_METHODS_YYYY : "program_code, khớp"
+  PROGRAMS_YYYY ||--o| PROGRAM_OVERVIEW_2026 : "program_code, khớp"
+  PROGRAMS_YYYY ||--o| TUITION_2026 : "program_code, khớp"
+  PROGRAMS_YYYY ||--o{ SUBJECT_COMBINATIONS_2026 : "program_code, khớp"
+  SUBJECT_COMBINATIONS_REF ||--o{ SUBJECT_COMBINATIONS_2026 : "combination_code, khớp"
+  SCORING_FORMULAS_2026 ||--o{ SUBJECT_COMBINATIONS_2026 : "formula_type, khớp"
+  ENTITY_ALIASES }o--|| PROGRAMS_YYYY : "entity_code, khớp"
+  PROGRAM_ALIASES }o--|| PROGRAMS_YYYY : "canonical_code, khớp"
+  PROGRAMS_YYYY }o..|| FACULTY_INFO_JSON : "L1: nối bằng faculty_name, lệch tên"
+  PROGRAM_JSON }o..|| FACULTY_INFO_JSON : "L1: faculty_code TE1 sai"
+  PROGRAM_METHODS_YYYY }o..o{ ADMISSION_SCORES_YYYY : "L3: XTTN khác XTTN_1.3"
+  PROGRAM_METHODS_YYYY }o..o{ SUBJECT_COMBINATIONS_2026 : "L8: FL1-FL4 thiếu K00"
+  TUITION_BY_YEAR }o..o{ PROGRAMS_YYYY : "L5: danh sách ngành là chữ"
+  TUITION_CREDIT }o..o{ PROGRAMS_YYYY : "L5: danh sách ngành là chữ"
+  LANGUAGE_EXIT_REQ_2026 }o..o{ PROGRAMS_YYYY : "L5: nhóm ngành là chữ"
+  CERT_BONUS_CONVERSION }o..o{ CERT_CEFR_EQUIVALENCE : "L6: tên chứng chỉ lệch"
+  CERT_CEFR_EQUIVALENCE }o..o{ CERT_EQUIVALENCE_OUTPUT_2026 : "L6: tên chứng chỉ lệch"
+```
+
+`admission_fees` không nối với bảng nào. L2 (49 mã nhiều tên) không phải một quan hệ: `program_name` bị chép lặp ở 10 file nên không vẽ được thành nét.
 
 ---
 
@@ -93,6 +145,56 @@ Học phí tín chỉ 2024–2025 và chuẩn đầu ra ngoại ngữ **không q
 **Vì sao làm bảng cầu thay vì để LLM đọc chữ:** nguyên tắc PRD — số liệu trả lời phải đến từ truy vấn, LLM không tự suy. "IT-EP có thuộc 'Chương trình tiên tiến ELITECH tăng cường ngoại ngữ' không?" là suy luận mà mô hình dễ sai, trong khi con người gán một lần là xong.
 **Vì sao làm tay, không script:** các nhóm được mô tả bằng chữ tự do ("và các CTĐT chuẩn khác", "trừ nhóm ngành ngôn ngữ"). Script so tên sẽ gán sai ở đúng những chỗ mơ hồ nhất. 55 dòng nhóm → ước chừng 68 ngành × 2 bảng, làm tay kèm cột `note` ghi căn cứ.
 **Rủi ro phải ghi rõ:** bảng cầu là **diễn giải của mình** từ văn bản, nên `verification_status = rule_derived` và citation vẫn trỏ về văn bản gốc.
+
+### 2.4 Khoá chính và sơ đồ ER (bổ sung 2026-10-04)
+
+Sơ đồ có thể bấm xem theo từng cụm: https://claude.ai/artifact/GVonC7WEHGSsyN8nToHprG (trang riêng tư, cần chia sẻ nếu người khác cần xem).
+
+CSV hiện chưa có cột `id`, và **không cần thêm cho mọi bảng**. Khoá chính là tập cột đủ phân biệt mọi dòng. Đã kiểm trên dữ liệu thật: mọi bảng đều có tập cột như vậy và không trùng, trừ R11.
+
+| Loại bảng | Khoá chính | Ví dụ |
+|---|---|---|
+| Danh mục | Mã có sẵn | `programs.program_code`, `combinations.combination_code`, `faculties.faculty_code` |
+| Số liệu | Khoá ghép từ các mã (cũng là khoá ngoại) | `admission_scores (program_code, year, method_code, combination_group)` |
+| Quy định theo nhóm | Id đọc được, ghi sẵn trong CSV | `tuition_rules.rule_id = "hp2425-chuan-550"`, `language_requirements.req_id = "nn2026-chuan"` |
+
+**Vì sao không dùng id tự tăng:** DB được dựng lại từ CSV mỗi lần chạy `build_db.py`. Nếu thứ tự dòng đổi thì id tự tăng cũng đổi, nên không bảng nào tham chiếu được lâu dài. Mã tự nhiên không đổi, đọc là hiểu, và trùng với mã trong payload Qdrant.
+**Vì sao bảng quy định cần id ghi sẵn trong CSV:** bảng cầu (`tuition_rule_members`, `language_req_members`) được gán tay và trỏ tới id đó. Nếu id sinh ra lúc nạp thì bảng cầu trỏ sai sau mỗi lần dựng lại.
+**Cột mới so với mục 2.2:** `language_requirements.min_level_group` (gán tay, vd "Bậc 3") để nối sang `cert_output.level_group`, nhờ đó trả lời được "IELTS 6.5 có đủ chuẩn đầu ra không" bằng truy vấn.
+
+```mermaid
+erDiagram
+  FACULTIES ||--o{ PROGRAMS : "faculty_code"
+  FACULTIES ||--o{ FACULTY_UNITS : "faculty_code"
+  PROGRAM_GROUPS ||--o{ PROGRAMS : "program_group_code"
+  PROGRAMS ||--o{ PROGRAM_YEARS : "program_code"
+  PROGRAM_YEARS ||--o{ ADMISSION_SCORES : "program_code, year"
+  PROGRAM_YEARS ||--o| QUOTAS : "program_code, year"
+  PROGRAM_YEARS ||--o| TUITION_PROGRAM : "program_code, year"
+  PROGRAM_YEARS ||--o{ PROGRAM_METHODS : "program_code, year"
+  ADMISSION_METHODS ||--o{ PROGRAM_METHODS : "method_code"
+  ADMISSION_METHODS ||--o{ ADMISSION_SCORES : "method_code"
+  ADMISSION_METHODS |o--o{ ADMISSION_METHODS : "parent_method"
+  ADMISSION_METHODS ||--o{ SCORING_FORMULAS : "method_code"
+  PROGRAM_METHODS ||--o{ PROGRAM_COMBINATIONS : "program_code, year, method_code"
+  COMBINATIONS ||--o{ PROGRAM_COMBINATIONS : "combination_code"
+  SCORING_FORMULAS ||--o{ PROGRAM_COMBINATIONS : "formula_type, year"
+  TUITION_RULES ||--o{ TUITION_RULE_MEMBERS : "rule_id"
+  PROGRAMS ||--o{ TUITION_RULE_MEMBERS : "program_code"
+  LANGUAGE_REQUIREMENTS ||--o{ LANGUAGE_REQ_MEMBERS : "req_id"
+  PROGRAMS ||--o{ LANGUAGE_REQ_MEMBERS : "program_code"
+  CERTIFICATES ||--o{ CERT_BONUS : "cert_code"
+  CERTIFICATES ||--o{ CERT_CEFR : "cert_code"
+  CERTIFICATES ||--o{ CERT_OUTPUT : "cert_code"
+  LANGUAGE_REQUIREMENTS }o..o{ CERT_OUTPUT : "min_level_group = level_group"
+  ENTITY_ALIASES }o..o| PROGRAMS : "entity_code"
+  ENTITY_ALIASES }o..o| FACULTIES : "entity_code"
+  ENTITY_ALIASES }o..o| CERTIFICATES : "entity_code"
+  PROGRAMS |o..o{ RAG_CHUNKS : "program_code (payload Qdrant)"
+  FACULTIES |o..o{ RAG_CHUNKS : "faculty_code (payload Qdrant)"
+```
+
+Nét liền là khoá ngoại thật trong DB. Nét đứt là liên kết logic, do `validate_links.py` kiểm tra. **Vì sao:** `entity_aliases.entity_code` trỏ tới nhiều loại bảng tuỳ `entity_type`, mà một khoá ngoại chỉ trỏ được tới một bảng. Chunk RAG thì nằm ở Qdrant, không cùng cơ sở dữ liệu. `program_combinations` trỏ tới `program_methods` (không trỏ thẳng tới `program_years`) để DB tự chặn trường hợp có tổ hợp mà không có phương thức. Đây là chiều ngược của lỗi L8.
 
 ---
 
@@ -158,5 +260,85 @@ Như `validate_aliases.py`: **thử ngược bằng lỗi cố ý** (đổi mã 
 ## 6. Cần anh quyết
 
 1. **Tên chuẩn của ngành** lấy theo đề án 2026 (khuyến nghị) hay theo trang giới thiệu ngành?
+Giữ tên ngành theo đúng chuẩn đề án 2026, các ngành chỉ thống nhất một mã ngành ngành nào thiếu không biết chọn cái nào hãy hỏi lại tôi 
 2. **EM4, TROY-BA** (chỉ tuyển 2025): giữ trong `programs` như ngành đã dừng tuyển (khuyến nghị — để trả lời đúng "năm nay không tuyển") hay bỏ?
+Không bỏ giữ trong programe
 3. **Bảng cầu học phí tín chỉ 2024–2025** có làm không? Học phí 2026 theo ngành đã có ở `tuition_2026`; bảng tín chỉ chỉ cần nếu anh muốn trả lời "bao nhiêu tiền một tín chỉ" (số năm 2024–2025, phải kèm ghi chú năm).
+có làm bảng cầu học phí tín chỉ bảng này sẽ dùng chung cho các năm để trả lời câu hỏi
+
+---
+
+# Đã thực hiện (2026-10-04)
+
+## Quyết định đã chốt
+
+| # | Quyết định | Cách làm |
+|---|---|---|
+| 1 | Tên chuẩn theo đề án 2026; mỗi ngành một mã | `programs.program_name` lấy từ `programs_2026`. EM4 và TROY-BA không có trong đề án 2026 nên lấy theo danh mục 2025 (EM4 chỉ có một tên; TROY-BA có 2 cách viết, cách còn lại đã vào alias). Bỏ hậu tố "(mới)" ở 5 ngành (người dùng chốt), vì "(mới)" chỉ đúng cho năm 2026 — năm mở ngành đã có trong `program_years` |
+| 2 | Giữ EM4, TROY-BA | `program_years` chỉ có 2024, 2025 → trả lời được "năm 2026 không tuyển" và vẫn tra được điểm chuẩn cũ |
+| 3 | Làm bảng cầu học phí tín chỉ, **dùng chung cho các năm** | Gán cả 5 ngành mở 2026 theo câu "và các CTĐT chuẩn khác" (ED5, FL4 → nhóm 480) và "các chương trình tiên tiến khác" (CH-E20, EM-E17, MI-E22). **Luật trả lời (cho SQL Tool Tuần 3):** số học phí tín chỉ luôn kèm "năm học 2024–2025", vì đó là năm của văn bản |
+| 4 | Lệ phí thi TSA: giữ dòng như người dùng đã sửa (500.000đ, `year = 2024`, nguồn đề án 2024) | Không đổi. **Lưu ý:** đề án 2024 ghi 450.000đ; mức 500.000đ là của 2026 và chưa có link nguồn — khi có link nên tách thành dòng `year = 2026` riêng |
+
+## Kết quả
+
+| Hạng mục | Kết quả |
+|---|---|
+| DB | `data/db/hust.sqlite` (không lên git — sinh lại từ CSV bằng `build_db.py`): 22 bảng, **0 trùng khoá, 0 khoá ngoại mồ côi** |
+| Số dòng khớp nguồn | `programs` 70 (68 + EM4 + TROY-BA) · `program_years` 197 (64 + 65 + 68) · `admission_scores` 687 (128 + 272 + 287) · `program_combinations` 297 (293 + 4 dòng K00) · `quotas` 133 · `tuition_rules` 41 (11 + 30) |
+| Bảng nối do người gán (`data/processed/linking/`, lên git) | `faculties` (10) · `program_groups` (4) · `admission_methods` (6) · `certificates` (27) · `tuition_rule_members` (161) · `language_req_members` (72) · `program_combinations_extra` (4) |
+| Alias | 174 → 253 dòng: +32 biến thể tên ngành, +29 Trường/Khoa (10 viết tắt, 15 tên cũ "Viện…", 4 tên đầy đủ), +18 chứng chỉ. `validate_aliases.py`: 0 lỗi, 0 cảnh báo (kể cả giả lập tra cứu) |
+| `validate_links.py` | **0 lỗi**, 5 cảnh báo đều là khoảng trống của nguồn (2024 không có bảng chỉ tiêu và phương thức; bảng học phí theo năm 2024–2025 không có dòng PFIEV và không có FL3). Tự thử ngược **12/12** |
+| Validator cũ | `validate_metadata` 0 lỗi (tự thử 19/19); chunk RAG sau khi đổi nguồn mã Khoa **giống từng byte** → không phải nhúng lại |
+
+Truy vấn mẫu chạy đúng trên DB: Q10 (công thức theo tổ hợp: K01 67 ngành, môn chính Toán 61, không môn chính 14, chưa rõ 1); "IELTS 6.5 đủ chuẩn đầu ra không" (Bậc 4 → đạt IT1 và IT-E10, chưa đạt FL1, IT-EP xét tiếng Pháp); "TROY-BA 2026" (chỉ có 2024, 2025); "các ngành của Viện Cơ khí động lực" (tên cũ → SME, 12 ngành gồm TE1); điểm chuẩn XTTN của IT1 theo cấp con 1.2 và 1.3.
+
+## Các lựa chọn phát sinh lúc làm — và vì sao
+
+| Lựa chọn | Vì sao |
+|---|---|
+| Bảng nối đặt ở `data/processed/linking/`, không sửa vào CSV do script sinh | `subject_combinations_2026.csv` và 3 bảng chứng chỉ do script ghi đè khi chạy lại (`verify_subject_combinations.py --write`, `build_cert_tables.py`). Sửa thẳng vào đó thì lần chạy lại sẽ mất phần sửa. Dòng K00 của FL1–FL4 và mã chứng chỉ vì vậy đi qua file riêng |
+| Cột id thêm thẳng vào `tuition_by_year`, `tuition_credit`, `language_exit_requirement_2026` | Ba bảng này không có script nào ghi đè (lập tay từ văn bản), và id là danh tính của dòng nên phải đi cùng dòng. `normalize_csv_meta.py` giữ cột lạ — đã kiểm chạy lại không đổi byte nào |
+| **R11 không phải lỗi đọc ảnh:** cột trong đề án là "HSK+HSKK" — một mức cần đồng thời HSK và HSKK | Xem lại ảnh `quydoi_cccnn_2026.png`: ở mức 2–4, HSKK đều là "Trung cấp (60-100)", chỉ phần HSK đi kèm khác nhau. Tách thành 2 chứng chỉ thì sinh ra 3 dòng trùng khoá. Đã gộp thành một chứng chỉ `HSK_HSKK` ("HSK4 (180-210) + HSKK Trung cấp (60-100)"), sửa cả CSV lẫn `build_cert_tables.py` |
+| `faculties.csv` là nguồn duy nhất của mã Khoa; `normalize_chunks.py`, `crawl_programs.py`, `crawl_program_pages.py` đọc từ đó | Trước đây mã Khoa nằm chép tay ở 2 nơi. **Gốc lỗi L1:** `crawl_programs.py` gán mã theo trang Khoa nào có link tới ngành (trang FED có link trùng tên → TE1 bị gán FED), thay vì theo `faculty_name` của danh mục. Đã sửa cách gán và 2 file JSON |
+| Tên Khoa chuẩn = chuỗi trong danh mục ngành đề án 2026 ("Trường CNTT&TT") | Cùng nguyên tắc với tên ngành (quyết định 1). Tên đầy đủ và tên trong `info.json` đưa vào alias |
+| Tên cũ "Viện…" chỉ thêm khi **có trong dữ liệu đã thu thập** (giới thiệu Trường/Khoa, Sổ tay) | Tránh bịa alias. FAMI, SOFL không tìm thấy tên cũ nào → chưa có |
+| Chứng chỉ có thêm cột số `value_min`, `value_max` (tính lúc nạp) | `cert_value` là chữ ("5.5÷6.5", "5,5 - 6,5") nên SQL không so sánh được với "IELTS 6.5". Giá trị không phải số ("Level 3") để trống; cột chữ gốc giữ nguyên |
+| `admission_scores.combination_group` rỗng → `tat_ca` (R12) | Cột thuộc khoá chính không được rỗng |
+| Khoá ngoại `program_combinations → program_methods` (không trỏ thẳng `program_years`) | DB tự chặn trường hợp có tổ hợp mà ngành không xét phương thức đó |
+| Luật E6 (điểm chuẩn phương thức con phải có phương thức cha) chỉ xét năm có bảng phương thức | Năm 2024 không có bảng phương thức; báo 128 dòng lỗi là che mất lỗi thật. Khoảng trống này báo một lần ở W1 |
+| `ET-E9` xếp vào nhóm chuẩn đầu ra tiếng Anh (Elitech) kèm ghi chú | Tên ngành ở bảng chỉ tiêu có "tăng cường tiếng Nhật", nhưng Phụ lục VII chỉ nêu IT-E6, ME-NUT — cần đối chiếu bản in |
+| 2 dòng gán học phí/ngoại ngữ dựa trên suy luận được đánh dấu "suy luận" trong `note` | FL3 → nhóm 480 ("và các CTĐT chuẩn khác"); "Ngôn ngữ Anh" → FL1; "các CT tiên tiến khác" = Elitech trừ các nhóm có dòng riêng. Mọi dòng bảng cầu đều `verification_status = rule_derived` |
+
+## Thứ tự chạy lại
+
+```
+(script bóc nguồn nào đổi thì chạy script đó)
+python scripts/normalize_csv_meta.py
+python scripts/validate_aliases.py          # 0 lỗi
+python scripts/build_db.py                  # -> data/db/hust.sqlite, 0 trùng khoá, 0 mồ côi
+python scripts/validate_links.py            # 0 lỗi
+```
+
+## Còn lại (ngoài phạm vi lần này)
+
+- Chuyển SQLite → PostgreSQL (service `postgres` trong `docker-compose.yml`, cổng máy 5433) khi bắt đầu Admission SQL Tool (Tuần 3).
+- `cert_value` dạng nhiều khoảng ("6.0-6.5 / 7.0-7.5 / 8.0" của VSTEP 2025) chưa tách được thành số.
+- Bảng tổ hợp theo ngành vẫn chỉ có 2026 (L9).
+
+## Bổ sung 2026-10-05: liên hệ và đơn vị trực thuộc của Trường/Khoa (khép Tuần 1)
+
+PRD mục 15.1 yêu cầu `faculties` có `address`, `contact_info`, `departments`, `official_channel_url`; bản 2026-10-04 mới có mã, tên, website.
+
+| Việc | Cách làm | Vì sao |
+|---|---|---|
+| Thêm `phone`, `email`, `address` vào `linking/faculties.csv` | Đối chiếu 2 nguồn: `data/link.md` (người dùng bổ sung) và mục "Đơn vị quản lý" trên trang ngành ts.hust.edu.vn. 6/10 khớp; 4 chỗ lệch (SEEE, SCLS, SMSE, SME) do **người dùng chốt**: lấy theo trang ngành, riêng SME ghi cả hai số | Không tự chọn giữa hai nguồn khi không biết nguồn nào mới hơn. Lý do từng Khoa ghi ở cột `contact_note`, link nguồn ở `contact_source_url` |
+| SEM lấy địa chỉ theo trang ngành (P403-404 C9) thay vì `link.md` (P406-407) | Áp cùng quy tắc người dùng chốt cho 3 chỗ lệch kia; ghi "cần người dùng xác nhận" trong `contact_note` | Chỗ lệch này phát hiện sau khi đã hỏi |
+| Giữ đủ các hotline khi nguồn ghi nhiều số (SEEE, SME, SEP, FAMI, SEM) | Nhiều số cách nhau bằng `;`, ghi chú trong ngoặc (vd "riêng chương trình TROY") | Người dùng chọn "ghi cả hai" cho SME; một đơn vị có hai hotline là bình thường |
+| FAMI "04 3869 2137" → "024 3869 2137" | — | Mã vùng Hà Nội đổi từ 04 sang 024 năm 2017; trang ngành đã ghi 024 |
+| Email SME lấy `sme@hust.edu.vn` (link.md) | — | Trang ngành ghi sai thành "sme.hust.edu.vn" (thiếu @) |
+| Đổi cột `website_url` → `official_channel_url` | — | Trùng tên PRD mục 15.1 (phục vụ ANNOUNCEMENT_QUERY) |
+| `departments` → bảng mới `faculty_units` (34 dòng, `unit_type` = khoa / bo_mon / trung_tam) | Lọc từ `data/faculty/*/info.json`: bỏ "Ban Giám hiệu", "Văn phòng", tên bị cắt cụt ("Khoa Khoa học &"), gộp dòng trùng | Danh sách gốc lẫn đơn vị hành chính và rác; nạp nguyên thì "Trường X có những khoa nào" trả lời sai. SEM, SOFL không có đơn vị chuyên môn nào trong dữ liệu thu được → để trống, `validate_links` cảnh báo W6 |
+| Luật mới trong `validate_links.py`: E7 định dạng số/email, W5 thiếu liên hệ, W6 thiếu đơn vị | Số di động 10 chữ số (03/05/07/08/09), số bàn 11 chữ số (02x) | Bắt đúng 2 lỗi đã gặp trong nguồn (mã vùng cũ, email thiếu @); tự thử ngược **16/16** |
+
+Kết quả: DB 23 bảng, 0 trùng khoá, 0 khoá ngoại mồ côi; `validate_links` 0 lỗi, 7 cảnh báo (5 cũ + W6 cho SEM, SOFL). Truy vấn "Viện Cơ khí động lực ở đâu, hotline?" → alias tên cũ → Trường Cơ khí, VP C7-614M, 086 804 0770; 024 3869 6165.
+

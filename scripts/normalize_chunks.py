@@ -112,14 +112,12 @@ DOCUMENT_TYPES = {"quy_che_dao_tao", "so_tay_sinh_vien", "de_an_tuyen_sinh", "qu
                   "quy_dinh_ngoai_ngu", "quy_che_thi_tsa", "gioi_thieu_nganh",
                   "gioi_thieu_don_vi", "tin_tuyen_sinh"}
 
-# Ten Truong/Khoa trong danh muc nganh -> ma Khoa. Tam thoi dat o day; PLAN - Data Linking
-# buoc 1 se dua vao bang `faculties`. Lay tu programs_2026.csv (dung), KHONG tu data/programs/*.json
-# (dang gan sai TE1 -> FED va thieu ma TROY-IT).
+# Ten Truong/Khoa trong danh muc nganh -> ma Khoa: doc tu bang danh muc
+# data/processed/linking/faculties.csv (PLAN - Data Linking buoc 1, 2026-10-04) — mot nguon duy
+# nhat cho ca build_db.py va crawl_programs.py. faculty_name o do = dung chuoi trong programs_*.csv.
 FACULTY_CODE = {
-    "Trường CNTT&TT": "SOICT", "Trường Điện - Điện tử": "SEEE", "Trường Cơ khí": "SME",
-    "Trường Hóa & KHSS": "SCLS", "Trường Vật liệu": "SMSE", "Trường Kinh tế": "SEM",
-    "Khoa Toán - Tin": "FAMI", "Khoa Vật lý Kỹ thuật": "SEP", "Khoa Ngoại ngữ": "SOFL",
-    "Khoa KH&CN Giáo dục": "FED",
+    r["faculty_name"]: r["faculty_code"]
+    for r in csv.DictReader((ROOT / "data" / "processed" / "linking" / "faculties.csv").open(encoding="utf-8"))
 }
 
 DROP_KEYS = {"stop_at", "layout", "program_name"}   # program_name: ten nganh chi song o bang danh muc

@@ -1,7 +1,7 @@
-"""Kiem tra moi truong truoc khi embed: file .env, Qdrant (Docker), OpenAI API.
+"""Kiem tra moi truong: file .env, Qdrant + PostgreSQL (Docker), OpenAI API.
 
 Dung:
-    python scripts/check_setup.py            # kiem tra .env + Qdrant (khong ton tien)
+    python scripts/check_setup.py            # kiem tra .env + Qdrant + Postgres (khong ton tien)
     python scripts/check_setup.py --openai   # them 1 lan goi embedding thu (~0,00001 USD)
 
 Khong bao gio in key ra man hinh — chi in do dai va 4 ky tu cuoi de anh doi chieu.
@@ -61,8 +61,30 @@ def main() -> int:
              "đợi ~10 giây rồi chạy lại")
         errors += 1
 
+    print("3. PostgreSQL")
+    db_url = os.getenv("DATABASE_URL", "")
+    if not db_url:
+        fail("DATABASE_URL trống", "thêm POSTGRES_PASSWORD, POSTGRES_PORT, DATABASE_URL vào .env (xem .env.example)")
+        errors += 1
+    else:
+        try:
+            import psycopg
+            with psycopg.connect(db_url, connect_timeout=5) as con:
+                ok(f"kết nối được {db_url.split('@')[-1]}")
+                info = con.execute("SELECT to_regclass('hust.build_info')").fetchone()[0] and con.execute(
+                    "SELECT built_at, git_commit FROM hust.build_info").fetchone()
+            if info:
+                ok(f"schema hust đã nạp lúc {info[0]} (commit {info[1]})")
+            else:
+                fail("chưa có dữ liệu trong schema hust", "chạy python scripts/build_db.py --postgres")
+                errors += 1
+        except Exception as e:  # noqa: BLE001
+            fail(f"không kết nối được PostgreSQL ({type(e).__name__}: {e})",
+                 "chạy `docker compose up -d postgres`; DATABASE_URL phải dùng 127.0.0.1, không dùng localhost")
+            errors += 1
+
     if "--openai" in sys.argv and key:
-        print("3. OpenAI embedding (1 lần gọi thử)")
+        print("4. OpenAI embedding (1 lần gọi thử)")
         try:
             from openai import OpenAI
             vec = OpenAI(api_key=key).embeddings.create(model=model, input="Học phí ngành IT1").data[0].embedding

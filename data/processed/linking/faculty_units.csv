@@ -1,0 +1,35 @@
+faculty_code,unit_name,unit_type,note,source_url,verification_status,dataset_version
+SOICT,Khoa Khoa học Máy tính,khoa,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Khoa Kỹ thuật Máy tính,khoa,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm An toàn – An ninh thông tin (BKCS),trung_tam,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm Cyber Security,trung_tam,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm Công nghệ và Giải pháp Chuyển đổi số trong Giáo dục (EdTech),trung_tam,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm Máy tính và Thực hành,trung_tam,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm Nghiên cứu Quốc tế về Trí tuệ nhân tạo (BKAI),trung_tam,info.json có 2 dòng (có và không có '(BKAI)') — gộp,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm Nghiên cứu Quốc tế về Định vị sử dụng vệ tinh (NAVIS),trung_tam,,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SOICT,Trung tâm Đổi mới Sáng tạo (Innovation),trung_tam,info.json có 2 dòng viết hoa khác nhau — gộp,https://soict.hust.edu.vn/can-bo,html_parsed,2026.1
+SEEE,Khoa Điện,khoa,,https://seee.hust.edu.vn/vi/con-nguoi/can-bo/,html_parsed,2026.1
+SEEE,Khoa Điện tử,khoa,,https://seee.hust.edu.vn/vi/con-nguoi/can-bo/,html_parsed,2026.1
+SEEE,Khoa Tự động hóa,khoa,,https://seee.hust.edu.vn/vi/con-nguoi/can-bo/,html_parsed,2026.1
+SEEE,Khoa Kỹ thuật truyền thông,khoa,,https://seee.hust.edu.vn/vi/con-nguoi/can-bo/,html_parsed,2026.1
+SEEE,Trung tâm Đào tạo thực hành Điện - Điện tử,trung_tam,,https://seee.hust.edu.vn/vi/con-nguoi/can-bo/,html_parsed,2026.1
+SME,Khoa Cơ khí chế tạo máy,khoa,,https://sme.hust.edu.vn/vi/organs/viewsearch/?q=&p=&oid=0,html_parsed,2026.1
+SME,Khoa Cơ điện tử,khoa,,https://sme.hust.edu.vn/vi/organs/viewsearch/?q=&p=&oid=0,html_parsed,2026.1
+SME,Khoa Cơ khí Động lực,khoa,,https://sme.hust.edu.vn/vi/organs/viewsearch/?q=&p=&oid=0,html_parsed,2026.1
+SME,Khoa Năng lượng nhiệt,khoa,,https://sme.hust.edu.vn/vi/organs/viewsearch/?q=&p=&oid=0,html_parsed,2026.1
+SME,Trung tâm NC các nguồn động lực và phương tiện tự hành,trung_tam,,https://sme.hust.edu.vn/vi/organs/viewsearch/?q=&p=&oid=0,html_parsed,2026.1
+SCLS,Khoa Hóa học,khoa,,https://scls.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SCLS,Khoa Kỹ thuật Hóa học,khoa,,https://scls.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SCLS,Khoa Kỹ thuật Sinh học,khoa,,https://scls.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SCLS,Khoa Kỹ thuật Thực phẩm,khoa,,https://scls.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SCLS,Khoa KH&CN Môi trường,khoa,,https://scls.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SCLS,Trung tâm Kỹ thuật,trung_tam,,https://scls.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SMSE,Khoa Kỹ thuật Vật liệu,khoa,,https://smse.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SMSE,Khoa Vật liệu Hoá học Ứng dụng,khoa,,https://smse.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SMSE,Khoa Vật liệu điện tử và linh kiện,khoa,,https://smse.hust.edu.vn/vi/organs/,html_parsed,2026.1
+SMSE,Khoa Dệt May - Da giầy và Thời trang,khoa,,https://smse.hust.edu.vn/vi/organs/,html_parsed,2026.1
+FAMI,Bộ môn Toán Tin,bo_mon,Suy từ slug URL trang cán bộ (bo-mon-toan-tin),https://fami.hust.edu.vn/danh-sach-giang-vien/bo-mon-toan-tin/,html_parsed,2026.1
+FAMI,Bộ môn Toán ứng dụng,bo_mon,Suy từ slug URL trang cán bộ (bo-mon-toan-ung-dung); trang thứ 3 (slug n-3) chưa xác định được tên bộ môn,https://fami.hust.edu.vn/danh-sach-giang-vien/bo-mon-toan-ung-dung/,html_parsed,2026.1
+SEP,Trung tâm Thí nghiệm Thực hành Vật lý Kỹ thuật,trung_tam,Trang cán bộ không liệt kê bộ môn,https://sep.hust.edu.vn/can-bo,html_parsed,2026.1
+FED,Bộ môn Khoa học & Công nghệ Giáo dục,bo_mon,,https://fed.hust.edu.vn/vi/about/can-bo-va-giang-vien.html,html_parsed,2026.1
+FED,Bộ môn Sư phạm các ngành kỹ thuật,bo_mon,,https://fed.hust.edu.vn/vi/about/can-bo-va-giang-vien.html,html_parsed,2026.1

@@ -55,10 +55,14 @@ CERTS_2026 = {
     "DSD": ["", "", "DSD1", "", "DSD2"],
     "JLPT": ["N4 (145-180)", "N3 (95-120)", "N3 (121-149)", "N3 (150-180)",
              "N2 (90-180) / N1 (100-180)"],
-    "HSK": ["HSK3 (241-300)", "HSK4 (180-210)", "HSK4 (211-240)", "HSK4 (241-300)",
-            "HSK5 (180-300) / HSK6 (180-300)"],
-    "HSKK": ["HSKK Sơ cấp (60-100)", "HSKK Trung cấp (60-100)", "HSKK Trung cấp (60-100)",
-             "HSKK Trung cấp (60-100)", "HSKK Cao cấp (60-100)"],
+    # Cot "HSK+HSKK" trong anh goc: moi muc can DONG THOI mot muc HSK va mot muc HSKK. Truoc
+    # 2026-10-04 tach thanh 2 chung chi -> 3 dong "HSKK Trung cap (60-100)" trung khoa (muc 2-4
+    # chi khac nhau o phan HSK di kem). Xem PLAN - Data Linking (v1) R11.
+    "HSK+HSKK": ["HSK3 (241-300) + HSKK Sơ cấp (60-100)",
+                 "HSK4 (180-210) + HSKK Trung cấp (60-100)",
+                 "HSK4 (211-240) + HSKK Trung cấp (60-100)",
+                 "HSK4 (241-300) + HSKK Trung cấp (60-100)",
+                 "HSK5 (180-300) / HSK6 (180-300) + HSKK Cao cấp (60-100)"],
     "TOPIK": ["TOPIK 3 (135-149)", "TOPIK 4 (150-162)", "TOPIK 4 (163-175)",
               "TOPIK 4 (176-189)", "TOPIK 5 (190-229) / TOPIK 6 (230-300)"],
 }
