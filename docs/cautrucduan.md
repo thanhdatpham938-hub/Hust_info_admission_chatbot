@@ -12,18 +12,19 @@ hust_chatbot/
 │   │   ├── graph/                         # LangGraph: state, router, checkpointer, synthesizer
 │   │   │   └── guardrails/                # input_guard.py, llm_judge.py
 │   │   ├── tools/                         ✅ context.py (dữ liệu nạp 1 lần), common.py (hàm dùng chung),
-│   │   │                                  ✅ admission.py (T1, T2), program_info.py (T3)
-│   │   │                                  # còn: tuition, certificates, university_info, rag_tool (PLAN - Tools)
+│   │   │                                  ✅ admission.py (T1, T2), program_info.py (T3), tuition.py (T4), certificate.py (T5)
+│   │   │                                  # còn: university_info, rag_tool (PLAN - Tools)
 │   │   ├── entity_resolution/             ✅ normalize.py, index.py, resolver.py (4 quy tắc PRD 10.3 + fuzzy), scan.py
 │   │   ├── rag/                           # retriever.py (đọc Qdrant)
 │   │   ├── db/                            ✅ pool.py (psycopg3 async, chỉ đọc, search_path=hust) — không ORM/Alembic
-│   │   ├── schemas/                       ✅ common.py (ToolResult), admission.py, program_info.py; request/response API ở Tuần 4
+│   │   ├── schemas/                       ✅ common.py (ToolResult), admission.py, program_info.py, tuition.py, certificate.py
 │   │   └── core/                          ✅ config.py (Settings đọc .env); logging.py (Langfuse) — Tuần 4
 │   ├── requirements.txt, pyproject.toml   ✅ thư viện backend (ghim phiên bản) + cấu hình pytest
 │   └── tests/
 │       ├── conftest.py, test_db.py        ✅ test nền lớp DB (marker db)
 │       ├── test_entity_resolution.py, test_scan.py   ✅ không cần DB
-│       ├── test_admission_scores.py, test_list_programs.py, test_program_info.py   ✅ marker db
+│       ├── test_admission_scores.py, test_list_programs.py, test_program_info.py,
+│       │   test_tuition.py, test_certificate.py   ✅ marker db
 │       ├── test_entity_cases.py           ✅ 104 ca có nhãn AC2/AC8 đã duyệt
 │       └── eval/                          ✅ 120_question_check_data.md (bộ câu hỏi đánh giá)
 │
@@ -72,6 +73,7 @@ hust_chatbot/
 │   ├── PLAN - Tools (v1).md               # kế hoạch 7 tool Tuần 3
 │   ├── PLAN - Entity Resolution + Admission Tool (v1).md   # đã thực hiện — chi tiết bước 1–3
 │   ├── PLAN - T3 program_info (v1).md     # đã thực hiện — thông tin ngành
+│   ├── PLAN - T4 T5 hoc phi va chung chi (v1).md   # đã thực hiện — học phí, lệ phí, chứng chỉ
 │   ├── PLAN - Embedding (v1).md           # đã thực hiện — 641 chunk trong Qdrant
 │   ├── nguon_du_lieu.md                   # tổng hợp link nguồn (sinh tự động)
 │   ├── cautrucduan.md                     # file này
