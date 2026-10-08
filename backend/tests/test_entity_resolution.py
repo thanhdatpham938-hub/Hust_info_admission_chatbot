@@ -118,6 +118,17 @@ def test_fuzzy_chi_hoi_lai_ung_vien_sat_diem(ctx):
     assert codes(ctx, "ky thuat oto") == ("clarify", {"TE1", "TE-E2"})
 
 
+@pytest.mark.parametrize("mention", ["Trường Y", "Trường Luật", "Khoa Y"])
+def test_chu_dau_chung_khong_lam_fuzzy_doan_bua(ctx, mention):
+    """Do 2026-10-09: 'truong y' tung duoc 86 diem voi moi 'truong ...'; 'Truong Luat' tung ra Truong Vat lieu."""
+    assert ctx.resolve(mention, "faculty").status == "not_found"
+
+
+def test_fuzzy_van_bat_loi_go_sau_chu_dau_chung(ctx):
+    assert codes(ctx, "truong vat lieuu", "faculty") == ("unique", {"SMSE"})
+    assert codes(ctx, "Ngành Logictics") == ("unique", {"EM-E14"})
+
+
 def test_cum_qua_ngan_khong_fuzzy(ctx):
     assert ctx.resolve("co", "program").status == "not_found"
 

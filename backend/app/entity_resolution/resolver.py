@@ -22,6 +22,17 @@ FUZZY_CUTOFF = 85           # E5: nguong khoi diem, chinh sau khi do tren bo 120
 FUZZY_MARGIN = 10           # top-1 hon top-2 it nhat chung nay diem moi TU CHON 1 nganh (AC8)
 CLOSE_MARGIN = 5            # ung vien cach top-1 duoi chung nay diem moi dua vao danh sach hoi lai
 MAX_UNDECLARED = 3          # anh chot: ung vien KHONG khai bao (chuoi con/fuzzy) cat con 3
+# Chu dau chung bo khoi CA HAI phia truoc khi cham fuzzy. Do 2026-10-09: "truong y" duoc 86 diem voi moi
+# "truong ..." (chi nho chu "truong"); "truong luat" bi doan thanh Truong Vat lieu ("luat" ~ "lieu").
+GENERIC_LEADS = {"truong", "khoa", "vien", "nganh"}
+
+
+def core(text: str) -> str:
+    """'truong vat lieu' -> 'vat lieu'; 'khoa hoc may tinh' -> 'hoc may tinh' (ap dung deu hai phia nen nhat quan)."""
+    tokens = text.split()
+    while len(tokens) > 1 and tokens[0] in GENERIC_LEADS:
+        tokens = tokens[1:]
+    return " ".join(tokens) if tokens and tokens[0] not in GENERIC_LEADS else ""
 
 Status = Literal["unique", "clarify", "group", "not_found"]
 MatchedBy = Literal["exact", "substring", "fuzzy"]
@@ -97,10 +108,15 @@ def resolve(mention: str, entity_type: str, idx: AliasIndex, years: list[int] | 
         if hits:
             return _decide(res, hits, "substring", idx, ys)
 
-    # B3b fuzzy (go sai chinh ta)
-    if len(key) >= MIN_FUZZY_LEN and not exact_but_closed:
-        found = process.extract(key, list(sub_index), scorer=window_ratio, score_cutoff=FUZZY_CUTOFF, limit=None)
-        hits = stage([(e, score) for k, score, _ in found for e in sub_index[k]])
+    # B3b fuzzy (go sai chinh ta) — cham tren phan loi sau khi bo chu dau chung (GENERIC_LEADS)
+    qcore = core(key)
+    if len(qcore) >= MIN_FUZZY_LEN and not exact_but_closed:
+        by_core: dict[str, list[str]] = {}
+        for k in sub_index:
+            if c := core(k):
+                by_core.setdefault(c, []).append(k)
+        found = process.extract(qcore, list(by_core), scorer=window_ratio, score_cutoff=FUZZY_CUTOFF, limit=None)
+        hits = stage([(e, score) for c, score, _ in found for k in by_core[c] for e in sub_index[k]])
         if hits:
             return _decide(res, hits, "fuzzy", idx, ys)
 
