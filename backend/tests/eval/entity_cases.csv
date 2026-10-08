@@ -1,0 +1,105 @@
+﻿id,mention,entity_type,year,expected_status,expected_codes,ac,category,note,duyet
+E001,IT1,program,,unique,IT1,AC2,ma,Q26,duyet
+E002,it-e10,program,,unique,IT-E10,AC2,ma,,duyet
+E003,ITE10,program,,unique,IT-E10,AC2,ma,bỏ gạch nối,duyet
+E004,te-ep,program,,unique,TE-EP,AC2,ma,,duyet
+E005,TROY-IT,program,,unique,TROY-IT,AC2,ma,,duyet
+E006,MI-E22,program,2026,unique,MI-E22,AC2,ma,ngành mở 2026,duyet
+E007,Kỹ thuật Hàng không,program,,unique,TE3,AC2,ten_day_du,,duyet
+E008,Quản lý năng lượng,program,,unique,EM1,AC2,ten_day_du,Q105,duyet
+E009,Toán - Tin,program,,unique,MI1,AC2,ten_day_du,Q97,duyet
+E010,Kỹ thuật Vi điện tử và Công nghệ nano,program,,unique,MS2,AC2,ten_day_du,,duyet
+E011,Tâm lý học công nghiệp và tổ chức,program,2026,unique,ED5,AC2,ten_day_du,ngành mở 2026,duyet
+E012,Hoá học Mỹ phẩm,program,,unique,CH-E20,AC2,ten_mot_phan,Q73; tên chuẩn có thêm '(CT tiên tiến)',duyet
+E013,Công nghệ Dệt - May,program,,unique,TX1,AC2,ten_day_du,,duyet
+E014,Hóa học,program,,unique,CH2,AC2,ten_day_du,PRD 10.3 quy tắc 2: khớp chính xác tên CH2 thắng 'Kỹ thuật Hoá học',duyet
+E015,toán tin,program,,unique,MI1,AC2,hoa_thuong,,duyet
+E016,TOAN TIN,program,,unique,MI1,AC2,khong_dau,,duyet
+E017,ky thuat nhiet,program,,unique,HE1,AC2,khong_dau,Q107,duyet
+E018,  Kỹ   thuật   Điện  ,program,,unique,EE1,AC2,khoang_trang,,duyet
+E019,quan tri kinh doanh,program,2026,unique,EM3,AC2,khong_dau,2026 TROY-BA đã dừng tuyển,duyet
+E020,Nuclear Engineering,program,,unique,PH2,AC2,tieng_anh,,duyet
+E021,Data Science and Artificial Intelligence,program,,unique,IT-E10,AC2,tieng_anh,,duyet
+E022,Cyber Security,program,,unique,IT-E15,AC2,tieng_anh,,duyet
+E023,Finance and Banking,program,,unique,EM5,AC2,tieng_anh,,duyet
+E024,data science,program,,unique,IT-E10,AC2,tieng_anh,"gõ một phần, chữ thường",duyet
+E025,Medical Physics,program,,unique,PH3,AC2,tieng_anh,,duyet
+E026,Chemistry,program,,unique,CH2,AC2,tieng_anh,PRD 10.3 quy tắc 2: không bị 'Cosmetic Chemistry' nuốt,duyet
+E027,Accounting,program,2026,unique,EM-E17,AC2,tieng_anh,PRD 10.3 quy tắc 1,duyet
+E028,Accounting,program,2025,unique,EM4,AC2,tieng_anh,PRD 10.3 quy tắc 1,duyet
+E029,HEDSPI,program,,unique,IT-E6,AC2,viet_tat,,duyet
+E030,Việt Nhật,program,,unique,IT-E6,AC2,thong_dung,Q65,duyet
+E031,Global ICT,program,,unique,IT-E7,AC2,thong_dung,Q63,duyet
+E032,Logistics,program,,unique,EM-E14,AC2,thong_dung,,duyet
+E033,Hóa dược,program,,unique,CH-E11,AC2,thong_dung,,duyet
+E034,Đa phương tiện,program,,unique,ET-E16,AC2,thong_dung,,duyet
+E035,IoT,program,,unique,ET-E9,AC2,thong_dung,'Hệ thống nhúng thông minh và IoT',duyet
+E036,trí tuệ nhân tạo,program,,unique,IT-E10,AC2,thong_dung,,duyet
+E037,an toàn thông tin,program,,unique,IT-E15,AC2,thong_dung,cách gọi phổ biến của An toàn không gian số,duyet
+E038,tài chính ngân hàng,program,,unique,EM5,AC2,thong_dung,,duyet
+E039,BA,program,,unique,EM-E13,AC2,viet_tat,PRD 10.3 quy tắc 4,duyet
+E040,kế toán,program,2026,unique,EM-E17,AC2,thong_dung,2026 chỉ còn bản tiên tiến,duyet
+E041,kế toán,program,2025,unique,EM4,AC2,thong_dung,,duyet
+E042,logictics,program,,unique,EM-E14,AC2,go_sai,,duyet
+E043,kĩ thuật hoá học,program,,unique,CH1,AC2,go_sai,"kĩ/kỹ, hoá/hóa",duyet
+E044,quan tri kinh doan,program,2026,unique,EM3,AC2,go_sai,,duyet
+E045,Toán Tinh,program,,unique,MI1,AC2,go_sai,,duyet
+E046,Khoa hoc may tihn,program,,clarify,IT1;TROY-IT,AC8,go_sai,gõ sai + mơ hồ,duyet
+E047,ky thuat oto,program,,clarify,TE1;TE-E2,AC8,go_sai,gõ sai + mơ hồ chuẩn/tiên tiến,duyet
+E048,SoICT,faculty,,unique,SOICT,AC2,viet_tat,,duyet
+E049,Trường Cơ khí,faculty,,unique,SME,AC2,ten_day_du,,duyet
+E050,Khoa Toán - Tin,faculty,,unique,FAMI,AC2,ten_day_du,,duyet
+E051,trường kinh tế,faculty,,unique,SEM,AC2,hoa_thuong,,duyet
+E052,Trường Vật liệu,faculty,,unique,SMSE,AC2,ten_day_du,Q106,duyet
+E053,Điện - Điện tử,faculty,,unique,SEEE,AC2,thong_dung,Q31; alias mới 2026-10-08,duyet
+E054,Viện Điện,faculty,,unique,SEEE,AC2,ten_cu,,duyet
+E055,Viện Công nghệ Thông tin và Truyền thông,faculty,,unique,SOICT,AC2,ten_cu,,duyet
+E056,Viện Kinh tế và Quản lý,faculty,,unique,SEM,AC2,ten_cu,,duyet
+E057,vien co khi dong luc,faculty,,unique,SME,AC2,ten_cu,không dấu,duyet
+E058,TSA,method,,unique,DGTD,AC2,viet_tat,Q12,duyet
+E059,thi đánh giá tư duy,method,,unique,DGTD,AC2,thong_dung,,duyet
+E060,xét tuyển tài năng,method,,unique,XTTN,AC2,ten_day_du,Q2,duyet
+E061,diện 1.2,method,,unique,XTTN_1.2,AC2,thong_dung,Q5,duyet
+E062,điểm thi THPT,method,,unique,THPT,AC2,thong_dung,Q26,duyet
+E063,xét tuyển thẳng,method,,unique,XTTN_1.1,AC2,thong_dung,Q3,duyet
+E064,IELTS,certificate,,unique,IELTS_ACADEMIC,AC2,thong_dung,Q4,duyet
+E065,ielts academic,certificate,,unique,IELTS_ACADEMIC,AC2,hoa_thuong,,duyet
+E066,TOEIC,certificate,,group,TOEIC_LISTENING;TOEIC_READING;TOEIC_SPEAKING;TOEIC_WRITING,AC2,nhom,TOEIC tính trung bình 4 kỹ năng,duyet
+E067,HSK,certificate,,unique,HSK_HSKK,AC2,viet_tat,,duyet
+E068,Elitech,program,,group,elitech,AC2,nhom,Q47,duyet
+E069,chương trình tiên tiến,program,,group,elitech,AC2,nhom,,duyet
+E070,hệ chuẩn,program,,group,chuan,AC2,nhom,,duyet
+E071,SIE,program,,group,lien_ket,AC2,nhom,Q79,duyet
+E072,Logistics và Quản lý chuỗi cung ứng,program,2026,unique,EM-E14,AC2,nam,tên cũ (quotas_2025) vẫn dùng cho 2026,duyet
+E073,Troy,program,2026,unique,TROY-IT,AC2,nam,2026 TROY-BA đã dừng tuyển,duyet
+E074,EM4,program,2026,not_found,,AC2,nam,ngành dừng tuyển 2026; phải báo có 2024–2025,duyet
+E075,Tiếng Hàn Khoa học và Công nghệ,program,2025,not_found,,AC2,nam,FL4 mở từ 2026,duyet
+E076,FL3,program,2024,not_found,,AC2,nam,FL3 mở từ 2025,duyet
+E077,Y đa khoa,program,,not_found,,AC2,ngoai_pham_vi,HUST không đào tạo,duyet
+E078,Luật kinh tế,program,,not_found,,AC2,ngoai_pham_vi,,duyet
+E079,Kiến trúc,program,,not_found,,AC2,ngoai_pham_vi,,duyet
+E080,học phí,program,,not_found,,AC2,ngoai_pham_vi,không phải tên ngành,duyet
+E081,học bạ,method,,not_found,,AC2,ngoai_pham_vi,HUST không xét học bạ,duyet
+E082,Khoa học máy tính,program,2026,clarify,IT1;TROY-IT,AC8,mo_ho,PRD 10.3 ví dụ,duyet
+E083,Kỹ thuật Ô tô,program,,clarify,TE1;TE-E2,AC8,mo_ho,Q96,duyet
+E084,Kỹ thuật Y sinh,program,,clarify,ET2;ET-E5,AC8,mo_ho,,duyet
+E085,Kỹ thuật Điện tử - Viễn thông,program,,clarify,ET1;ET-E4,AC8,mo_ho,,duyet
+E086,Kỹ thuật Thực phẩm,program,,clarify,BF2;BF-E12,AC8,mo_ho,,duyet
+E087,Kỹ thuật Sinh học,program,,clarify,BF1;BF-E19,AC8,mo_ho,,duyet
+E088,Kỹ thuật Cơ điện tử,program,,clarify,ME1;ME-E1,AC8,mo_ho,,duyet
+E089,Kỹ thuật Điều khiển - Tự động hoá,program,,clarify,EE2;EE-E8,AC8,mo_ho,,duyet
+E090,Computer Science,program,,clarify,IT1;TROY-IT,AC8,mo_ho,,duyet
+E091,PFIEV,program,,clarify,EE-EP;TE-EP;IT-EP,AC8,mo_ho,Q64; anh chốt có IT-EP,duyet
+E092,Việt Pháp,program,,clarify,IT-EP;EE-EP;TE-EP,AC8,mo_ho,Q58,duyet
+E093,Troy,program,2025,clarify,TROY-IT;TROY-BA,AC8,mo_ho,,duyet
+E094,Tự động hóa,program,,clarify,EE2;EE-E8;EE-EP,AC8,mo_ho,,duyet
+E095,bán dẫn,program,,clarify,MS2;ET1;ET-E4;ET-E9,AC8,mo_ho,,duyet
+E096,BK CNTT,program,,clarify,IT1;IT2;IT-E10;IT-E15;IT-E6;IT-E7;IT-EP,AC8,mo_ho,anh chốt: liệt kê đủ,duyet
+E097,công nghệ thông tin,program,,clarify,IT1;IT2;IT-E6;IT-E7;IT-EP,AC8,mo_ho,Q9; alias mới 2026-10-08,duyet
+E098,Leibniz,program,,clarify,ET-LUH;ME-LUH,AC8,mo_ho,Q49; alias mới 2026-10-08,duyet
+E099,Business Administration,program,2025,clarify,EM3;TROY-BA,AC8,mo_ho,,duyet
+E100,quản trị kinh doanh,program,2025,clarify,EM3;TROY-BA,AC8,mo_ho,năm 2025 cả EM3 và TROY-BA đều là QTKD,duyet
+E101,cơ điện tử,program,,clarify,ME1;ME-E1;ME-LUH;ME-NUT,AC8,mo_ho,4 ngành đều là Cơ điện tử,duyet
+E102,Hợp tác quốc tế,program,,clarify,TROY-IT;FL2;ET-LUH;ME-LUH;ME-NUT;ME-GU,AC8,mo_ho,,duyet
+E103,Cambridge,certificate,,clarify,CAMBRIDGE_ASSESSMENT;CAMBRIDGE_TESTS,AC8,mo_ho,,duyet
+E104,TOEFL,certificate,,clarify,TOEFL_IBT;TOEFL_ITP,AC8,mo_ho,Q84,duyet

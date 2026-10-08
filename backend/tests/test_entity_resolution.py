@@ -107,6 +107,17 @@ def test_fuzzy_go_sai_chinh_ta(ctx):
     assert ctx.resolve("logictics", "program").codes == ["EM-E14"]
 
 
+def test_ten_dung_nhung_nganh_chua_mo_khong_doan_fuzzy(ctx):
+    """Do 2026-10-08: FL4 (mo tu 2026) hoi nam 2025 tung bi fuzzy doan sang FL3 (Tieng Trung)."""
+    r = ctx.resolve("Tiếng Hàn Khoa học và Công nghệ", "program", [2025])
+    assert r.status == "not_found" and r.other_years == {"FL4": [2026]}
+
+
+def test_fuzzy_chi_hoi_lai_ung_vien_sat_diem(ctx):
+    """Do 2026-10-08: 'ky thuat oto' tung keo them ME-E1 (87 diem) vao cap TE1/TE-E2 (96 diem)."""
+    assert codes(ctx, "ky thuat oto") == ("clarify", {"TE1", "TE-E2"})
+
+
 def test_cum_qua_ngan_khong_fuzzy(ctx):
     assert ctx.resolve("co", "program").status == "not_found"
 

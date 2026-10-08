@@ -19,7 +19,8 @@ from app.entity_resolution.normalize import normalize
 MIN_SUBSTRING_LEN = 3       # E5: "co" la chuoi con cua hang chuc ten nganh
 MIN_FUZZY_LEN = 4
 FUZZY_CUTOFF = 85           # E5: nguong khoi diem, chinh sau khi do tren bo 120 cau
-FUZZY_MARGIN = 10           # top-1 hon top-2 it nhat chung nay diem moi coi la ro rang (AC8)
+FUZZY_MARGIN = 10           # top-1 hon top-2 it nhat chung nay diem moi TU CHON 1 nganh (AC8)
+CLOSE_MARGIN = 5            # ung vien cach top-1 duoi chung nay diem moi dua vao danh sach hoi lai
 MAX_UNDECLARED = 3          # anh chot: ung vien KHONG khai bao (chuoi con/fuzzy) cat con 3
 
 Status = Literal["unique", "clarify", "group", "not_found"]
@@ -82,6 +83,10 @@ def resolve(mention: str, entity_type: str, idx: AliasIndex, years: list[int] | 
     hits = stage([(e, 100.0) for e in idx.exact.get(key, [])])
     if hits:
         return _decide(res, hits, "exact", idx, ys)
+    # Khop CHINH XAC mot ma nhung ma do khong tuyen nam dang hoi -> nguoi dung go dung ten that, khong go
+    # sai. Van cho B3a (chuoi con: "Accounting" -> "Accounting (Advanced Program)" EM-E17) nhung KHONG doan
+    # bang fuzzy: do 2026-10-08, "Tieng Han KH&CN" nam 2025 bi fuzzy doan sang FL3 (Tieng Trung KH&CN).
+    exact_but_closed = bool(res.other_years)
 
     sub_index = idx.substring_keys()
     # B3a chuoi con (nguoi dung go mot phan cua ten/alias) — khop NGUYEN TU: "tinh" khong duoc
@@ -93,7 +98,7 @@ def resolve(mention: str, entity_type: str, idx: AliasIndex, years: list[int] | 
             return _decide(res, hits, "substring", idx, ys)
 
     # B3b fuzzy (go sai chinh ta)
-    if len(key) >= MIN_FUZZY_LEN:
+    if len(key) >= MIN_FUZZY_LEN and not exact_but_closed:
         found = process.extract(key, list(sub_index), scorer=window_ratio, score_cutoff=FUZZY_CUTOFF, limit=None)
         hits = stage([(e, score) for k, score, _ in found for e in sub_index[k]])
         if hits:
@@ -129,6 +134,12 @@ def _decide(res: Resolution, hits: list[tuple[Entry, float]], how: MatchedBy, id
         res.status, res.codes = "clarify", sorted(ranked)
     elif how == "fuzzy" and best[ranked[0]] - best[ranked[1]] >= FUZZY_MARGIN:
         res.status, res.codes = "unique", ranked[:1]
+    elif how == "fuzzy":
+        # Chi hoi lai giua cac ung vien SAT diem top-1 (AC8): do 2026-10-08, "ky thuat oto" keo them
+        # ME-E1 diem thap hon han vao danh sach hoi lai TE1/TE-E2
+        # ("ky thuat oto": TE1/TE-E2 96 diem, ME-E1 87 -> chi hoi TE1/TE-E2)
+        close = [c for c in ranked if best[ranked[0]] - best[c] < CLOSE_MARGIN]
+        res.status, res.codes = "clarify", close[:MAX_UNDECLARED]
     else:
         res.status, res.codes = "clarify", ranked[:MAX_UNDECLARED]
     return res
