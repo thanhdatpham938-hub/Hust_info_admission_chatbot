@@ -80,11 +80,10 @@ async def tuition_fees(inp: TuitionInput, ctx: ToolContext | None = None) -> Too
         return invalid_result(NEED_SCOPE_MESSAGE)
 
     # ---- pham vi nganh
-    # Hoc phi tin chi / theo nhom ap dung cho SINH VIEN DANG HOC moi khoa, khong chi khoa tuyen nam do: EM4 ngung
-    # tuyen tu 2026 nhung QD hoc phi 2026-2027 van ghi "Ke toan". Chi hoc phi theo nganh (trang nganh 2026) moi
-    # loc theo nam tuyen sinh.
-    years_for_resolve = (sorted(set(inp.years)) or None) if "program" in kinds \
-        else ctx.coverage.years["program_years"]
+    # Cung quy tac voi T1-T3 (anh chot 2026-10-09): khong noi nam -> nam moi nhat, nen "ke toan" ra EM-E17 (EM4 da
+    # chuyen thanh EM-E17); chi khi nhac 2025 moi ra EM4. Nam ngoai danh muc nganh (vd 2027: chua co bang hoc phi)
+    # van tra nganh theo nam moi nhat, de bao dung ly do "chua co bang" thay vi "nganh khong tuyen".
+    years_for_resolve = [y for y in sorted(set(inp.years)) if y in ctx.coverage.years["program_years"]] or None
     prog = resolve_mentions(ctx, programs, "program", years_for_resolve)
     if prog.clarifications:                      # A5-T7: tung nganh cu the -> hoi lai
         return ambiguous_result(prog.clarifications, prog.resolved)

@@ -184,6 +184,8 @@ async def test_t4_18_quet_toan_bo(dbctx):
             members[(r["program_code"], rule_year[r["rule_id"]])].add(r["rule_id"])
     wrong = []
     for (code, year), rules in sorted(members.items()):
+        if year not in dbctx.aliases.valid_years[code]:
+            continue        # nganh chua mo / da chuyen nganh (EM4 -> EM-E17) nam do: anh chot khong tra (2026-10-09)
         res = await call(dbctx, programs=[code], kinds=["credit"], years=[year])
         own = {r.rule_id for r in (res.data.credit_rules if res.data else []) if not r.applies_to_all}
         if own != rules:
@@ -201,3 +203,12 @@ async def test_t4_19_moi_so_tien_co_don_vi_va_doi_dung(dbctx):
     assert all(f.unit for f in fees.data.fees)
     assert to_vnd(26000, "nghìn đồng/học kỳ") == (26_000_000, "đồng/học kỳ")
     assert to_vnd(33, "triệu đồng/học kỳ") == (33_000_000, "đồng/học kỳ")
+
+
+@pytest.mark.parametrize("years,want", [([], ("EM-E17", 680, "2026-2027")), ([2025], ("EM4", 600, "2025-2026"))])
+async def test_t4_20_ke_toan_theo_nam(dbctx, years, want):
+    """Anh chot 2026-10-09: 'ke toan' khong noi nam -> EM-E17 (nam moi nhat); nhac 2025 -> EM4."""
+    res = await call(dbctx, programs=["kế toán"], kinds=["credit"], years=years)
+    own = [r for r in res.data.credit_rules if not r.applies_to_all]
+    assert res.resolved[0].codes == [want[0]]
+    assert [(r.amount_min, r.academic_year) for r in own] == [want[1:]]
