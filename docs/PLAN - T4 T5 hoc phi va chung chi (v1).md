@@ -321,16 +321,16 @@ Anh đưa thêm hai quyết định học phí, kèm link công bố:
 
 | Việc | Kết quả |
 |---|---|
-| T4 `tuition_fees` | `app/schemas/tuition.py`, `app/tools/tuition.py`; `backend/tests/test_tuition.py` **23/23** ca đã duyệt xanh (T4-07 tách 3 ca theo năm học), gồm quét đủ 68 ngành và **mọi cặp (ngành, năm học)** có luật tín chỉ |
+| T4 `tuition_fees` | `app/schemas/tuition.py`, `app/tools/tuition.py`; `backend/tests/test_tuition.py` **25/25** (23 ca duyệt + T4-20 hai ca "kế toán" theo năm) (T4-07 tách 3 ca theo năm học), gồm quét đủ 68 ngành và **mọi cặp (ngành, năm học)** có luật tín chỉ |
 | T5 `certificate_lookup` | `app/schemas/certificate.py`, `app/tools/certificate.py`; `backend/tests/test_certificate.py` **19/19** ca xanh, gồm quét mọi dòng `cert_bonus` 2026 và mọi dòng `cert_output` |
 | `ToolContext` | Nạp thêm `tuition_program`, `tuition_rules`, `admission_fees`; độ phủ năm của học phí theo nhóm (`tuition_nam`) và tín chỉ (`tuition_tin_chi`) |
-| Tổng | `pytest backend` **246 passed**; `pyflakes` sạch; `validate_aliases` 0/0, `validate_links` 0 lỗi, `validate_metadata` 0/0; AC2/AC8 vẫn 100% |
+| Tổng | `pytest backend` **248 passed**; `pyflakes` sạch; `validate_aliases` 0/0, `validate_links` 0 lỗi, `validate_metadata` 0/0; AC2/AC8 vẫn 100% |
 
 ## Các lựa chọn phát sinh lúc làm — và vì sao
 
 | Chỗ | Làm | Vì sao |
 |---|---|---|
-| Tra ngành cho học phí tín chỉ / theo nhóm | Tra trên **mọi năm có ngành** (2024–2026), không lọc theo năm tuyển sinh; chỉ `kinds=["program"]` (trang ngành 2026) mới lọc theo năm | Test quét toàn bộ bắt được: học phí tín chỉ áp dụng cho **sinh viên đang học** mọi khoá. EM4 ngừng tuyển từ 2026 nhưng QĐ 12006 (2026–2027) vẫn ghi "Kế toán". Lọc theo năm tuyển thì báo nhầm "ngành không tuyển" và mất số liệu đúng |
+| Tra ngành cho học phí tín chỉ / theo nhóm | **Cùng quy tắc T1–T3**: không nói năm → năm mới nhất; năm ngoài danh mục ngành (vd 2027) → tra ngành theo năm mới nhất | Bản đầu tra trên mọi năm để không sót EM4 (QĐ 2026–2027 vẫn ghi "Kế toán"). **Anh chốt 2026-10-09:** EM4 đã chuyển thành EM-E17, hỏi "kế toán" không năm thì trả EM-E17, chỉ khi nhắc 2025 mới trả EM4 — tra mọi năm làm "kế toán" ra EM4 nên đã bỏ. Thêm ca T4-20 (2 ca) giữ quy tắc này; phép quét T4-18 bỏ qua cặp (ngành, năm) mà ngành không tuyển năm đó |
 | `programs` chứa tên nhóm (vd "Elitech") | Coi như hỏi theo nhóm (lấy cả nhóm) thay vì báo `invalid` như T1 | T4 có chế độ hỏi theo nhóm (A5-T2, A5-T9); LLM có thể đặt tên nhóm vào ô `programs` |
 | T5 khớp `value` | Số thuần (6.5, 300, "7,5") → so khoảng `value_min`–`value_max`; còn lại (N3, B2, "275-395", "≥ 8.0") → so chữ đã chuẩn hoá | Bảng có cả mức số lẫn mức chữ; quét toàn bộ xác nhận mọi dòng đều tra lại được bằng chính giá trị của nó |
 | T5 `meets` | Chỉ khi yêu cầu khớp đúng mẫu "Có chứng chỉ … từ Bậc N trở lên", không có ";", cùng ngôn ngữ, không phải yêu cầu đầu khoá | B5-T5 anh duyệt; mẫu chặt để không kết luận nhầm với PFIEV / ngành ngôn ngữ / tài năng |
