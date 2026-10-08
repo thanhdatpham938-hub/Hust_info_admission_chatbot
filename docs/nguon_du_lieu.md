@@ -6,8 +6,8 @@ Cập nhật 2026-09-26 · `dataset_version = 2026.1`. Sinh tự động từ tr
 
 | # | Nguồn | Link | Dùng ở |
 | --: | --- | --- | --- |
-| 1 | Phương án tuyển sinh 2025 | https://ts.hust.edu.vn/tin-tuc/dhbk-ha-noi-cong-bo-phuong-an-tuyen-sinh-dai-hoc-chinh-quy-nam-2025 | RAG de_an_tuyen_sinh_2025 (7); cert_bonus_conversion.csv (7); cert_cefr_equivalence.csv (47); program_methods_2025.csv (195); quotas_2025.csv (65); subject_combinations_ref.csv (12) |
-| 2 | Thông tin tuyển sinh 2026 | https://ts.hust.edu.vn/tin-tuc/thong-tin-tuyen-sinh-dai-hoc-chinh-quy-nam-2026 | RAG de_an_tuyen_sinh_2026 (8); cert_bonus_conversion.csv (110); program_methods_2026.csv (204); programs_2026.csv (68); quotas_2026.csv (68) |
+| 1 | Phương án tuyển sinh 2025 | https://ts.hust.edu.vn/tin-tuc/dhbk-ha-noi-cong-bo-phuong-an-tuyen-sinh-dai-hoc-chinh-quy-nam-2025 | RAG de_an_tuyen_sinh_2025 (9); cert_bonus_conversion.csv (7); cert_cefr_equivalence.csv (47); program_methods_2025.csv (195); quotas_2025.csv (65); subject_combinations_ref.csv (12) |
+| 2 | Thông tin tuyển sinh 2026 | https://ts.hust.edu.vn/tin-tuc/thong-tin-tuyen-sinh-dai-hoc-chinh-quy-nam-2026 | RAG de_an_tuyen_sinh_2026 (10); cert_bonus_conversion.csv (105); program_methods_2026.csv (204); programs_2026.csv (68); quotas_2026.csv (68) |
 | 3 | Điểm chuẩn 2024 | https://ts.hust.edu.vn/tin-tuc/diem-chuan-dai-hoc-bach-khoa-ha-noi-2024-diem-thi-dgtd-cao-nhat-83-82-diem-thi-tot-nghiep-thpt-cao-nhat-28-53 | RAG trang_tuyen_sinh (4); admission_scores_2024.csv (128); programs_2024.csv (64) |
 | 4 | Điểm chuẩn 2025 | https://ts.hust.edu.vn/tin-tuc/diem-chuan-cao-nhat-dh-bach-khoa-ha-noi-2025-29-39-diem-thpt-tuong-duong-93-96-diem-xttn-va-86-97-diem-tsa | RAG trang_tuyen_sinh (5); admission_scores_2025.csv (272); programs_2025.csv (65) |
 | 5 | Điểm chuẩn 2026 | https://ts.hust.edu.vn/tin-tuc/diem-chuan-dai-hoc-bach-khoa-ha-noi-nam-2026 | RAG trang_tuyen_sinh (4); admission_scores_2026.csv (287); scoring_formulas_2026.csv (5) |
@@ -28,9 +28,11 @@ Cập nhật 2026-09-26 · `dataset_version = 2026.1`. Sinh tự động từ tr
 | 3 | Quy định chuẩn ngoại ngữ K71 (10828/QĐ-ĐHBK, 07/9/2026) | https://ctt.hust.edu.vn/DisplayWeb/DisplayBaiViet?baiviet=51634 | RAG Quy_dinh_ngoai_ngu_K71_2026 (7); cert_equivalence_output_2026.csv (153); language_exit_requirement_2026.csv (14) |
 | 4 | Quy định chuẩn ngoại ngữ K70 (10728/QĐ-ĐHBK, 26/9/2025) | https://ctt.hust.edu.vn/DisplayWeb/DisplayBaiViet?baiviet=44574 | RAG Quy_dinh_ngoai_ngu_K70 (7) |
 | 5 | Sổ tay sinh viên 2026 (bản web) | https://ctsv.hust.edu.vn/so-tay-sv | RAG So_tay_sinh_vien_2026 (206) |
-| 6 | Đề án tuyển sinh 2024 (trang đăng; PDF nhúng Google Drive trùng từng byte với file trong máy) | https://ts.hust.edu.vn/tin-tuc/de-an-tuyen-sinh-dai-hoc-nam-2024 | RAG de_an_tuyen_sinh_2024 (37); admission_fees.csv (6); cert_bonus_conversion.csv (18); tuition_by_year.csv (11) |
+| 6 | Đề án tuyển sinh 2024 (trang đăng; PDF nhúng Google Drive trùng từng byte với file trong máy) | https://ts.hust.edu.vn/tin-tuc/de-an-tuyen-sinh-dai-hoc-nam-2024 | RAG de_an_tuyen_sinh_2024 (38); admission_fees.csv (6); cert_bonus_conversion.csv (18); tuition_by_year.csv (11) |
 | 7 | Quyết định học phí 2024–2025 | https://ctt.hust.edu.vn/Upload/Nguyen%20Quoc%20Dat/files/DTDH_QDQC/Hocphi/2024-2025/2024_2_%20Q%C4%90%20h%E1%BB%8Dc%20ph%C3%AD%20-%202024-2025.pdf | RAG tuition (1); tuition_credit.csv (30) |
-| 8 | Quy định học bổng KKHT 2022 | https://ctt.hust.edu.vn/Upload/Nguyen%20Viet%20Tien/files/Quy%20%C4%91%E1%BB%8Bnh%20HB%20KKHT%20n%C4%83m%202022.pdf | RAG kkht_2022 (7) |
+| 8 | Quyết định học phí 2025–2026 (10232/QĐ-ĐHBK, 12/9/2025) | https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hocphi/2025-2026/QD%20HOC%20PHI%20-%202025-2026-final.pdf | tuition_credit.csv (29) |
+| 9 | Quyết định học phí 2026–2027 (12006/QĐ-ĐHBK, 05/10/2026) | https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hocphi/2026-2027/12006_Q%C4%90-%C4%90HBK.pdf | tuition_credit.csv (31) |
+| 10 | Quy định học bổng KKHT 2022 | https://ctt.hust.edu.vn/Upload/Nguyen%20Viet%20Tien/files/Quy%20%C4%91%E1%BB%8Bnh%20HB%20KKHT%20n%C4%83m%202022.pdf | RAG kkht_2022 (7) |
 
 Các file `Quy_dinh_ngoai_ngu_K71_2026.pdf`, `Quy_dinh_ngoai_ngu_K70.pdf`, `QCDT_2025_5445_QD-DHBK.pdf`, `10461-QD-DHBK_Quy_che_thi_TSA_2024.pdf`, `qui-dinh-ve-xttn-nam-2026-ky.pdf`, `So tay sinh vien_2026.pdf` là bản tải về của các link ở bảng trên.
 

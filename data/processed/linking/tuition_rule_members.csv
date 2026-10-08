@@ -160,3 +160,195 @@ hptc2425-elitech-khac-coban,EM-E17,"Ngành mở 2026, không có trong văn bả
 hptc2425-elitech-khac-khac,EM-E17,"Ngành mở 2026, không có trong văn bản 2024-2025; gán theo câu 'các chương trình tiên tiến khác' vì bảng tín chỉ dùng chung cho các năm (người dùng chốt 2026-10-04) — suy luận, khi trả lời phải ghi rõ mức của năm học 2024-2025",rule_derived,2026.1
 hptc2425-elitech-khac-coban,MI-E22,"Ngành mở 2026, không có trong văn bản 2024-2025; gán theo câu 'các chương trình tiên tiến khác' vì bảng tín chỉ dùng chung cho các năm (người dùng chốt 2026-10-04) — suy luận, khi trả lời phải ghi rõ mức của năm học 2024-2025",rule_derived,2026.1
 hptc2425-elitech-khac-khac,MI-E22,"Ngành mở 2026, không có trong văn bản 2024-2025; gán theo câu 'các chương trình tiên tiến khác' vì bảng tín chỉ dùng chung cho các năm (người dùng chốt 2026-10-04) — suy luận, khi trả lời phải ghi rõ mức của năm học 2024-2025",rule_derived,2026.1
+hptc2526-chuan-630,ME1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-630,ET1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-630,EE2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-630,IT1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-630,IT2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,MI1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,MI2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,ET2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,ME2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,TE2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,BF2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,BF1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,TE1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,EE1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,EM5,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,EM2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,EM1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,EM3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,EM4,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,FL1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-600,FL3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,CH1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,CH2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,MS5,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,MS1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,MS3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,MS2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,TE3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,PH1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,PH2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,HE1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,PH3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,TX1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,EV1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,EV2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,ED2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-chuan-550,ED3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-cntt-vn-gict-coban,IT-E6,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-cntt-vn-gict-coban,IT-E7,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-cntt-vn-gict-khac,IT-E6,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-cntt-vn-gict-khac,IT-E7,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-khdl-logistics-coban,IT-E10,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-khdl-logistics-coban,EM-E14,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-khdl-logistics-khac,IT-E10,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-khdl-logistics-khac,EM-E14,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-dktdh-coban,EE-E8,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-dktdh-khac,EE-E8,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-codientu-coban,ME-E1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-codientu-khac,ME-E1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,BF-E12,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,BF-E19,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,CH-E11,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,EE-E18,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,EM-E13,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,ET-E16,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,ET-E4,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,ET-E5,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,ET-E9,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,IT-E15,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,IT-EP,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,MS-E3,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-coban,TE-E2,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,BF-E12,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,BF-E19,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,CH-E11,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,EE-E18,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,EM-E13,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,ET-E16,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,ET-E4,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,ET-E5,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,ET-E9,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,IT-E15,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,IT-EP,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,MS-E3,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-elitech-vietphap-conlai-khac,TE-E2,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2526-pfiev-ipe,EE-EP,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-pfiev-ipe,TE-EP,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-pfiev-ipe,FL2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-me-gu-nut-coban,ME-GU,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-me-gu-nut-coban,ME-NUT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-me-gu-nut-khac,ME-GU,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-me-gu-nut-khac,ME-NUT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-luh-coban,ME-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-luh-coban,ET-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-luh-khac,ME-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-luh-khac,ET-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-troy-k70,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-troy-k70,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-troy-k69,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-troy-k69,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-troy-k68,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2526-troy-k68,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-700,ME1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-700,ET1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-700,EE2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-700,IT1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-700,IT2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,MI1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,MI2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,ET2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,ME2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,TE2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,BF2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,BF1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,TE1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,EE1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,EM5,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,EM2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,EM1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,EM3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,EM4,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,FL1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,FL3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-680,FL4,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,CH1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,CH2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,MS5,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,MS1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,MS3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,MS2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,TE3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,PH1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,PH2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,HE1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,PH3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,TX1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,EV1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,EV2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,ED2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,ED3,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-chuan-620,ED5,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-cntt-vn-coban,IT-E6,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-cntt-vn-khac,IT-E6,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-khdl-logistics-coban,IT-E10,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-khdl-logistics-coban,EM-E14,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-khdl-logistics-khac,IT-E10,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-khdl-logistics-khac,EM-E14,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-dktdh-gict-coban,EE-E8,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-dktdh-gict-coban,IT-E7,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-dktdh-gict-khac,EE-E8,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-dktdh-gict-khac,IT-E7,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-codientu-coban,ME-E1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-codientu-khac,ME-E1,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,BF-E12,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,BF-E19,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,CH-E11,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,CH-E20,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,EE-E18,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,EM-E13,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,ET-E16,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,ET-E4,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,ET-E5,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,ET-E9,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,IT-E15,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,IT-EP,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,MS-E3,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-coban,TE-E2,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,BF-E12,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,BF-E19,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,CH-E11,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,CH-E20,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,EE-E18,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,EM-E13,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,ET-E16,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,ET-E4,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,ET-E5,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,ET-E9,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,IT-E15,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,IT-EP,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,MS-E3,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-vietphap-conlai-khac,TE-E2,Theo danh sách tên trong QĐ học phí; 'các CT tiên tiến còn lại' = các ngành ELITECH không có tên riêng,rule_derived,2026.1
+hptc2627-elitech-ketoan-mie22,EM-E17,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-elitech-ketoan-mie22,MI-E22,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-pfiev-ipe,EE-EP,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-pfiev-ipe,TE-EP,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-pfiev-ipe,FL2,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-me-gu-nut-coban,ME-GU,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-me-gu-nut-coban,ME-NUT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-me-gu-nut-khac,ME-GU,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-me-gu-nut-khac,ME-NUT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-luh-coban,ME-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-luh-coban,ET-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-luh-khac,ME-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-luh-khac,ET-LUH,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k71,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k71,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k70,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k70,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k69,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k69,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k68,TROY-BA,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
+hptc2627-troy-k68,TROY-IT,Theo danh sách tên trong QĐ học phí,rule_derived,2026.1
