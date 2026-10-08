@@ -1,6 +1,6 @@
 # PLAN — Các tool Tuần 3 (v1)
 
-**Ngày:** 2026-10-06 · **Trạng thái:** anh đã chốt mục 10 (2026-10-07); chi tiết Entity Resolution + T1/T2 ở `PLAN - Entity Resolution + Admission Tool (v1).md` — **bước 1–3 đã xong 2026-10-07** (80 test xanh) · Gắn với PRD v1.2 mục 3.1 (độ phủ dữ liệu), 10.2 (Admission Tool), 10.3 (Entity Resolution), 12 (Citation), 13 (Fallback), 20 (Tuần 3), 21 (AC1, AC2, AC4, AC8, AC9), 24 (mã lỗi) · Đi trước: `PLAN - Backend PostgreSQL (v1).md` (lớp DB, mục 4 đã thống nhất cách tool dùng DB)
+**Ngày:** 2026-10-06 · **Trạng thái:** anh đã chốt mục 10 (2026-10-07); chi tiết Entity Resolution + T1/T2 ở `PLAN - Entity Resolution + Admission Tool (v1).md` — **bước 1–3 đã xong 2026-10-07**; **bước 4 (T3 `program_info`) xong 2026-10-08** theo `PLAN - T3 program_info (v1).md` · Gắn với PRD v1.2 mục 3.1 (độ phủ dữ liệu), 10.2 (Admission Tool), 10.3 (Entity Resolution), 12 (Citation), 13 (Fallback), 20 (Tuần 3), 21 (AC1, AC2, AC4, AC8, AC9), 24 (mã lỗi) · Đi trước: `PLAN - Backend PostgreSQL (v1).md` (lớp DB, mục 4 đã thống nhất cách tool dùng DB)
 
 Mỗi quyết định có dòng **Vì sao**.
 
