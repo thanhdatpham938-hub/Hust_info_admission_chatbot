@@ -16,8 +16,9 @@ from app.entity_resolution.scan import Scanner
 # Bang can cho alias + do phu nam. Bang nho (< 1000 dong) nen doc ca bang.
 TABLES = ["programs", "program_years", "program_groups", "faculties", "certificates", "admission_methods",
           "entity_aliases", "admission_scores", "quotas", "program_methods", "program_combinations",
-          "combinations"]
-COVERAGE_TABLES = ["admission_scores", "quotas", "program_methods", "program_combinations", "program_years"]
+          "combinations", "tuition_program", "tuition_rules", "admission_fees"]
+COVERAGE_TABLES = ["admission_scores", "quotas", "program_methods", "program_combinations", "program_years",
+                   "tuition_program", "admission_fees"]
 
 
 @dataclass
@@ -54,6 +55,10 @@ class ToolContext:
         for r in T["admission_scores"]:
             by_method[r["method_code"]].add(int(r["year"]))
         self.coverage.score_years_by_method = {m: sorted(ys) for m, ys in by_method.items()}
+        # Hoc phi theo nhom (nam) va theo tin chi (tin_chi) co nam rieng — T4
+        for kind in ("nam", "tin_chi"):
+            self.coverage.years[f"tuition_{kind}"] = sorted({int(r["year"]) for r in T["tuition_rules"]
+                                                           if r["rule_type"] == kind})
 
     @classmethod
     def from_tables(cls, T: dict[str, list[dict]]) -> "ToolContext":
