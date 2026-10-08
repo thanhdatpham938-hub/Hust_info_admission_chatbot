@@ -8,20 +8,18 @@ Tool nhan dung chu nguoi dung go va TU goi Entity Resolution (D2): LLM khong co 
 """
 
 from collections import defaultdict
-from dataclasses import dataclass, field
 from decimal import Decimal
 from itertools import combinations as pairs
 
 from app.db.pool import fetch_all
 from app.schemas.admission import (AdmissionScoresData, AdmissionScoresInput, Delta, GroupStat, ListProgramsData,
                                    ListProgramsInput, ListRow, ScoreRow)
-from app.schemas.common import (Candidate, Clarification, ErrorCode, Missing, Resolved, Source, Status,
-                                ToolResult, dedupe_sources)
+from app.schemas.common import Clarification, ErrorCode, Missing, Resolved, Status, ToolResult, dedupe_sources
+from app.tools.common import (MAX_ENTITIES, TOO_MANY_MESSAGE, ambiguous_result, invalid_result, pick_years,
+                              resolve_mentions, row_source, to_float)
 from app.tools.context import ToolContext, get_context
 
-MAX_ENTITIES = 3
 MAX_LIMIT = 100
-TOO_MANY_MESSAGE = "Vui lòng hỏi từng ngành/năm để đảm bảo độ chính xác."     # PRD 10.2
 GROUP_LABELS = {      # A2: hai nhan sau theo dung cach goi trong score_note (bai cong bo diem chuan)
     "tat_ca": "mọi tổ hợp",
     "ky_thuat": "tổ hợp khối ngành kỹ thuật",
@@ -29,53 +27,7 @@ GROUP_LABELS = {      # A2: hai nhan sau theo dung cach goi trong score_note (ba
 }
 
 
-# ================================================================ phan giai cum tu (dung chung T1/T2)
-@dataclass
-class _Outcome:
-    codes: list[str] = field(default_factory=list)
-    per_mention: dict[str, list[str]] = field(default_factory=dict)   # cum -> ma (de bao missing theo cum)
-    clarifications: list[Clarification] = field(default_factory=list)
-    resolved: list[Resolved] = field(default_factory=list)
-    missing: list[Missing] = field(default_factory=list)
-    groups: list[str] = field(default_factory=list)                    # cum tro toi nhom nganh
-
-
-def _resolve_all(ctx: ToolContext, mentions: list[str], etype: str, years: list[int] | None,
-                 *, take_all_on_clarify: bool = False) -> _Outcome:
-    out = _Outcome()
-    for mention in dict.fromkeys(m.strip() for m in mentions if m and m.strip()):
-        r = ctx.resolve(mention, etype, years)
-        if r.status == "clarify" and not take_all_on_clarify:
-            kind = "program" if etype == "program" else etype
-            out.clarifications.append(Clarification(mention=mention, candidates=[
-                Candidate(code=c, name=ctx.aliases.name(kind, c), entity_type=kind) for c in r.codes]))
-            continue
-        if r.status == "not_found":
-            if r.other_years:
-                for code, ys in r.other_years.items():
-                    out.missing.append(Missing(what=f"{mention} ({code})", reason="program_not_open",
-                                               available_years=ys))
-            else:
-                out.missing.append(Missing(what=mention, reason="entity_not_found"))
-            continue
-        if r.status == "group" and r.group_code:
-            out.groups.append(r.group_code)
-        out.per_mention[mention] = r.codes
-        out.codes += [c for c in r.codes if c not in out.codes]
-        out.resolved.append(Resolved(mention=mention, entity_type=etype, codes=r.codes,
-                                     matched_by=r.matched_by or "exact"))
-    return out
-
-
-def _source(r: dict) -> Source:
-    return Source(title=r["source"] or "", url=r["source_url"] or "", year=r["year"],
-                  verification_status=r["verification_status"])
-
-
-def _f(x: Decimal | float | int) -> float:
-    return float(round(Decimal(x), 2))
-
-
+# ================================================================ chenh lech (T1/T2)
 def _year_deltas(rows: list[dict], value_key: str) -> list[Delta]:
     """Cung nganh + phuong thuc + nhom to hop, cac nam lien ke (A1: khong so khac thang/khac khoi)."""
     by = defaultdict(list)
@@ -86,27 +38,9 @@ def _year_deltas(rows: list[dict], value_key: str) -> list[Delta]:
         rs.sort(key=lambda r: r["year"])
         for x, y in zip(rs, rs[1:]):
             out.append(Delta(kind="year", program_code=code, method_code=method, combination_group=group,
-                             a=str(x["year"]), b=str(y["year"]), value_a=_f(x[value_key]),
-                             value_b=_f(y[value_key]), diff=_f(Decimal(y[value_key]) - Decimal(x[value_key]))))
+                             a=str(x["year"]), b=str(y["year"]), value_a=to_float(x[value_key]),
+                             value_b=to_float(y[value_key]), diff=to_float(Decimal(y[value_key]) - Decimal(x[value_key]))))
     return out
-
-
-def _invalid(message: str, **kw) -> ToolResult:
-    return ToolResult(status=Status.INVALID, error_code=ErrorCode.INVALID_REQUEST, message=message, **kw)
-
-
-def _ambiguous(clarifications: list[Clarification], resolved: list[Resolved]) -> ToolResult:
-    # K1: co mot cum can hoi lai thi KHONG truy van gi
-    return ToolResult(status=Status.AMBIGUOUS, error_code=ErrorCode.ENTITY_AMBIGUOUS,
-                      clarifications=clarifications, resolved=resolved)
-
-
-def _years(ctx: ToolContext, table: str, years: list[int]) -> tuple[list[int], list[Missing]]:
-    have = ctx.coverage.years[table]
-    asked = sorted(set(years)) or [have[-1]]          # anh chot: khong noi nam -> nam moi nhat
-    missing = [Missing(what=f"năm {y}", reason="year_out_of_range", available_years=have)
-               for y in asked if y not in have]
-    return [y for y in asked if y in have], missing
 
 
 # ================================================================ T1 admission_scores
@@ -128,18 +62,18 @@ async def admission_scores(inp: AdmissionScoresInput, ctx: ToolContext | None = 
     ctx = ctx or await get_context()
     programs = list(dict.fromkeys(p.strip() for p in inp.programs if p.strip()))
     if not programs:
-        return _invalid("Cần ít nhất một ngành.")
+        return invalid_result("Cần ít nhất một ngành.")
     if max(len(programs), len(set(inp.years)), len(set(inp.methods))) > MAX_ENTITIES:
-        return _invalid(TOO_MANY_MESSAGE)
+        return invalid_result(TOO_MANY_MESSAGE)
 
-    years, missing = _years(ctx, "admission_scores", inp.years)
-    meth = _resolve_all(ctx, inp.methods, "method", None)
-    prog = _resolve_all(ctx, programs, "program", years or None)
+    years, missing = pick_years(ctx, "admission_scores", inp.years)
+    meth = resolve_mentions(ctx, inp.methods, "method", None)
+    prog = resolve_mentions(ctx, programs, "program", years or None)
     resolved = prog.resolved + meth.resolved
     if prog.clarifications or meth.clarifications:
-        return _ambiguous(prog.clarifications + meth.clarifications, resolved)
+        return ambiguous_result(prog.clarifications + meth.clarifications, resolved)
     if prog.groups or len(prog.codes) > MAX_ENTITIES:
-        return _invalid(f"{TOO_MANY_MESSAGE} Câu hỏi theo cả nhóm ngành/Trường dùng list_programs.",
+        return invalid_result(f"{TOO_MANY_MESSAGE} Câu hỏi theo cả nhóm ngành/Trường dùng list_programs.",
                         resolved=resolved)
     missing += prog.missing + meth.missing
     if not prog.codes or not years:
@@ -176,8 +110,8 @@ async def admission_scores(inp: AdmissionScoresInput, ctx: ToolContext | None = 
         method_code=r["method_code"], method_name=r["method_name"], combination_group=r["combination_group"],
         combination_group_label=GROUP_LABELS.get(r["combination_group"], r["combination_group"]),
         subject_combinations=[c for c in (r["subject_combinations"] or "").split(";") if c],
-        score=_f(r["score"]), scale=r["scale"], score_note=r["score_note"] or None,
-        is_rule_derived=r["verification_status"] == "rule_derived", source=_source(r)) for r in rows]
+        score=to_float(r["score"]), scale=r["scale"], score_note=r["score_note"] or None,
+        is_rule_derived=r["verification_status"] == "rule_derived", source=row_source(r)) for r in rows]
 
     deltas = _year_deltas(rows, "score")
     by_slot = defaultdict(dict)                # (nam, phuong thuc, khoi) -> {nganh: dong}
@@ -187,8 +121,8 @@ async def admission_scores(inp: AdmissionScoresInput, ctx: ToolContext | None = 
         ordered = [c for c in prog.codes if c in per]
         for a, b in pairs(ordered, 2):
             deltas.append(Delta(kind="program", method_code=method, combination_group=group, a=a, b=b,
-                                value_a=_f(per[a]["score"]), value_b=_f(per[b]["score"]),
-                                diff=_f(Decimal(per[b]["score"]) - Decimal(per[a]["score"]))))
+                                value_a=to_float(per[a]["score"]), value_b=to_float(per[b]["score"]),
+                                diff=to_float(Decimal(per[b]["score"]) - Decimal(per[a]["score"]))))
 
     if not rows:
         status, err = Status.NOT_FOUND, ErrorCode.DATA_NOT_FOUND
@@ -263,12 +197,12 @@ QUOTA_SQL = {"desc": _QUOTA_HEAD + "DESC" + _QUOTA_TAIL, "asc": _QUOTA_HEAD + "A
 async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) -> ToolResult[ListProgramsData]:
     ctx = ctx or await get_context()
     if len(set(inp.years)) > MAX_ENTITIES:
-        return _invalid(TOO_MANY_MESSAGE)
+        return invalid_result(TOO_MANY_MESSAGE)
     if inp.limit is not None and not 1 <= inp.limit <= MAX_LIMIT:
-        return _invalid(f"limit phải từ 1 đến {MAX_LIMIT}, hoặc bỏ trống để lấy cả bảng.")
+        return invalid_result(f"limit phải từ 1 đến {MAX_LIMIT}, hoặc bỏ trống để lấy cả bảng.")
 
     table = "admission_scores" if inp.metric == "score" else "quotas"
-    years, missing = _years(ctx, table, inp.years)
+    years, missing = pick_years(ctx, table, inp.years)
     notes: list[str] = []
     resolved: list[Resolved] = []
     clar: list[Clarification] = []
@@ -276,7 +210,7 @@ async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) 
     # ---- phuong thuc
     methods: list[str] = []
     if inp.method:
-        m = _resolve_all(ctx, [inp.method], "method", None)
+        m = resolve_mentions(ctx, [inp.method], "method", None)
         clar += m.clarifications; resolved += m.resolved; missing += m.missing
         methods = sorted({x for c in m.codes for x in ctx.expand_method(c)})
         if inp.metric == "quota" and m.codes:
@@ -288,7 +222,7 @@ async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) 
     # ---- pham vi: Truong/Khoa, nhom nganh, nganh (T2-3: alias mo ho -> lay het ung vien)
     faculty = grp = None
     if inp.faculty:
-        f = _resolve_all(ctx, [inp.faculty], "faculty", None)
+        f = resolve_mentions(ctx, [inp.faculty], "faculty", None)
         clar += f.clarifications; resolved += f.resolved; missing += f.missing
         faculty = f.codes[0] if f.codes else None
         if not f.codes and not f.clarifications:
@@ -296,21 +230,21 @@ async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) 
                               missing=missing, resolved=resolved)
     codes: list[str] = []
     if inp.program_group:
-        g = _resolve_all(ctx, [inp.program_group], "program", years or None, take_all_on_clarify=True)
+        g = resolve_mentions(ctx, [inp.program_group], "program", years or None, take_all_on_clarify=True)
         resolved += g.resolved; missing += g.missing
         if g.groups:
             grp = g.groups[0]
         else:
             codes += g.codes
     if inp.programs:
-        pr = _resolve_all(ctx, inp.programs, "program", years or None, take_all_on_clarify=True)
+        pr = resolve_mentions(ctx, inp.programs, "program", years or None, take_all_on_clarify=True)
         resolved += pr.resolved; missing += pr.missing
         codes += [c for c in pr.codes if c not in codes]
         if not pr.codes:
             return ToolResult(status=Status.NOT_FOUND, error_code=ErrorCode.ENTITY_NOT_FOUND,
                               missing=missing, resolved=resolved)
     if clar:
-        return _ambiguous(clar, resolved)
+        return ambiguous_result(clar, resolved)
 
     # ---- to hop, phuong thuc loai tru
     combo = inp.combination.strip().upper() if inp.combination else None
@@ -323,7 +257,7 @@ async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) 
                      "đầy đủ theo ngành.")              # T2-4, PRD 13.2
     without = None
     if inp.without_method:
-        w = _resolve_all(ctx, [inp.without_method], "method", None)
+        w = resolve_mentions(ctx, [inp.without_method], "method", None)
         resolved += w.resolved; missing += w.missing
         if w.codes:
             # program_methods ghi theo ma cha (XTTN), khong theo XTTN_1.x
@@ -347,8 +281,8 @@ async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) 
         faculty_code=r["faculty_code"], faculty_name=r["faculty_name"], program_group_code=r["program_group_code"],
         year=r["year"], method_code=r.get("method_code"), combination_group=r.get("combination_group"),
         combination_group_label=GROUP_LABELS.get(r.get("combination_group") or "", None),
-        value=_f(r["value"]), scale=r.get("scale"), is_rule_derived=r["verification_status"] == "rule_derived",
-        source=_source(r)) for r in rows]
+        value=to_float(r["value"]), scale=r.get("scale"), is_rule_derived=r["verification_status"] == "rule_derived",
+        source=row_source(r)) for r in rows]
 
     stats, seen = [], set()
     for r in rows:
@@ -356,15 +290,15 @@ async def list_programs(inp: ListProgramsInput, ctx: ToolContext | None = None) 
         if k not in seen:
             seen.add(k)
             stats.append(GroupStat(year=r["year"], method_code=r.get("method_code"), count=r["n"],
-                                   min=_f(r["vmin"]), max=_f(r["vmax"]),
-                                   total=_f(r["vsum"]) if "vsum" in r else None))
+                                   min=to_float(r["vmin"]), max=to_float(r["vmax"]),
+                                   total=to_float(r["vsum"]) if "vsum" in r else None))
     total_rows = sum(s.count for s in stats)
 
     deltas = _year_deltas(rows, "value") if len(years) > 1 else []
     if inp.metric == "quota" and len(stats) > 1:
         for a, b in zip(stats, stats[1:]):
             deltas.append(Delta(kind="total", a=str(a.year), b=str(b.year), value_a=a.total, value_b=b.total,
-                                diff=_f(Decimal(str(b.total)) - Decimal(str(a.total)))))
+                                diff=to_float(Decimal(str(b.total)) - Decimal(str(a.total)))))
 
     data = ListProgramsData(rows=out_rows, stats=stats, deltas=deltas, total_rows=total_rows,
                             truncated=len(out_rows) < total_rows, notes=notes)

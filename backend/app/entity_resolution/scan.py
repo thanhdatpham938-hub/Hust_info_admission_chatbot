@@ -14,7 +14,6 @@ import unicodedata
 from dataclasses import dataclass
 
 from app.entity_resolution.index import AliasIndex
-from app.entity_resolution.normalize import normalize
 
 MIN_PHRASE_LEN = 4
 YEAR_RE = re.compile(r"(?<!\d)(20\d\d)(?!\d)")
