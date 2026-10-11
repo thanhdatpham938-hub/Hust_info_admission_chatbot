@@ -79,6 +79,8 @@ table([
     ('Sổ tay sinh viên 2026 (bản web)', 'https://ctsv.hust.edu.vn/so-tay-sv'),
     ('Đề án tuyển sinh 2024 (trang đăng; PDF nhúng Google Drive trùng từng byte với file trong máy)', 'https://ts.hust.edu.vn/tin-tuc/de-an-tuyen-sinh-dai-hoc-nam-2024'),
     ('Quyết định học phí 2024–2025', 'https://ctt.hust.edu.vn/Upload/Nguyen%20Quoc%20Dat/files/DTDH_QDQC/Hocphi/2024-2025/2024_2_%20Q%C4%90%20h%E1%BB%8Dc%20ph%C3%AD%20-%202024-2025.pdf'),
+    ('Quyết định học phí 2025–2026 (10232/QĐ-ĐHBK, 12/9/2025)', 'https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hocphi/2025-2026/QD%20HOC%20PHI%20-%202025-2026-final.pdf'),
+    ('Quyết định học phí 2026–2027 (12006/QĐ-ĐHBK, 05/10/2026)', 'https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hocphi/2026-2027/12006_Q%C4%90-%C4%90HBK.pdf'),
     ('Quy định học bổng KKHT 2022', 'https://ctt.hust.edu.vn/Upload/Nguyen%20Viet%20Tien/files/Quy%20%C4%91%E1%BB%8Bnh%20HB%20KKHT%20n%C4%83m%202022.pdf'),
 ])
 w('Các file `Quy_dinh_ngoai_ngu_K71_2026.pdf`, `Quy_dinh_ngoai_ngu_K70.pdf`, `QCDT_2025_5445_QD-DHBK.pdf`, `10461-QD-DHBK_Quy_che_thi_TSA_2024.pdf`, '

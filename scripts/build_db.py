@@ -57,7 +57,8 @@ CREATE TABLE programs (
   program_code TEXT PRIMARY KEY, program_name TEXT NOT NULL,
   faculty_code TEXT NOT NULL REFERENCES faculties(faculty_code),
   program_group_code TEXT REFERENCES program_groups(program_group_code),
-  language TEXT, degree TEXT, duration TEXT, curriculum_url TEXT, short_description TEXT, {PROV_DDL});
+  language TEXT, degree TEXT, duration TEXT, curriculum_url TEXT, short_description TEXT,
+  program_page_url TEXT, {PROV_DDL});
 CREATE TABLE program_years (
   program_code TEXT NOT NULL REFERENCES programs(program_code), year INTEGER NOT NULL, {PROV_DDL},
   PRIMARY KEY (program_code, year));
@@ -275,6 +276,8 @@ def build_rows() -> dict[str, list[dict]]:
             "faculty_code": fac_by_name[r["faculty_name"]], "program_group_code": group_of.get(code),
             "language": ov.get("language"), "degree": ov.get("degree"), "duration": ov.get("duration"),
             "curriculum_url": ov.get("curriculum_url"), "short_description": ov.get("short_description"),
+            # Nguon cua language/degree/duration/short_description (trang nganh) — PLAN - T3 program_info (v1)
+            "program_page_url": ov.get("source_url"),
             **prov(r)})
     T["program_years"] = [{"program_code": r["program_code"], "year": y, **prov(r)}
                           for y, rows in prog_years for r in rows]

@@ -265,3 +265,18 @@ diện 1.1,method,XTTN_1.1,colloquial,unique,,,2026.1
 diện 1.2,method,XTTN_1.2,colloquial,unique,,,2026.1
 diện 1.3,method,XTTN_1.3,colloquial,unique,,,2026.1
 hồ sơ năng lực,method,XTTN_1.3,colloquial,unique,,,2026.1
+Công nghệ thông tin,program,IT1,colloquial,clarify,,Cùng tập mã với alias tiếng Anh 'Information Technology' (Q9),2026.1
+Công nghệ thông tin,program,IT2,colloquial,clarify,,Cùng tập mã với alias tiếng Anh 'Information Technology' (Q9),2026.1
+Công nghệ thông tin,program,IT-E6,colloquial,clarify,,Cùng tập mã với alias tiếng Anh 'Information Technology' (Q9),2026.1
+Công nghệ thông tin,program,IT-E7,colloquial,clarify,,Cùng tập mã với alias tiếng Anh 'Information Technology' (Q9),2026.1
+Công nghệ thông tin,program,IT-EP,colloquial,clarify,,Cùng tập mã với alias tiếng Anh 'Information Technology' (Q9),2026.1
+Leibniz,program,ET-LUH,colloquial,clarify,,Hai ngành hợp tác ĐH Leibniz Hannover (Q49),2026.1
+Leibniz,program,ME-LUH,colloquial,clarify,,Hai ngành hợp tác ĐH Leibniz Hannover (Q49),2026.1
+Điện - Điện tử,faculty,SEEE,colloquial,unique,,Q31 'khối ngành Điện - Điện tử',2026.1
+Vật liệu,faculty,SMSE,colloquial,unique,,Q33 'Nhóm ngành Vật liệu'; tên ngành chứa 'Vật liệu' vẫn khớp dài hơn,2026.1
+Quản trị kinh doanh,program,EM3,colloquial,clarify,,Năm 2025 cả EM3 và TROY-BA đều là QTKD — khớp chính xác tên EM3 sẽ bỏ qua TROY-BA (cùng loại 7 cặp PRD 10.3),2026.1
+Quản trị kinh doanh,program,TROY-BA,colloquial,clarify,,Năm 2025 cả EM3 và TROY-BA đều là QTKD — khớp chính xác tên EM3 sẽ bỏ qua TROY-BA (cùng loại 7 cặp PRD 10.3),2026.1
+Cơ điện tử,program,ME1,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1
+Cơ điện tử,program,ME-E1,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1
+Cơ điện tử,program,ME-LUH,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1
+Cơ điện tử,program,ME-NUT,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1

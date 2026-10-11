@@ -11,18 +11,22 @@ hust_chatbot/
 │   │   ├── api/                           # chat.py (POST /api/chat, /api/chat/stream), health.py
 │   │   ├── graph/                         # LangGraph: state, router, checkpointer, synthesizer
 │   │   │   └── guardrails/                # input_guard.py, llm_judge.py
-│   │   ├── tools/                         ✅ context.py (dữ liệu nạp 1 lần), admission.py (T1 admission_scores, T2 list_programs)
-│   │   │                                  # còn: program_info, tuition, certificates, university_info, rag_tool (PLAN - Tools)
+│   │   ├── tools/                         ✅ context.py (dữ liệu nạp 1 lần), common.py (hàm dùng chung),
+│   │   │                                  ✅ admission.py (T1, T2), program_info.py (T3), tuition.py (T4), certificate.py (T5),
+│   │   │                                  ✅ university_info.py (T6), rag_tool.py (T7) — đủ 7 tool Tuần 3
 │   │   ├── entity_resolution/             ✅ normalize.py, index.py, resolver.py (4 quy tắc PRD 10.3 + fuzzy), scan.py
-│   │   ├── rag/                           # retriever.py (đọc Qdrant)
+│   │   ├── rag/                           ✅ retriever.py (nhánh RRF, cosine, trích dẫn), phrases.py (cụm từ + cách gọi tương đương)
 │   │   ├── db/                            ✅ pool.py (psycopg3 async, chỉ đọc, search_path=hust) — không ORM/Alembic
-│   │   ├── schemas/                       ✅ common.py (ToolResult), admission.py; request/response API ở Tuần 4
+│   │   ├── schemas/                       ✅ common.py (ToolResult), admission.py, program_info.py, tuition.py, certificate.py, university_info.py, rag.py
 │   │   └── core/                          ✅ config.py (Settings đọc .env); logging.py (Langfuse) — Tuần 4
 │   ├── requirements.txt, pyproject.toml   ✅ thư viện backend (ghim phiên bản) + cấu hình pytest
 │   └── tests/
 │       ├── conftest.py, test_db.py        ✅ test nền lớp DB (marker db)
 │       ├── test_entity_resolution.py, test_scan.py   ✅ không cần DB
-│       ├── test_admission_scores.py, test_list_programs.py   ✅ marker db
+│       ├── test_admission_scores.py, test_list_programs.py, test_program_info.py,
+│       │   test_tuition.py, test_certificate.py, test_university_info.py   ✅ marker db
+│       ├── test_rag_unit.py (không mạng), test_rag_search.py (marker rag: pytest -m rag)
+│       ├── test_entity_cases.py           ✅ 104 ca có nhãn AC2/AC8 đã duyệt
 │       └── eval/                          ✅ 120_question_check_data.md (bộ câu hỏi đánh giá)
 │
 ├── frontend/                              ⬜ (khung: app/, components/{Chat,Citation,ClarificationPrompt}/, lib/)
@@ -54,6 +58,7 @@ hust_chatbot/
 │   ├── normalize_chunks.py, normalize_csv_meta.py # chuẩn hoá metadata
 │   ├── validate_*.py, check_dangling_refs.py, coverage_report.py, probe_questions.py            # kiểm tra
 │   ├── eval_entity_scan.py                        # chạy Entity Resolution trên bộ 120 câu -> docs/ghi_chu/
+│   ├── eval_entity_cases.py, eval_retrieval.py    # đo AC2/AC8; đo retrieval T7 (hit@5 + phân bố điểm)
 │   ├── check_setup.py                             # kiểm tra .env + Qdrant + OpenAI
 │   ├── embed_chunks.py, search_chunks.py          # nhúng vào Qdrant + tìm thử/đo retrieval
 │   ├── build_db.py, validate_links.py             # CSV -> SQLite (+ Postgres với --postgres) + kiểm liên kết
@@ -69,6 +74,10 @@ hust_chatbot/
 │   ├── PLAN - Backend PostgreSQL (v1).md  # đã thực hiện — Postgres + pool + test nền
 │   ├── PLAN - Tools (v1).md               # kế hoạch 7 tool Tuần 3
 │   ├── PLAN - Entity Resolution + Admission Tool (v1).md   # đã thực hiện — chi tiết bước 1–3
+│   ├── PLAN - T3 program_info (v1).md     # đã thực hiện — thông tin ngành
+│   ├── PLAN - T4 T5 hoc phi va chung chi (v1).md   # đã thực hiện — học phí, lệ phí, chứng chỉ
+│   ├── PLAN - T6 university_info (v1).md  # đã thực hiện — Trường/Khoa
+│   ├── PLAN - T7 retrieval (v1).md, (v2).md  # v2 đã thực hiện — retrieval văn bản (v1: thử nghiệm, lịch sử)
 │   ├── PLAN - Embedding (v1).md           # đã thực hiện — 641 chunk trong Qdrant
 │   ├── nguon_du_lieu.md                   # tổng hợp link nguồn (sinh tự động)
 │   ├── cautrucduan.md                     # file này

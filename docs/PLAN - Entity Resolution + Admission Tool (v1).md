@@ -1,6 +1,6 @@
 # PLAN — Entity Resolution + Admission Tool (v1, chi tiết)
 
-**Ngày:** 2026-10-07 · **Trạng thái:** anh duyệt toàn bộ mục 7 (2026-10-07), **đã thực hiện 2026-10-07** — xem mục "Đã thực hiện" cuối file · Chi tiết hoá bước 1–3 của `PLAN - Tools (v1).md` mục 9 · Dùng các quyết định anh đã chốt ở mục 10 của plan đó.
+**Ngày:** 2026-10-07 · **Trạng thái:** đề xuất, chờ anh duyệt mục 7 · Chi tiết hoá bước 1–3 của `PLAN - Tools (v1).md` mục 9 · Dùng các quyết định anh đã chốt ở mục 10 của plan đó.
 
 Mỗi quyết định có dòng **Vì sao**.
 
@@ -395,49 +395,7 @@ Chạy `scan` + `resolve` trên 114 câu, xuất bảng `câu → cụm tìm đ�
 ## 7. Cần anh duyệt
 
 1. **Danh sách 13 alias phương thức** ở mục 2.5: giữ, bỏ hay sửa dòng nào? Tôi chỉ ghi vào CSV sau khi anh duyệt.
+giữ lại oke
 2. **T2 gặp alias mơ hồ thì lấy tất cả ứng viên** thay vì hỏi lại (T2-3)? Khuyến nghị: có. T1 vẫn luôn hỏi lại.
-3. **Cách viết nhãn nhóm tổ hợp** (A2): "mọi tổ hợp" / "tổ hợp khối ngành kỹ thuật" / "tổ hợp khối ngành kinh tế, giáo dục, ngoại ngữ" (hai nhãn sau theo đúng cách gọi trong `score_note`). Anh muốn gọi khác không?
 
----
-
-# Đã thực hiện (2026-10-07)
-
-Anh duyệt cả 3 điểm ở mục 7 đúng như đề xuất: 13 alias phương thức, T2 lấy hết ứng viên khi mơ hồ, nhãn nhóm tổ hợp theo `score_note`.
-
-## Kết quả
-
-| Bước | Kết quả |
-|---|---|
-| 1 | `app/schemas/common.py` (`ToolResult`…), `app/tools/context.py` (`ToolContext`: alias + `Scanner` + độ phủ năm + phương thức + mã tổ hợp; dựng từ Postgres hoặc từ `build_db.build_rows()`) |
-| 2a | `app/entity_resolution/{normalize,index,resolver}.py`. Mọi ca ở mục 2.7 xanh, không cần DB |
-| 2b | `app/entity_resolution/scan.py`. Dựng một lần mất 6 ms, mỗi câu hỏi 0–2 ms |
-| 2c | 13 alias phương thức đã ghi vào `entity_aliases.csv` (266 dòng). `validate_aliases.py` dùng resolver của backend, nay kiểm **mọi loại** thực thể (bản cũ chỉ kiểm `program`): **0 lỗi, 0 cảnh báo**. `validate_links.py` nhận loại `method`: 0 lỗi |
-| 2d | `scripts/eval_entity_scan.py` → `docs/ghi_chu/2026-10-07 - Ket qua entity resolution.md`. 114 câu, 62 câu có cụm; các cụm ra 85 `unique` / 19 `group` / 8 `clarify`, không cụm nào `not_found` |
-| 3 | `app/schemas/admission.py`, `app/tools/admission.py` (T1). **Quét đủ 687 dòng điểm chuẩn: đúng 100%** (AC1 tool accuracy trên toàn bộ dữ liệu) |
-| 4 | T2 trong cùng file. Mọi ca ở mục 4.3 xanh |
-| Tổng | `pytest backend`: **80 passed**, khoảng 4 giây. Mỗi lần gọi tool mất 0,6–12 ms (PRD 22.2 đòi < 500 ms) |
-
-## Các lựa chọn phát sinh lúc làm — và vì sao
-
-| Chỗ | Làm | Vì sao |
-|---|---|---|
-| Cách chấm fuzzy | `window_ratio`: `fuzz.ratio` so với đoạn từ liên tiếp khớp nhất trong tên (dài n−1 đến n+1 từ); cụm 1 từ thì so cả chuỗi. Plan ghi `fuzz.ratio` so cả chuỗi | Đã đo trên 10 lỗi gõ. `ratio` so cả chuỗi trượt khi cụm gõ sai chỉ là một phần của tên dài ("khoa hoc may tihn" vs "cntt khoa hoc may tinh": 82 điểm). `partial_ratio`/`WRatio` cho "hoa hoc" 100 điểm (khớp nhầm). So theo cửa sổ từ giữ được cả hai yêu cầu |
-| Fuzzy nhiều ứng viên | Top-1 hơn top-2 từ 10 điểm trở lên thì trả `unique`, còn lại hỏi lại top-3 | AC8: chỉ hỏi lại khi các ứng viên sát điểm nhau |
-| Chuỗi con (B3a) | Khớp **nguyên từ** | "tinh" không được khớp vào giữa từ khác. Gõ thiếu chữ ("kinh doan") thì để fuzzy bắt |
-| Mã nhóm ngành | Mã nội bộ `chuan`/`elitech`/`pfiev`/`lien_ket` **không** làm khoá tra | Validator mới bắt được: khoá `pfiev` lấn alias "PFIEV" anh đã chốt (3 ngành, có IT-EP). Mã nhóm do mình tự đặt ở bước Data Linking, người dùng không gõ |
-| `group` ngoài nhóm ngành | Trả tất cả mã đã khai báo (TOEIC → 4 kỹ năng) | Validator mới bắt được: bản đầu hiểu mọi `group` là nhóm ngành |
-| `Missing.reason` | Thêm `entity_not_found` (lý do thứ 5) | K2: cụm không tìm thấy không chặn truy vấn nhưng vẫn phải báo lại |
-| Mã gõ không gạch nối | Thêm khoá `compact` ("ite10") trong resolver và trong `scan` | Đúng mục 2.2; `scan` cũng cần thì mới tìm được trong câu |
-| T2 `program_group` | Nếu cụm không ra nhóm mà ra ngành, dùng các ngành đó làm bộ lọc | Người dùng/Router có thể đưa tên ngành vào ô nhóm; bỏ qua thì mất bộ lọc |
-| T2 `stats` | Tính theo (năm, phương thức) trên **mọi** dòng khớp lọc, trước khi cắt `limit` | Q33 "dao động trong khoảng nào" cần min/max của cả nhóm, không chỉ của top-10 |
-| T2 `Delta(kind="total")` | Chênh lệch tổng chỉ tiêu giữa các năm | Q37 |
-| T2 `notes` | Ghi chú cố định khi lọc tổ hợp năm 2024 | PRD 13.2: chỉ có tổ hợp đại diện |
-| `build_db.py` | `connect_timeout=10` | Lúc làm Docker Desktop đang tắt, `--postgres` treo quá 2 phút; giờ báo lỗi sau 10 giây |
-| `.gitkeep` | `git rm` ở `schemas/`, `tools/`, `entity_resolution/`, thay bằng `__init__.py` | Thư mục đã có code thật |
-
-## Còn lại
-
-- **4 alias có thể còn thiếu** ("công nghệ thông tin", "Điện - Điện tử", "ngành Vật liệu", "Leibniz"): bảng gợi ý ở cuối file ghi chú entity resolution. Đây là sửa dữ liệu nguồn nên **chờ anh quyết**.
-- **Bộ ca có nhãn để đo AC2/AC8**: anh chưa chọn ai soạn (mục 10.5 của `PLAN - Tools`).
-- Ghi cho Router (Tuần 4): ưu tiên mã trong ngoặc ngay sau tên ngành (Q96); "THPT" trong "trường THPT chuyên" không phải phương thức; "2026-2027" là một năm học.
-- Tiếp theo theo `PLAN - Tools (v1)` mục 9: bước 4 T3 `program_info`.
+3. **Cách viết nhãn nhóm tổ hợp** (A2): "mọi tổ hợp" / "tổ hợp khối ngành kỹ thuật" / "tổ hợp khối ngành kinh tế, giáo dục, ngoại ngữ" (hai nhãn sau theo đúng cách gọi trong `score_note`). Anh muốn gọi khác không? Không cần thế này oke

@@ -69,6 +69,12 @@ SOURCES = {
     # PDF co lop chu, nhung chunk nay duoc chep bang vision tu Phu luc I (bang) -> giu vision_extracted
     "tuition": dict(slug="hocphi2024", kind="pdf_text", status="vision_extracted",
                     collected="2026-09-20", locator="dieu"),
+    # QD hoc phi 2025-2026, 2026-2027: muc "Cac muc hoc phi khac", chep tu lop chu PDF (PLAN - T7 retrieval v2).
+    # Ten nguon KHONG dat "tuition_2026": trung ten tuition_2026.csv ma bo 120 cau ghi lam tham chieu -> do sai
+    "qd_hoc_phi_2025_2026": dict(slug="hocphi2025", kind="pdf_text", status="pdf_text",
+                         collected="2026-10-09", locator="dieu"),
+    "qd_hoc_phi_2026_2027": dict(slug="hocphi2026", kind="pdf_text", status="pdf_text",
+                         collected="2026-10-09", locator="dieu"),
 }
 
 # Trang (so trang cua FILE PDF, cung quy uoc voi QCDT/XTTN/ngoai ngu) cua tung Dieu trong 2 ban
@@ -86,6 +92,9 @@ PAGE_BY_DIEU = {
     "kkht_2022": {1: "1", 2: "1", 3: "1", 4: "1-2", 5: "2", 6: "2", 7: "2"},
     # "Cac muc hoc phi khac" nam o Phu luc I, trang 4 (tim thay 4/5 dong trong lop chu trang 4)
     "tuition": {5: "4"},
+    # Trang FILE PDF cua muc 5 (xem anh trang 2026-10-11)
+    "qd_hoc_phi_2025_2026": {5: "4-5"},
+    "qd_hoc_phi_2026_2027": {5: "5"},
 }
 
 # Bai dang tren ts.hust.edu.vn -> slug ngan cho chunk_id

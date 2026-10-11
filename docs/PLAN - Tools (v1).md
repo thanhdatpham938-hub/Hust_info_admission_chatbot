@@ -1,6 +1,6 @@
 # PLAN — Các tool Tuần 3 (v1)
 
-**Ngày:** 2026-10-06 · **Trạng thái:** anh đã chốt mục 10 (2026-10-07); chi tiết Entity Resolution + T1/T2 ở `PLAN - Entity Resolution + Admission Tool (v1).md` — **bước 1–3 đã xong 2026-10-07** (80 test xanh) · Gắn với PRD v1.2 mục 3.1 (độ phủ dữ liệu), 10.2 (Admission Tool), 10.3 (Entity Resolution), 12 (Citation), 13 (Fallback), 20 (Tuần 3), 21 (AC1, AC2, AC4, AC8, AC9), 24 (mã lỗi) · Đi trước: `PLAN - Backend PostgreSQL (v1).md` (lớp DB, mục 4 đã thống nhất cách tool dùng DB)
+**Ngày:** 2026-10-06 · **Trạng thái:** anh đã chốt mục 10 (2026-10-07); chi tiết Entity Resolution + T1/T2 ở `PLAN - Entity Resolution + Admission Tool (v1).md` — **bước 1–3 đã xong 2026-10-07**; **bước 4 (T3 `program_info`) xong 2026-10-08** theo `PLAN - T3 program_info (v1).md`; **bước 5 (T4, T5) xong 2026-10-09** theo `PLAN - T4 T5 hoc phi va chung chi (v1).md`; **bước 6 (T6) xong 2026-10-09** theo `PLAN - T6 university_info (v1).md`; **bước 7 (T7 retrieval) xong 2026-10-11** theo `PLAN - T7 retrieval (v2).md` — **đủ 7 tool Tuần 3** · Gắn với PRD v1.2 mục 3.1 (độ phủ dữ liệu), 10.2 (Admission Tool), 10.3 (Entity Resolution), 12 (Citation), 13 (Fallback), 20 (Tuần 3), 21 (AC1, AC2, AC4, AC8, AC9), 24 (mã lỗi) · Đi trước: `PLAN - Backend PostgreSQL (v1).md` (lớp DB, mục 4 đã thống nhất cách tool dùng DB)
 
 Mỗi quyết định có dòng **Vì sao**.
 
@@ -195,11 +195,17 @@ Tôi soạn nháp từ CSV và bộ 120 câu, **anh duyệt** trước khi dùng
 ## 10. Cần anh quyết
 
 1. **Số ứng viên khi hỏi lại.** PRD 10.3 ghi "tối đa 3 candidate", nhưng có alias khai báo `clarify` trỏ tới 4–7 ngành (ví dụ "BK CNTT" → 7 ngành CNTT, "Vi mạch" → 4 ngành). Cắt còn 3 thì người dùng không thấy được ngành mình muốn. **Khuyến nghị:** alias đã khai báo trong bảng thì liệt kê đủ; chỉ ứng viên từ fuzzy mới cắt còn 3.
+   - *Anh trả lời (2026-10-07, nguyên văn):* Chuyển thành khai báo hết không thì hỏi lại người dùng đưa ra lựa chọn
 2. **Thêm alias phương thức** (E3, khoảng 15 dòng `entity_type = method` vào `entity_aliases.csv`)? Việc này sửa dữ liệu nguồn nên cần anh đồng ý. Tôi sẽ đưa danh sách để anh duyệt trước khi ghi.
+   - *Anh trả lời (2026-10-07, nguyên văn):* Tôi đồng ý gửi lại danh sách cho tôi
 3. **Không nói năm thì lấy năm nào** (D6)? **Khuyến nghị:** năm mới nhất có dữ liệu, kèm danh sách năm có sẵn. Phương án khác: riêng điểm chuẩn thì trả cả 3 năm (thông tin hơn, nhưng câu trả lời dài hơn).
+   - *Anh trả lời (2026-10-07, nguyên văn):* Thì lấy dữ liệu năm mới nhất nhưng phải ghi rõ nguồn là của năm nào
 4. **Fuzzy dùng `rapidfuzz` (khuyến nghị) hay `difflib` có sẵn trong Python?** `rapidfuzz` nhanh hơn và có sẵn hàm so khớp theo từ (token), hợp với tên ngành dài. `difflib` thì không phải cài thêm thư viện.
+   - *Anh trả lời (2026-10-07, nguyên văn):* sử dụng rapidfuzz
 5. **Bộ ca có nhãn** (mục 8): tôi soạn nháp, anh duyệt. Anh đồng ý cách chia việc này không?
+   - *Anh trả lời (2026-10-07, nguyên văn):* Tôi đồng ý
 6. **Thêm `short_description` của 68 ngành vào `program_overview_2026.csv`** (S7, lấy từ `data/programs/*.json`)? Việc này sửa dữ liệu nguồn nên cần anh đồng ý.
+   - *Anh trả lời (2026-10-07, nguyên văn):* Tôi đồng ý
 
 **Anh đã chốt (2026-10-07):**
 

@@ -107,6 +107,28 @@ def test_fuzzy_go_sai_chinh_ta(ctx):
     assert ctx.resolve("logictics", "program").codes == ["EM-E14"]
 
 
+def test_ten_dung_nhung_nganh_chua_mo_khong_doan_fuzzy(ctx):
+    """Do 2026-10-08: FL4 (mo tu 2026) hoi nam 2025 tung bi fuzzy doan sang FL3 (Tieng Trung)."""
+    r = ctx.resolve("Tiếng Hàn Khoa học và Công nghệ", "program", [2025])
+    assert r.status == "not_found" and r.other_years == {"FL4": [2026]}
+
+
+def test_fuzzy_chi_hoi_lai_ung_vien_sat_diem(ctx):
+    """Do 2026-10-08: 'ky thuat oto' tung keo them ME-E1 (87 diem) vao cap TE1/TE-E2 (96 diem)."""
+    assert codes(ctx, "ky thuat oto") == ("clarify", {"TE1", "TE-E2"})
+
+
+@pytest.mark.parametrize("mention", ["Trường Y", "Trường Luật", "Khoa Y"])
+def test_chu_dau_chung_khong_lam_fuzzy_doan_bua(ctx, mention):
+    """Do 2026-10-09: 'truong y' tung duoc 86 diem voi moi 'truong ...'; 'Truong Luat' tung ra Truong Vat lieu."""
+    assert ctx.resolve(mention, "faculty").status == "not_found"
+
+
+def test_fuzzy_van_bat_loi_go_sau_chu_dau_chung(ctx):
+    assert codes(ctx, "truong vat lieuu", "faculty") == ("unique", {"SMSE"})
+    assert codes(ctx, "Ngành Logictics") == ("unique", {"EM-E14"})
+
+
 def test_cum_qua_ngan_khong_fuzzy(ctx):
     assert ctx.resolve("co", "program").status == "not_found"
 
