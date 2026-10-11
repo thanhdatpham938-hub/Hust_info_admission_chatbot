@@ -25,6 +25,7 @@ class ErrorCode(StrEnum):
     ENTITY_AMBIGUOUS = "ENTITY_AMBIGUOUS"
     DATA_NOT_FOUND = "DATA_NOT_FOUND"
     INVALID_REQUEST = "INVALID_REQUEST"
+    LOW_RETRIEVAL_CONFIDENCE = "LOW_RETRIEVAL_CONFIDENCE"   # T7: diem cosine top-1 duoi nguong (R6)
 
 
 class Source(BaseModel):
