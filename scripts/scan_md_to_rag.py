@@ -40,6 +40,24 @@ DOCS = {
         "source_url": "https://ctt.hust.edu.vn/Upload/Nguyen%20Quoc%20Dat/files/DTDH_QDQC/Hocphi/2024-2025/2024_2_%20Q%C4%90%20h%E1%BB%8Dc%20ph%C3%AD%20-%202024-2025.pdf",
         "verification_status": "vision_extracted",
     },
+    # Muc "5) Cac muc hoc phi khac" cua 2 QD hoc phi moi (PLAN - T7 retrieval (v2), buoc 0): chep tu LOP CHU PDF,
+    # doi chieu anh trang -> pdf_text (khac ban 2024-2025 chep bang vision)
+    "qd_hoc_phi_2025_2026": {
+        "document_title": "Quy định học phí 2025-2026 - các mức học phí khác",
+        "document_no": "10232/QĐ-ĐHBK",
+        "document_type": "quy_dinh_hoc_phi",
+        "year": 2025,
+        "source_url": "https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hocphi/2025-2026/QD%20HOC%20PHI%20-%202025-2026-final.pdf",
+        "verification_status": "pdf_text",
+    },
+    "qd_hoc_phi_2026_2027": {
+        "document_title": "Quy định học phí 2026-2027 - các mức học phí khác",
+        "document_no": "12006/QĐ-ĐHBK",
+        "document_type": "quy_dinh_hoc_phi",
+        "year": 2026,
+        "source_url": "https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hocphi/2026-2027/12006_Q%C4%90-%C4%90HBK.pdf",
+        "verification_status": "pdf_text",
+    },
 }
 
 DIEU_RE = re.compile(r"^###\s+(Điều\s+(\d+)\.?\s*(.*))$")

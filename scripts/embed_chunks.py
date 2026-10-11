@@ -19,6 +19,7 @@ ID diem = uuid5(NAMESPACE, chunk_id) - chay lai la ghi de dung chunk cu, khong s
 Dung:
   python scripts/embed_chunks.py              # bao loi neu collection da ton tai
   python scripts/embed_chunks.py --recreate   # xoa va dung lai tu dau
+  python scripts/embed_chunks.py --add-missing   # chi nhung chunk moi + cap nhat co is_latest (PLAN T7 v2)
 """
 
 import json
@@ -154,6 +155,9 @@ def main() -> None:
     print(f"  versioned=True: {sum(c['versioned'] for c in chunks)} chunk "
           f"(is_latest=False trong số đó: {sum(c['versioned'] and not c['is_latest'] for c in chunks)})")
 
+    if "--add-missing" in sys.argv:
+        sys.exit(add_missing(chunks, qdrant_url, collection, model, key))
+
     print(f"2. Dựng chuỗi embed cho {len(chunks)} chunk")
     texts = [embed_string(c) for c in chunks]
 
@@ -187,6 +191,50 @@ def main() -> None:
     print("6. Tự kiểm")
     ok = self_check(client, collection, chunks, vectors, oa, model)
     sys.exit(0 if ok else 1)
+
+
+def add_missing(chunks: list[dict], qdrant_url: str, collection: str, model: str, key: str) -> int:
+    """--add-missing (PLAN - T7 retrieval (v2), buoc 0): chi nhung chunk CHUA co trong collection, roi cap nhat
+    co is_latest/versioned cua chunk cu bi doi (vd them ban 2026 lam ban 2024 het la 'moi nhat').
+
+    Vi sao khong --recreate: nhung lai toan bo lam vector cu doi nhe (embedding khong hoan toan tat dinh), so do
+    retrieval khong con so duoc voi lan truoc. Neu NOI DUNG chunk cu da doi thi dung lai — truong hop do phai
+    --recreate, khong va do."""
+    client = QdrantClient(url=qdrant_url, timeout=30)
+    existing: dict[str, dict] = {}
+    offset = None
+    while True:
+        pts, offset = client.scroll(collection, limit=256, offset=offset, with_payload=True, with_vectors=False)
+        existing |= {p.payload["chunk_id"]: p.payload for p in pts}
+        if offset is None:
+            break
+    changed = [c["chunk_id"] for c in chunks if c["chunk_id"] in existing and existing[c["chunk_id"]]["text"] != c["text"]]
+    if changed:
+        print(f"  [LỖI] {len(changed)} chunk cũ đã đổi nội dung (vd {changed[:3]}) — chạy --recreate, không vá dở")
+        return 1
+    gone = sorted(set(existing) - {c["chunk_id"] for c in chunks})
+    if gone:
+        print(f"  [LỖI] {len(gone)} điểm trong Qdrant không còn trong file (vd {gone[:3]}) — chạy --recreate")
+        return 1
+    new = [c for c in chunks if c["chunk_id"] not in existing]
+    print(f"2. Chunk mới cần nhúng: {len(new)} — {[c['chunk_id'] for c in new]}")
+    if new:
+        oa = OpenAI(api_key=key)
+        vectors = embed_batch(oa, model, [embed_string(c) for c in new])
+        client.upsert(collection_name=collection, points=[
+            models.PointStruct(id=make_point_id(c["chunk_id"]), vector={"dense": v}, payload=dict(c))
+            for c, v in zip(new, vectors)])
+    flips = [c for c in chunks if c["chunk_id"] in existing
+             and (existing[c["chunk_id"]].get("is_latest"), existing[c["chunk_id"]].get("versioned"))
+             != (c["is_latest"], c["versioned"])]
+    for c in flips:
+        client.set_payload(collection, payload={"is_latest": c["is_latest"], "versioned": c["versioned"]},
+                           points=[make_point_id(c["chunk_id"])])
+    print(f"3. Cập nhật cờ is_latest/versioned cho chunk cũ: {[(c['chunk_id'], c['is_latest']) for c in flips]}")
+    count = client.count(collection, exact=True).count
+    ok = count == len(chunks)
+    print(f"4. [{'OK' if ok else 'LỖI'}] số điểm = {count} (kỳ vọng {len(chunks)})")
+    return 0 if ok else 1
 
 
 def self_check(client, collection, chunks, vectors, oa, model) -> bool:
