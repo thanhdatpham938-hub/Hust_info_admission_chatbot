@@ -45,6 +45,8 @@ class ToolContext:
         self.methods = {r["method_code"]: Method(r["method_code"], r["method_name"], r["scale"],
                                                  r["parent_method"] or None) for r in T["admission_methods"]}
         self.combinations = {r["combination_code"] for r in T["combinations"]}
+        # ma nganh -> nhom chuong trinh (chuan / elitech / pfiev / lien_ket): pick_choice buoc 5b ("hệ chuẩn")
+        self.program_group = {r["program_code"]: r["program_group_code"] for r in T["programs"]}
         # (nganh, nam) -> phuong thuc: T3 gan cong thuc DGTD/XTTN theo phuong thuc cua nganh
         self.program_methods: dict[tuple[str, int], set[str]] = defaultdict(set)
         for r in T["program_methods"]:
