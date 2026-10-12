@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-large"
     # SecretStr: in Settings ra log khong lo key
     openai_api_key: SecretStr | None = None
+    # LLM cho Router va Synthesizer (PRD 17); nhiet do dat o noi goi, khong o day
+    chat_model: str = "gpt-4o-mini"
+    # Langfuse (PRD 18): thieu key thi tu tat, code van chay
+    langfuse_public_key: SecretStr | None = None
+    langfuse_secret_key: SecretStr | None = None
+    langfuse_host: str = "https://cloud.langfuse.com"
 
 
 @lru_cache
