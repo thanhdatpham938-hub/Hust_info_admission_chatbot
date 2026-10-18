@@ -14,7 +14,7 @@ flowchart TD
     PC -->|nút bấm / khớp,<br/>không phần thừa| RN
     PC -->|có phần thừa /<br/>không khớp| RT
 
-    RT -->|OTHER_UNIVERSITY<br/>GENERAL_OFF_TOPIC<br/>UNKNOWN · tiếng Anh| FB[fallback<br/>câu mẫu]
+    RT -->|OTHER_UNIVERSITY<br/>GENERAL_OFF_TOPIC<br/>UNKNOWN · ngôn ngữ khác Việt-Anh| FB[fallback<br/>câu mẫu]
     RT -->|CLARIFICATION_NEEDED| CL[clarification<br/>hỏi lại]
     RT -->|ADMISSION · REGULATION<br/>UNIVERSITY_INFO · ANNOUNCEMENT| MC[merge_context<br/>quy tắc PRD 14]
 
@@ -75,7 +75,7 @@ start_turn                                   xoá turn cũ; thêm tin nhắn và
   │                        └─ có phần thừa / không khớp ─┐               Router xử lý cả câu, kèm pending
   ▼                                                      │
 router ◄─────────────────────────────────────────────────┘   1 lần LLM: intent + 0–3 lệnh gọi tool + tham số (gồm cả việc chặn injection)
-  ├─ OTHER_UNIVERSITY / GENERAL_OFF_TOPIC / UNKNOWN / tiếng Anh ──► fallback
+  ├─ OTHER_UNIVERSITY / GENERAL_OFF_TOPIC / UNKNOWN / ngôn ngữ khác ──► fallback
   ├─ CLARIFICATION_NEEDED (cả câu thiếu thông tin) ───────────────► clarification
   ▼ ADMISSION / REGULATION / UNIVERSITY_INFO / ANNOUNCEMENT
 merge_context                                C1–C5: điền phần thiếu từ ngữ cảnh cũ hoặc bỏ ngữ cảnh cũ
@@ -104,7 +104,7 @@ END
 |---|---|---|---|
 | `start_turn` | Không | Ghi đè `turn` bằng dict mới (xoá `answer`, `retry`, kết quả tool của lượt trước); thêm tin nhắn vào `messages`, cắt còn 3 lượt | `pending` có → `pick_choice`, không → `router` |
 | `pick_choice` | Không | Trường `choice` của nút bấm, hoặc khớp chữ với `context.pending.candidates`: mã ("TE-E2"), khoá, số thứ tự ("cái thứ 2"), tên/đặc điểm ("hệ tiên tiến"). Chỉ đi đường tắt khi tin nhắn **không còn phần thừa**; có thêm thông tin ("TE-E2, năm 2024") thì Router xử lý cả câu và `merge_context` ghép với lệnh gọi đang chờ (chi tiết: `PLAN - State va Context Rules (v1).md` 4.3, 4.3b) | khớp, không phần thừa → `run_tools`; còn lại → `router` |
-| `router` | Có | Một lần gọi structured output: `intent`, `calls` (0–3), `refers_to_context`, `language`, `scope_note`; khi đang chờ chọn thêm `pick_status` (`picked` / `new_question` / `cancel` / `unclear`) và `picked` (danh sách mã). Validate `args` bằng chính model `*Input` của tool; sai thì coi là `UNKNOWN` | theo intent |
+| `router` | Có | Một lần gọi structured output (2026-10-13: LLM trả `language`, `need`, `topic`; code ánh xạ `topic` → `intent` và thêm 4 luật chặn — `PLAN - Router (v1)` mục 11): `intent`, `calls` (0–3), `refers_to_context`, `language`, `scope_note`; khi đang chờ chọn thêm `pick_status` (`picked` / `new_question` / `cancel` / `unclear`) và `picked` (danh sách mã). Validate `args` bằng chính model `*Input` của tool; sai thì coi là `UNKNOWN` | theo intent |
 | `merge_context` | Không | Quy tắc C1–C5 (plan mục 5): cùng tool thì điền ngành/năm/phương thức/khoá còn trống; khác tool thì chỉ mang ngành, Trường; không tham chiếu thì không mang gì. `pick_status = picked` thì ghép với lệnh gọi cũ trong `pending` (mã đã chọn bị khoá, luôn chạy câu hỏi gốc); `new_question`/`cancel` thì bỏ `pending`; `unclear` thì hỏi lại, lần 2 thả `pending` (`PLAN - State va Context Rules (v1).md` 4.3b, 4.3c) | → `run_tools` |
 | `run_tools` | Không | `asyncio.gather` các hàm T1–T7. Tool tự phân giải thực thể (lọc năm B1, khớp chính xác B2, chuỗi con/fuzzy B3) và trả `ToolResult`. Lỗi DB/Qdrant bắt tại đây, ghi `error_code` | → `check_status` |
 | `check_status` | Không | Đọc `status` của mọi `ToolResult` theo thứ tự ưu tiên: `invalid` → `ambiguous` → thông báo → toàn `not_found` → còn lại | xem sơ đồ |
@@ -113,7 +113,7 @@ END
 | `template_answer` | Không | Dựng câu trả lời từ dữ liệu thô: bảng số + nguồn + phần `missing` | → `save_context` |
 | `clarification` | Không | Câu hỏi lại + danh sách lựa chọn: **đủ** danh sách nếu alias đã khai báo `clarify`, cắt còn 3 nếu từ fuzzy. Hỏi khoá (T5/T7), hỏi ngành/năm khi cả câu thiếu. Ghi `context.pending` | → `save_context` |
 | `announcement` | Không | Link `official_channel_url` của Trường/Khoa (T6) + lý do MVP không tra nội dung thông báo | → `save_context` |
-| `fallback` | Không | Câu mẫu theo lý do: trường khác, ngoài chủ đề, tiếng Anh, quá 3 thực thể, thiếu dữ liệu (nêu năm có sẵn), độ tin cậy thấp, lỗi DB/LLM | → `save_context` |
+| `fallback` | Không | Câu mẫu theo lý do (bản tiếng Việt và tiếng Anh, chọn theo `language`): trường khác, ngoài chủ đề, ngôn ngữ khác Việt–Anh (câu song ngữ), quá 3 thực thể, thiếu dữ liệu (nêu năm có sẵn), độ tin cậy thấp, lỗi DB/LLM | → `save_context` |
 | `save_context` | Không | Cập nhật `context` từ `ToolResult.resolved` (chỉ mã đã xác nhận), `last_tool`, `last_intent`; xoá `pending` nếu lượt này không hỏi lại. Lượt từ chối thì **không** đổi ngữ cảnh | → END |
 
 ## 4. State
@@ -190,7 +190,7 @@ def after_router(s: ChatState) -> str:
         if r.get("pick_status") == "cancel":
             return "fallback"                # câu mẫu "Đã bỏ câu hỏi trước. Bạn muốn hỏi gì?"
         # picked → merge_context (bên dưới); new_question → xử lý như câu mới
-    if r["language"] != "vi" or r["intent"] in ("OTHER_UNIVERSITY", "GENERAL_OFF_TOPIC", "UNKNOWN"):
+    if r["language"] == "other" or r["intent"] in ("OTHER_UNIVERSITY", "GENERAL_OFF_TOPIC", "UNKNOWN"):
         return "fallback"
     if r["intent"] == "CLARIFICATION_NEEDED":
         return "clarification"
@@ -230,7 +230,7 @@ Mọi cạnh có điều kiện đều liệt kê đủ đích, nên một giá 
 | `input_guard` (LLM) + `router` (LLM) + `select_tools` (LLM) | Gộp thành **một** `router` | Ba lần gọi LLM nối tiếp trước khi có dữ liệu thì khó đạt P95 TTFT < 4 giây (PRD 22.1). Guard và router cùng phân loại "ngoài phạm vi", trong khi API phải trả `OTHER_UNIVERSITY` / `GENERAL_OFF_TOPIC` tách riêng (PRD 19); hai chỗ cùng quyết thì AC3 đo không rõ. Prompt injection là một dạng `GENERAL_OFF_TOPIC` |
 | Node `entity_resolution` riêng, một giá trị `resolution` cho cả lượt | Bỏ; tool tự phân giải, `check_status` rẽ nhánh theo `status` của từng `ToolResult` | Code Tuần 3 đã phân giải **bên trong** tool, mỗi tool một ngữ cảnh: lọc năm B1 ("kế toán" → EM-E17 hay EM4), T4 chỉ dùng năm trong `program_years`, T6 phân giải Trường/Khoa, T5 cần khoá. Node chung phải làm lại tất cả, dễ lệch 104 ca AC2/AC8 đã duyệt. Một lượt có 2–3 tool thì cần kết quả phân giải theo từng tool. Tool vẫn dừng ở `ambiguous` **trước** khi truy vấn, nên AC8 giữ nguyên |
 | Không có nhánh cho câu không nhắc ngành | Không cần: tool không có thực thể thì chạy bình thường | Phần lớn câu RAG (cảnh báo học tập, Q10, Q18) không nhắc ngành; bản đầu sẽ đẩy chúng sang `not_found` hoặc báo lỗi thiếu cạnh |
-| Router thiếu cạnh cho `CLARIFICATION_NEEDED`, `UNKNOWN` | Có đủ cạnh, cả tiếng Anh | Thiếu cạnh thì LangGraph báo lỗi khi gặp giá trị đó |
+| Router thiếu cạnh cho `CLARIFICATION_NEEDED`, `UNKNOWN` | Có đủ cạnh, cả ngôn ngữ khác Việt–Anh | Thiếu cạnh thì LangGraph báo lỗi khi gặp giá trị đó |
 | State phẳng; checkpointer lưu cả `retry_count`, `answer` sang lượt sau | Tách `turn` (xoá mỗi lượt) và `context` (giữ qua lượt); thêm `start_turn` | Bản đầu: lượt trước thử lại 2 lần thì lượt sau trượt `verify` lần đầu là vào thẳng `review_queue` |
 | Không ai đọc `candidates`; không áp quy tắc reset | `pick_choice` + `merge_context` + `save_context` | Người dùng trả lời "TE-E2" phải được hiểu là chọn lựa (PRD 14, dòng 3); "Thế còn 2025?" phải mang IT1 sang (US3) |
 | `current_program` một giá trị | `programs: list[str]` (tối đa 3), thêm `cohort`, `faculties` | Tool nhận tới 3 ngành/năm (PRD 10.2); T5/T7 cần khoá, T6 cần Trường |

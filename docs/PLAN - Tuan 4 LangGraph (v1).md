@@ -41,7 +41,7 @@ tin nhắn + thread_id
       │
 [merge]   CODE áp quy tắc ngữ cảnh PRD 14 (mục 5): điền phần thiếu từ ngữ cảnh cũ hoặc bỏ ngữ cảnh cũ
       │
-      ├─ OTHER_UNIVERSITY / GENERAL_OFF_TOPIC / tiếng Anh / UNKNOWN ──► [template] câu trả lời mẫu, không gọi LLM lần 2
+      ├─ OTHER_UNIVERSITY / GENERAL_OFF_TOPIC / ngôn ngữ khác Việt-Anh / UNKNOWN ──► [template] câu trả lời mẫu, không gọi LLM lần 2
       ├─ ANNOUNCEMENT_QUERY ──► T6 (fields=channel) ──► [template] link kênh chính thức (AC9)
       ├─ CLARIFICATION_NEEDED (câu hỏi quá chung) ──► [template] hỏi lại thiếu gì
       ▼
@@ -189,7 +189,7 @@ Router chỉ báo `refers_to_context`. Việc điền tham số từ ngữ cản
 | OTHER_UNIVERSITY | Phạm vi hỗ trợ là ĐH Bách khoa Hà Nội; không cung cấp dữ liệu trường khác (US5) |
 | GENERAL_OFF_TOPIC | Bot chỉ hỗ trợ tuyển sinh, học vụ HUST; gợi ý vài câu hỏi mẫu |
 | ANNOUNCEMENT_QUERY | Link `official_channel_url` của Trường/Khoa (T6) + lý do: nội dung thay đổi liên tục, MVP chưa tra trực tiếp (US8, AC9). Không rõ Trường/Khoa nào → hỏi lại |
-| Tiếng Anh (`language = en`) | Đề nghị hỏi lại bằng tiếng Việt (PRD 4.6) |
+| Ngôn ngữ khác Việt–Anh (`language = other`) | Câu song ngữ Việt–Anh báo phạm vi hỗ trợ (PRD 4.6 sửa 2026-10-12: câu thuần tiếng Anh nay được trả lời bằng tiếng Anh; mọi câu mẫu có bản tiếng Anh, xem `PLAN - Router (v1).md` mục 10) |
 | Hỏi lại ngành / khoá | "Bạn muốn hỏi ngành nào?" + danh sách lựa chọn từ `clarifications` (đủ danh sách nếu alias đã khai báo, cắt còn 3 nếu từ fuzzy — anh đã chốt) |
 | Quá 3 thực thể | `TOO_MANY_MESSAGE` có sẵn ở `tools/common.py` |
 | T7 độ tin cậy thấp, không tool nào có dữ liệu | Câu fallback PRD 13.2 + link trang tuyển sinh chính thức |
@@ -271,7 +271,7 @@ scripts/eval_router.py, eval_e2e.py     đo, ghi docs/ghi_chu/
 | G-22 | 24 điểm thì đỗ ngành nào? | ADMISSION, `advice` | Theo Q5 | Theo Q5 |
 | G-23 | Ngành KHMT học những môn gì từng kỳ? | ADMISSION, `curriculum_detail` | T3 → mơ hồ IT1 / TROY-IT | Hỏi lại; chọn xong → link CTĐT, không liệt kê môn |
 | G-24 | Ngành FL4 có link chương trình đào tạo không? | ADMISSION | T3 | Chưa có link; đưa trang ngành + liên hệ Trường quản lý (PRD 4.7) |
-| G-25 | What is the tuition fee for IT1? | UNKNOWN, `en` | — | Câu mẫu đề nghị hỏi bằng tiếng Việt |
+| G-25 | What is the tuition fee for IT1? | ADMISSION, `en` | T4 `programs=[IT1]` | Trả lời **bằng tiếng Anh**, đơn vị + năm áp dụng (PRD 4.6 sửa 2026-10-12) |
 | G-26 | Ký túc xá có bao nhiêu chỗ? (Q111) | REGULATION | T7 → độ tin cậy thấp | Fallback PRD 13.2, không bịa con số |
 
 ### 8.2 Nhiều lượt (bộ đầy đủ ở `multiturn_cases.json`, khoảng 15 hội thoại)
@@ -296,11 +296,11 @@ scripts/eval_router.py, eval_e2e.py     đo, ghi docs/ghi_chu/
 | Bước | Việc | Xong khi |
 |---|---|---|
 | 0 | Môi trường: sửa xung đột `langchain-core` (theo Q2); thêm vào `requirements.txt`: `langgraph`, `langgraph-checkpoint-postgres`, `fastapi`, `uvicorn`, `langfuse` (ghim bản đang chạy); thêm `chat_model` vào `Settings`, `.env.example` | `import langgraph.graph` chạy; `pytest backend` vẫn 281 passed |
-| 1 | **Router** + prompt + `router_cases.csv` (tôi soạn nháp, anh duyệt) + `scripts/eval_router.py` | **AC3 ≥ 95%** trên bộ đã duyệt; ghi chú `docs/ghi_chu/<ngày> - Do AC3 Router.md` |
+| 1 | **Router** + prompt + `router_cases.csv` (tôi soạn nháp, anh duyệt) + `scripts/eval_router.py` | **AC3 ≥ 95%** trên bộ đã duyệt; ghi chú `docs/ghi_chu/<ngày> - Do AC3 Router.md`. *2026-10-13: đã làm, AC3 gộp 94,7% trên nhãn nháp (chưa duyệt); xem `docs/ghi_chu/2026-10-13 - Bao cao Router.md`* |
 | 2 | Khung StateGraph: load → (pick) → router → merge → dispatch → clarify/template → save; LLM giả | Test không mạng cho mọi nhánh mục 2 và C1–C5 |
 | 3 | Synthesizer + prompt + gắn trích dẫn + kiểm số | Chạy thật trên các ca mục 8.1: AC4 trích dẫn hợp lệ, 0 số lạ |
 | 4 | Checkpointer Postgres + `multiturn_cases.json` (tôi soạn nháp, anh duyệt) | **AC6**: mọi hội thoại đã duyệt đúng; khởi động lại server vẫn nhớ `thread_id` |
-| 5 | Hoàn thiện fallback/guardrails: OOD, thông báo, tiếng Anh, tư vấn, lỗi DB/LLM | **AC7, AC9** đúng 100% trên các ca tương ứng |
+| 5 | Hoàn thiện fallback/guardrails: OOD, thông báo, ngôn ngữ khác, câu mẫu song ngữ, tư vấn, lỗi DB/LLM | **AC7, AC9** đúng 100% trên các ca tương ứng |
 | 6 | FastAPI + SSE + giới hạn tần suất + `run.py` | Gọi `curl` cho 3 endpoint; stream ra chữ |
 | 7 | Langfuse (theo Q6) | Mỗi lượt có một trace đủ router/tool/synth |
 | 8 | Chạy từ đầu đến cuối trên 114 câu + ca bổ sung (`scripts/eval_e2e.py`, chạy tay) | Ghi chú kết quả; đo thời gian ra chữ đầu P50/P95 trên máy; thêm mục "Đã thực hiện" vào plan này |

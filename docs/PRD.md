@@ -214,7 +214,12 @@ MVP không tra cứu nội dung thông báo, sự kiện, lịch cập nhật th
 
 ### 4.6. Phạm vi ngôn ngữ
 
-Ngôn ngữ hội thoại chính: tiếng Việt. Alias tiếng Anh chỉ được hỗ trợ ở tầng Entity Resolution (tên ngành/khoa phổ biến ánh xạ về entity), không hỗ trợ toàn bộ hội thoại bằng tiếng Anh trong MVP. Câu hỏi thuần tiếng Anh → fallback gợi ý hỏi lại bằng tiếng Việt.
+*Sửa 2026-10-12 (người dùng chốt): HUST có sinh viên quốc tế trao đổi, nên MVP hỗ trợ cả câu hỏi tiếng Anh. Bản trước: câu thuần tiếng Anh → fallback gợi ý hỏi lại bằng tiếng Việt.*
+
+- **Hai ngôn ngữ: tiếng Việt và tiếng Anh.** Ngôn ngữ khác (Trung, Hàn, Nhật, Pháp…) → câu mẫu song ngữ Việt–Anh báo phạm vi hỗ trợ, không tra dữ liệu.
+- **Ngôn ngữ trả lời:** chỉ khi **toàn bộ câu hỏi bằng tiếng Anh** mới trả lời bằng tiếng Anh. Câu tiếng Việt, kể cả câu chèn tên ngành/thuật ngữ tiếng Anh ("Điểm chuẩn Computer Science 2025?"), trả lời bằng tiếng Việt.
+- **Dữ liệu không đổi:** corpus RAG và bảng số vẫn là tiếng Việt. Trả lời tiếng Anh dùng đúng số liệu và nguồn đó; tên văn bản pháp quy giữ tên tiếng Việt chính thức. Alias tiếng Anh ở tầng Entity Resolution phủ tên ngành và tên Trường/Khoa.
+- **Không mở rộng dữ liệu cho sinh viên trao đổi** (thủ tục trao đổi, visa, ký túc xá cho sinh viên quốc tế): ngoài phạm vi MVP, câu hỏi loại này đi fallback "không đủ dữ liệu" như mọi câu khác (mục 13.2).
 
 ### 4.7. Chương trình đào tạo chi tiết
 
