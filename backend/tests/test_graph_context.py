@@ -168,6 +168,12 @@ def test_khong_ambiguous_thi_khong_pending():
     ("Elitech", ["TE-E2"]),                   # 5b
     ("cả hai", ["TE1", "TE-E2"]),             # M26
     ("TE1 và TE-E2", ["TE1", "TE-E2"]),       # go hai ma: ro rang, lay ca hai
+    ("the second one", ["TE-E2"]),            # tieng Anh (R1c)
+    ("the first one please", ["TE1"]),
+    ("the last one", ["TE-E2"]),
+    ("both", ["TE1", "TE-E2"]),
+    ("the advanced one", ["TE-E2"]),
+    ("standard program", ["TE1"]),
 ])
 def test_pick_duong_tat(oto, ctx, text, want):
     out = pick(text, oto, ctx)
@@ -183,6 +189,9 @@ def test_pick_duong_tat(oto, ctx, text, want):
     "TE1, học phí bao nhiêu?",                # M22
     "cái kia",
     "Học phí IT1 bao nhiêu?",                 # M6: cau moi
+    "the advanced one, for 2024 please",      # P016: tieng Anh co phan thua
+    "never mind",                             # P018: huy -> Router xep cancel
+    "What is the tuition fee for IT1?",       # P020: cau moi tieng Anh
 ])
 def test_pick_de_router_xu_ly(oto, ctx, text):
     assert pick(text, oto, ctx).calls is None

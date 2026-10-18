@@ -157,19 +157,23 @@ def substitute(pending: Pending, codes: list[str]) -> list[ToolCall]:
 
 # ---------------------------------------------------------------- 4.3 pick_choice
 # Tu dem: bo di ma tin nhan khong con gi -> chon xong, khong can Router (4.3b)
+# Tieng Anh (PLAN - Router (v1) muc 10.2, R1c): nguoi hoi tieng Anh tra loi cau hoi lai bang tieng Anh
 FILLERS = set("""nhe nha a oi cai he nganh chuong trinh chon lay di thoi so thu minh em toi
-cho la nay do ay kia voi va vay the ok oke uh u um vang da""".split())
-ALL_PHRASES = ("ca hai", "ca 2", "ca ba", "ca 3", "tat ca", "lay het")
+cho la nay do ay kia voi va vay the ok oke uh u um vang da
+one please i d like would want choose pick take option program yes""".split())
+ALL_PHRASES = ("ca hai", "ca 2", "ca ba", "ca 3", "tat ca", "lay het", "both", "all of them", "all")
 # Khong co "nhat" dung rieng: "Việt Nhật" se thanh "thu nhat". Them nua, tu nao nam trong TEN lua chon thi
 # khong duoc tinh la so thu tu (xem _match_ordinal).
 ORDINALS = {"1": 1, "mot": 1, "thu nhat": 1, "dau tien": 1, "dau": 1, "2": 2, "hai": 2, "3": 3, "ba": 3,
-            "4": 4, "5": 5, "6": 6, "7": 7}
-LAST_WORDS = ("cuoi cung", "cuoi")
+            "4": 4, "5": 5, "6": 6, "7": 7,
+            "first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3}
+LAST_WORDS = ("cuoi cung", "cuoi", "last")
 MAX_ORDINAL_WORDS = 6               # buoc 4: chi xet so thu tu khi tin nhan ngan
 # 5b: tu dong nghia -> program_group_code (bang `programs`). Khong co "chat luong cao" (trung nghia PFIEV/ELITECH)
 GROUP_SYNONYMS = {"chuan": "chuan", "dai tra": "chuan", "thuong": "chuan", "tien tien": "elitech",
                   "elitech": "elitech", "pfiev": "pfiev", "viet phap": "pfiev", "lien ket": "lien_ket",
-                  "hop tac quoc te": "lien_ket"}
+                  "hop tac quoc te": "lien_ket",
+                  "standard": "chuan", "regular": "chuan", "advanced": "elitech", "joint program": "lien_ket"}
 # 5a: tu chung khong dung de phan biet lua chon
 NAME_STOPWORDS = {"va", "voi", "cua", "cac", "dh", "dhcn", "ct", "chuong", "trinh", "nganh", "ky", "thuat",
                   "hop", "tac", "chlb"}
