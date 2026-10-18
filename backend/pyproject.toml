@@ -4,12 +4,13 @@ pythonpath = ["."]
 testpaths = ["tests"]
 # Test async (pool psycopg) khong can gan @pytest.mark.asyncio tung ham
 # Mac dinh bo qua ca `rag` (goi API embedding, ton phi nho); chay tay: pytest -m rag  (-m sau cung thang)
-addopts = "-m 'not rag'"
+addopts = "-m 'not rag and not llm'"
 asyncio_mode = "auto"
 # Mot event loop cho ca phien test: pool mo mot lan o conftest.py va gan voi loop do
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 markers = [
     "rag: can Qdrant (docker compose up -d) va OPENAI_API_KEY; ton phi embedding rat nho. Chay: pytest -m rag",
+    "llm: goi OpenAI chat that (Router/Synthesizer); ton phi nho. Chay: pytest -m llm",
     "db: can PostgreSQL dang chay va da nap (docker compose up -d postgres; python scripts/build_db.py --postgres)",
 ]

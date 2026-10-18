@@ -280,3 +280,16 @@ Cơ điện tử,program,ME1,colloquial,clarify,,4 ngành đều là Cơ điện
 Cơ điện tử,program,ME-E1,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1
 Cơ điện tử,program,ME-LUH,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1
 Cơ điện tử,program,ME-NUT,colloquial,clarify,,4 ngành đều là Cơ điện tử; khai báo để liệt kê đủ khi hỏi lại,2026.1
+School of Information and Communication Technology,faculty,SOICT,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of ICT,faculty,SOICT,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of Electrical and Electronic Engineering,faculty,SEEE,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of Mechanical Engineering,faculty,SME,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of Chemistry and Life Sciences,faculty,SCLS,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of Materials Science and Engineering,faculty,SMSE,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of Economics and Management,faculty,SEM,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+Faculty of Mathematics and Informatics,faculty,FAMI,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+Faculty of Engineering Physics,faculty,SEP,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+School of Foreign Languages,faculty,SOFL,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+Faculty of Foreign Languages,faculty,SOFL,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+Faculty of Education,faculty,FED,en,unique,,"Tên tiếng Anh suy từ viết tắt chính thức (PLAN Router R1b, 2026-10-12); chưa đối chiếu web",2026.1
+Viện CNTT,faculty,SOICT,old_name,unique,,"Dạng viết tắt tên cũ hay gõ; trước 2026-10-12 ra not_found (ca G-14, R162)",2026.1
