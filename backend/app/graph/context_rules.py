@@ -360,7 +360,7 @@ def merge_pick(pending: Pending, picked: list[str], router_calls: list[ToolCall]
 
 
 # ---------------------------------------------------------------- 4.4 update_context
-UpdateKind = Literal["answered", "clarify", "refused", "cancel"]
+UpdateKind = Literal["answered", "clarify", "refused", "cancel", "released"]
 
 
 def _confirmed(results: list[dict], etypes: tuple[str, ...]) -> list[str]:
@@ -382,7 +382,7 @@ def update_context(ctx: ConvContext, kind: UpdateKind, calls: Sequence[ToolCall]
     out: ConvContext = copy.deepcopy(ctx)
     if kind == "refused":
         return out
-    if kind == "cancel":
+    if kind in ("cancel", "released"):           # huy / tha cau hoi lai: chi bo pending
         out["pending"] = None
         return out
     if kind == "clarify":
