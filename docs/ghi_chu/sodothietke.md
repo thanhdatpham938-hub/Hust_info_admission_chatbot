@@ -2,6 +2,47 @@
 
 Bản sửa 2026-10-12, ghép bản thiết kế đầu với `docs/PLAN - Tuan 4 LangGraph (v1).md`. Mục 6 ghi những gì đã đổi so với bản đầu và vì sao.
 
+## 0. Graph đang chạy trong code (2026-10-19)
+
+**Mục này là bản hiện hành.** Mục 1–5 bên dưới là thiết kế 2026-10-12, giữ lại để đối chiếu; chỗ nào lệch thì theo mục này và `docs/PLAN - StateGraph (v1).md`.
+
+Code: `backend/app/graph/build.py` (cạnh), `nodes.py` (node), `dispatch.py` (chạy tool), `templates.py` (câu mẫu song ngữ). Sơ đồ dưới đây do LangGraph tự vẽ từ graph đã dựng (`build_graph(...).get_graph().draw_mermaid()`), nên khớp code tuyệt đối:
+
+```mermaid
+graph TD;
+    START([START]) --> start_turn
+    start_turn -.->|có pending| pick_choice
+    start_turn -.->|không| router
+    pick_choice -.->|chọn được| run_tools
+    pick_choice -.->|"tất cả" > 3| clarification
+    pick_choice -.->|không khớp / có phần thừa| router
+    router -.->|picked / câu nội dung| merge
+    router -.->|thiếu thông tin / unclear lần 1| clarification
+    router -.->|từ chối / cancel / released / ngôn ngữ khác / lỗi LLM| fallback
+    merge -.-> run_tools
+    merge -.->|không lệnh gọi nào| fallback
+    run_tools --> check_status
+    check_status -.->|ambiguous| clarification
+    check_status -.->|thông báo| announcement
+    check_status -.->|invalid / không có dữ liệu / lỗi| fallback
+    check_status -.->|có dữ liệu| answer
+    clarification --> save_context
+    announcement --> save_context
+    fallback --> save_context
+    answer --> save_context
+    save_context --> END([END])
+```
+
+Khác thiết kế mục 1–5:
+
+| Thiết kế 2026-10-12 | Code 2026-10-19 | Vì sao |
+|---|---|---|
+| `merge_context` một node | `merge` gọi `merge_pick` (đang chờ chọn, `picked`) hoặc `merge_context` | "Cách 3 gọn" (PLAN State 4.3b): câu chọn kèm thông tin thêm do Router xử lý rồi ghép |
+| Router chỉ rẽ theo intent | Rẽ theo `pick_status` trước khi xét intent | PLAN State 4.3c: cancel / unclear / picked khi đang chờ chọn |
+| `generate` → `verify` → `template_answer` | **Tạm** một node `answer`: bản nháp JSON từ dữ liệu thô (`draft = True`) | Synthesizer làm ở bước 3; các node khác không đổi khi thay |
+| Câu mẫu một ngôn ngữ, tiếng Anh bị từ chối | Câu mẫu song ngữ, chọn theo `language`; ngôn ngữ khác in cả hai | PRD 4.6 sửa 2026-10-12 |
+| Không có node riêng | `dispatch.py` bắt lỗi DB / OpenAI / timeout thành mã PRD 24 | Lỗi một tool không làm sập cả lượt |
+
 ## 1. Sơ đồ luồng
 
 ```mermaid

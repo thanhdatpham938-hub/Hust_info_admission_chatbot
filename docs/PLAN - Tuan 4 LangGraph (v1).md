@@ -297,7 +297,7 @@ scripts/eval_router.py, eval_e2e.py     đo, ghi docs/ghi_chu/
 |---|---|---|
 | 0 | Môi trường: sửa xung đột `langchain-core` (theo Q2); thêm vào `requirements.txt`: `langgraph`, `langgraph-checkpoint-postgres`, `fastapi`, `uvicorn`, `langfuse` (ghim bản đang chạy); thêm `chat_model` vào `Settings`, `.env.example` | `import langgraph.graph` chạy; `pytest backend` vẫn 281 passed |
 | 1 | **Router** + prompt + `router_cases.csv` (tôi soạn nháp, anh duyệt) + `scripts/eval_router.py` | **AC3 ≥ 95%** trên bộ đã duyệt; ghi chú `docs/ghi_chu/<ngày> - Do AC3 Router.md`. *2026-10-13: đã làm, AC3 gộp 94,7% trên nhãn nháp (chưa duyệt); xem `docs/ghi_chu/2026-10-13 - Bao cao Router.md`* |
-| 2 | Khung StateGraph: load → (pick) → router → merge → dispatch → clarify/template → save; LLM giả | Test không mạng cho mọi nhánh mục 2 và C1–C5 |
+| 2 | Khung StateGraph: load → (pick) → router → merge → dispatch → clarify/template → save; LLM giả | Test không mạng cho mọi nhánh mục 2 và C1–C5. *2026-10-19: đã làm, 445 test xanh; xem `PLAN - StateGraph (v1).md` mục 12* |
 | 3 | Synthesizer + prompt + gắn trích dẫn + kiểm số | Chạy thật trên các ca mục 8.1: AC4 trích dẫn hợp lệ, 0 số lạ |
 | 4 | Checkpointer Postgres + `multiturn_cases.json` (tôi soạn nháp, anh duyệt) | **AC6**: mọi hội thoại đã duyệt đúng; khởi động lại server vẫn nhớ `thread_id` |
 | 5 | Hoàn thiện fallback/guardrails: OOD, thông báo, ngôn ngữ khác, câu mẫu song ngữ, tư vấn, lỗi DB/LLM | **AC7, AC9** đúng 100% trên các ca tương ứng |
