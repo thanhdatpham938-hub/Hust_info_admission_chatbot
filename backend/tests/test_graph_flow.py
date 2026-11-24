@@ -5,13 +5,22 @@ import uuid
 
 import psycopg
 import pytest
-
+from app.entity_resolution.normalize import normalize
 from app.graph.build import build_graph, chat
 from app.graph.nodes import GraphDeps
 from app.graph.router import RouterError, RouterOutput
-from app.schemas.common import Candidate, Clarification, ErrorCode, Missing, Resolved, Source, Status, ToolResult
+from app.schemas.common import (
+    Candidate,
+    Clarification,
+    ErrorCode,
+    Missing,
+    Resolved,
+    Source,
+    Status,
+    ToolResult,
+)
 from app.tools.common import TOO_MANY_MESSAGE
-from app.entity_resolution.normalize import normalize
+from app.tools.tuition import NEED_SCOPE_MESSAGE
 
 OTO = [Candidate(code="TE1", name="Kỹ thuật Ô tô", entity_type="program"),
        Candidate(code="TE-E2", name="Kỹ thuật Ô tô (CT tiên tiến)", entity_type="program")]
@@ -96,6 +105,8 @@ class Tools:
 
     async def t4(self, inp, ctx):
         self.calls.append(("tuition_fees", inp.model_dump()))
+        if not inp.programs and not inp.program_group:          # nhu tool that (tuition.py NEED_SCOPE_MESSAGE)
+            return ToolResult(status=Status.INVALID, error_code=ErrorCode.INVALID_REQUEST, message=NEED_SCOPE_MESSAGE)
         return ToolResult(status=Status.OK, data={"programs": inp.programs},
                           resolved=[Resolved(mention=p, entity_type="program", codes=[p], matched_by="exact")
                                     for p in inp.programs])
@@ -112,11 +123,11 @@ class Tools:
         if "ký túc xá" in inp.query:
             return ToolResult(status=Status.NOT_FOUND, error_code=ErrorCode.LOW_RETRIEVAL_CONFIDENCE)
         if "dài" in inp.query:
-            return ToolResult(status=Status.OK, data={"chunks": ["đoạn trích quy chế " * 80]})
+            return ToolResult(status=Status.OK, data={"chunks": [chunk("đoạn trích quy chế " * 80)]})
         if "top_k" in inp.query:
             return ToolResult(status=Status.INVALID, error_code=ErrorCode.INVALID_REQUEST,
                               message="top_k phải từ 1 đến 10.")
-        return ToolResult(status=Status.OK, data={"chunks": ["..."]})
+        return ToolResult(status=Status.OK, data={"chunks": [chunk("Nội dung quy chế.")]})
 
     def count(self, tool):
         return sum(1 for t, _ in self.calls if t == tool)
@@ -125,12 +136,32 @@ class Tools:
         return [a for t, a in self.calls if t == tool][-1]
 
 
+def chunk(text):
+    """Doan van ban T7 dung cau truc that (RetrievedChunk.model_dump)."""
+    return {"document_title": "Quy chế đào tạo 2025", "heading": "Điều 19. Cảnh báo học tập", "dieu_no": "19",
+            "khoan_no": None, "page_no": "42", "year": 2025, "cohort": None, "text": text,
+            "citation": {"title": "Quy chế đào tạo 2025", "url": "https://ctt.hust.edu.vn/qcdt"}}
+
+
+async def fake_synth(payload, issues):
+    """Synthesizer gia: khong goi OpenAI. Trich dan doan van ban dau tien neu co."""
+    parts = []
+    for item in payload["evidence"]:
+        if item.get("chunks"):
+            ch = item["chunks"][0]
+            parts.append(f"{ch['text']} [{ch['id']}]")
+        else:
+            parts.append(f"Kết quả tra cứu {item['tool']}.")
+    return " ".join(parts)
+
+
 @pytest.fixture
 def env():
     """(graph, router, tools, thread_id) moi cho moi test."""
     def make(script):
         router, tools = FakeRouter(script), Tools()
-        graph = build_graph(GraphDeps(route=router, tools=tools.table(), program_group=GROUPS))
+        graph = build_graph(GraphDeps(route=router, tools=tools.table(), program_group=GROUPS,
+                                      synthesize=fake_synth))
         return graph, router, tools, str(uuid.uuid4())
     return make
 
@@ -143,8 +174,11 @@ def ctx_of(r):
 async def test_tra_loi_mot_luot(env):
     g, router, tools, tid = env({"Điểm IT1 2025?": ro(calls=[T1(["IT1"], [2025])])})
     r = await chat(g, tid, "Điểm IT1 2025?")
-    assert r["metadata"]["intent"] == "ADMISSION_QUERY" and r["metadata"]["draft"] is True
-    assert "IT1" in r["answer"] and r["citations"] == [{"title": "Điểm chuẩn", "url": "https://ts.hust.edu.vn/diem-chuan"}]
+    assert r["metadata"]["intent"] == "ADMISSION_QUERY" and r["metadata"]["draft"] is False
+    assert r["answer"].startswith("Kết quả tra cứu admission_scores.") and r["metadata"]["rewrites"] == 0
+    assert r["citations"] == [{"n": 1, "title": "Điểm chuẩn", "url": "https://ts.hust.edu.vn/diem-chuan",
+                               "location": ""}]
+    assert "Nguồn:\n[1] Điểm chuẩn — https://ts.hust.edu.vn/diem-chuan" in r["answer"]
     assert ctx_of(r)["programs"] == ["IT1"] and ctx_of(r)["years"] == [2025]
 
 
@@ -200,6 +234,22 @@ async def test_qua_ba_nganh(env):
     r = await chat(g, tid, "4 ngành")
     assert r["metadata"]["fallback_reason"] == "too_many" and "tối đa 3 ngành" in r["answer"]
     assert ctx_of(r)["programs"] == []
+
+
+async def test_hoc_phi_khong_gan_nganh_chuyen_sang_tim_van_ban(env):
+    """Buoc 4 (PLAN Sua loi, S29): tuition_fees thieu nganh/nhom -> rag_search voi `need` cua Router."""
+    g, _, tools, tid = env({"Sinh viên nước ngoài đóng học phí khác không?": ro(
+        calls=[T4([])], need="học phí của sinh viên nước ngoài tự túc", topic="hoc_phi")})
+    r = await chat(g, tid, "Sinh viên nước ngoài đóng học phí khác không?")
+    assert tools.count("tuition_fees") == 1 and tools.last("rag_search")["query"] == "học phí của sinh viên nước ngoài tự túc"
+    assert r["metadata"]["fallback_reason"] is None and "[1]" in r["answer"]
+
+
+async def test_hoc_phi_khong_gan_nganh_da_co_rag_thi_chi_bo_lenh_hoc_phi(env):
+    g, _, tools, tid = env({"q": ro(calls=[T4([]), T7("học phí học lại"), T1(["IT1"])])})
+    r = await chat(g, tid, "q")
+    assert tools.count("rag_search") == 1 and tools.count("admission_scores") == 1    # lenh da xong khong chay lai
+    assert [c["tool"] for c in r["_state"]["turn"]["calls"]] == ["rag_search", "admission_scores"]
 
 
 async def test_invalid_khac_khong_lo_cau_ky_thuat(env):
@@ -374,3 +424,73 @@ async def test_tieng_anh_hoi_lai_va_duong_tat_giu_ngon_ngu(env):
     assert "could be one of the following programs" in r["answer"]
     r = await chat(g, tid, "TE-E2")
     assert r["metadata"]["language"] == "en" and len(router.seen) == 1
+
+
+# ================================================================ Synthesizer: viet lai toi da 2 lan (Q7)
+def env_synth(script, synth):
+    router, tools = FakeRouter(script), Tools()
+    g = build_graph(GraphDeps(route=router, tools=tools.table(), program_group=GROUPS, synthesize=synth))
+    return g, str(uuid.uuid4())
+
+
+async def test_so_la_viet_lai_mot_lan_roi_dat():
+    seen = []
+
+    async def synth(payload, issues):
+        seen.append(issues)
+        return "Điểm chuẩn IT1 năm 2025 là 29,93." if not issues else "Đã có kết quả tra cứu IT1 năm 2025."
+    g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025])])}, synth)
+    r = await chat(g, tid, "q")
+    assert r["metadata"]["rewrites"] == 1 and not r["metadata"]["used_template"]
+    assert "29,93" in seen[1][0] and "29,93" not in r["answer"]
+
+
+async def test_sai_ba_lan_thi_dung_ban_dung_tu_du_lieu():
+    n = []
+
+    async def synth(payload, issues):
+        n.append(1)
+        return "Điểm chuẩn IT1 là 99,99."
+    g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025])])}, synth)
+    r = await chat(g, tid, "q")
+    assert len(n) == 3 and r["metadata"]["rewrites"] == 2 and r["metadata"]["used_template"]
+    assert "99,99" not in r["answer"] and r["answer"].startswith("Dưới đây là dữ liệu tra được:")
+    assert r["metadata"]["intent"] == "ADMISSION_QUERY"
+
+
+async def test_loi_openai_hai_lan_thi_dung_ban_dung_tu_du_lieu():
+    from app.graph.synthesizer import SynthError
+
+    async def synth(payload, issues):
+        raise SynthError("timeout")
+    g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025])])}, synth)
+    r = await chat(g, tid, "q")
+    assert r["metadata"]["used_template"] and "Dưới đây là dữ liệu tra được:" in r["answer"]
+
+
+async def test_van_ban_khong_trich_dan_phai_viet_lai():
+    async def synth(payload, issues):
+        ch = payload["evidence"][0]["chunks"][0]
+        return "Nội dung quy chế." + (f" [{ch['id']}]" if issues else "")
+    g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("cảnh báo học tập")])}, synth)
+    r = await chat(g, tid, "q")
+    assert r["metadata"]["rewrites"] == 1
+    assert r["citations"][0]["location"] == "Điều 19, trang 42"
+
+
+async def test_n10_ca_graph_hoi_ca_nhom_khong_noi_bang_dai():
+    """N10 (S09): cau so sanh voi ca nhom -> cau tra loi khong kem bang 20 dong, khoi nguon 1 dong."""
+    from app.schemas.tuition import TuitionInput
+    from test_synthesizer import group_tuition_result
+
+    class Res:                                   # dispatch goi .model_dump(mode="json") nhu ToolResult that
+        def model_dump(self, mode=None):
+            return group_tuition_result()
+
+    async def t4(inp, ctx):
+        return Res()
+    q = "Học phí IT-E6 có cao hơn hệ chuẩn không?"
+    router = FakeRouter({q: ro(calls=[{"tool": "tuition_fees", "args": {"program_group": "hệ chuẩn"}}])})
+    g = build_graph(GraphDeps(route=router, tools={"tuition_fees": (t4, TuitionInput)}, synthesize=fake_synth))
+    r = await chat(g, str(uuid.uuid4()), q)
+    assert "| P19 |" not in r["answer"] and r["answer"].count("\n[") == 1

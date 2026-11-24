@@ -7,19 +7,39 @@ test thay bang ban gia, khong goi OpenAI, khong can DB.
 Moi nhanh ket thuc o save_context; node tra loi chi dat `outcome`, save_context quyet ngu canh (PLAN StateGraph 3).
 """
 
-import json
+import logging
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import date
 
+from app.graph import render
 from app.graph import templates as T
-from app.graph.context_rules import (build_pending, merge_context, merge_pick, pick_choice, register_unclear,
-                                     update_context)
+from app.graph.context_rules import (
+    build_pending,
+    merge_context,
+    merge_pick,
+    pick_choice,
+    register_unclear,
+    update_context,
+)
 from app.graph.dispatch import TOOL_TIMEOUT_S, run_calls
+from app.graph.guardrails.check import finalize, verify
 from app.graph.router import RouterError, calls_as_dicts, looks_english
-from app.graph.state import ChatState, ConvContext, append_message, empty_context, new_turn
+from app.graph.state import (
+    ChatState,
+    ConvContext,
+    append_message,
+    empty_context,
+    new_turn,
+)
+from app.graph.synthesizer import SynthError, build_evidence
+from app.graph.synthesizer import generate as generate_text
+from app.schemas.rag import RagSearchInput
 from app.tools.common import TOO_MANY_MESSAGE
+from app.tools.tuition import NEED_SCOPE_MESSAGE
 
+log = logging.getLogger(__name__)
+MAX_REWRITES = 2           # nguoi dung chot 2026-10-20 (Q7): viet lai toi da 2 lan, van sai -> template_answer
 REFUSAL = {"OTHER_UNIVERSITY": "other_university", "GENERAL_OFF_TOPIC": "off_topic"}
 # fallback_reason -> outcome cho save_context. "not_found"/"low_confidence" tinh la answered: cau hoi hop le, nen
 # nho nganh da xac nhan cho luot sau (PLAN StateGraph 3). Tu choi va loi he thong giu nguyen ngu canh.
@@ -38,6 +58,8 @@ class GraphDeps:
     program_group: Mapping[str, str] = field(default_factory=dict)   # pick_choice buoc 5b
     today: Callable[[], date] = date.today
     tool_timeout: float = TOOL_TIMEOUT_S
+    synthesize: Callable[..., Awaitable[str]] | None = None   # (payload, issues) -> van ban; None = OpenAI that
+    program_names: Mapping[str, tuple[str, str | None]] = field(default_factory=dict)   # Q6 = C
 
 
 def _ctx(s: ChatState) -> ConvContext:
@@ -72,9 +94,12 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
         ctx, t = _ctx(s), s["turn"]
         q = t["question"]
         history = (s.get("messages") or [])[:-1]          # tin nhan cuoi la cau hien tai: route() tu them
+        # Co ToolContext thi Router dung bo quet goi y + kiem sau (PLAN Sua loi, buoc 3); test gia khong truyen
+        kw = {"tctx": await deps.tool_ctx()} if deps.tool_ctx else {}
         try:
-            out = await deps.route(q, ctx, history, deps.today())
-        except RouterError:
+            out = await deps.route(q, ctx, history, deps.today(), **kw)
+        except RouterError as e:
+            log.warning("Router loi: %s", e)          # do 2026-10-21: 31 cau loi ma khong biet loai loi gi
             lang = "en" if looks_english(q) else ctx.get("last_language", "vi")
             return {"turn": {**t, "language": lang, "intent": "UNKNOWN", "route": "fallback",
                              "fallback_reason": "llm_error", "error_code": "LLM_ERROR"}}
@@ -132,6 +157,9 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
         st = [r.get("status") for r in res]
         if "ambiguous" in st:
             return {"turn": {**t, "route": "clarification", "fallback_reason": "ambiguous"}}
+        swapped = None if t.get("rerouted") else _tuition_to_rag(t)
+        if swapped:                                        # buoc 4 (PLAN Sua loi): chay lai mot lan, lenh khac giu done
+            return {"turn": {**t, "calls": swapped, "rerouted": True, "route": "run_tools"}}
         if "invalid" in st:                                # Q1 = A: tu choi ca luot
             too_many = any(r.get("status") == "invalid" and (r.get("message") or "").startswith(TOO_MANY_MESSAGE)
                            for r in res)
@@ -149,7 +177,7 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
             low = any(r.get("error_code") == "LOW_RETRIEVAL_CONFIDENCE" for r in res)
             reason = "low_confidence" if low and not has_missing else "not_found"
             return {"turn": {**t, "route": "fallback", "fallback_reason": reason}}
-        return {"turn": {**t, "route": "answer"}}
+        return {"turn": {**t, "route": "generate"}}
 
     # ------------------------------------------------------------ clarification
     async def clarification(s: ChatState) -> dict:
@@ -200,18 +228,46 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
         return {"turn": {**t, "answer": T.render(reason, lang_used, **kw), "outcome": OUTCOME.get(reason, "refused"),
                          "intent_final": intent}}
 
-    # ------------------------------------------------------------ answer (TAM: ban nhap tu du lieu tho, muc 7)
-    async def answer(s: ChatState) -> dict:
+    # ------------------------------------------------------------ generate (LLM viet, PLAN Synthesizer 2-3)
+    async def generate(s: ChatState) -> dict:
         t = s["turn"]
-        blocks, sources = [], []
-        for c, r in zip(t["calls"], t["results"]):
-            blocks.append({"tool": c["tool"], "status": r.get("status"), "data": _compact(r.get("data")),
-                           "missing": r.get("missing") or None})
-            for src in r.get("sources") or []:
-                if src.get("url") and src["url"] not in {x["url"] for x in sources}:
-                    sources.append({"title": src.get("title", ""), "url": src["url"]})
-        text = json.dumps(blocks, ensure_ascii=False, indent=1)
-        return {"turn": {**t, "answer": text, "citations": sources, "draft": True, "outcome": "answered",
+        ev = t.get("evidence") or build_evidence(
+            t["question"], t.get("intent", "UNKNOWN"), t.get("language", "vi"),
+            (t.get("router") or {}).get("scope_note"), t["calls"], t["results"], deps.program_names, deps.today())
+        synth = deps.synthesize or generate_text
+        text = None
+        for _ in range(2):                                  # loi goi OpenAI: thu lai 1 lan (muc 4.4)
+            try:
+                text = await synth(ev["payload"], t.get("verify_issues") or None)
+                break
+            except SynthError as e:
+                log.warning("Synthesizer loi: %s", e)
+        if text is None:
+            return {"turn": {**t, "evidence": ev, "route": "template_answer", "synth_error": True}}
+        return {"turn": {**t, "evidence": ev, "draft_text": text, "route": "verify"}}
+
+    # ------------------------------------------------------------ verify (code kiem, PLAN Synthesizer 4)
+    async def verify_node(s: ChatState) -> dict:
+        t = s["turn"]
+        ev, lang = t["evidence"], t.get("language", "vi")
+        text, issues, used = verify(t["draft_text"], ev)
+        log_ = (t.get("verify_log") or []) + [issues]
+        if not issues:
+            answer, citations = finalize(text, ev, used, lang)
+            return {"turn": {**t, "answer": answer, "citations": citations, "draft": False, "verify_log": log_,
+                             "outcome": "answered", "intent_final": t.get("intent", "UNKNOWN"),
+                             "route": "save_context"}}
+        if t.get("retry", 0) < MAX_REWRITES:               # Q7: viet lai toi da 2 lan
+            return {"turn": {**t, "verify_issues": issues, "retry": t.get("retry", 0) + 1, "verify_log": log_,
+                             "route": "generate"}}
+        return {"turn": {**t, "verify_issues": issues, "verify_log": log_, "route": "template_answer"}}
+
+    # ------------------------------------------------------------ template_answer (code dung tu du lieu tho)
+    async def template_node(s: ChatState) -> dict:
+        t = s["turn"]
+        lang = t.get("language", "vi")
+        return {"turn": {**t, "answer": render.template_answer(t["evidence"], t["results"], lang),
+                         "citations": t["evidence"]["sources"], "used_template": True, "outcome": "answered",
                          "intent_final": t.get("intent", "UNKNOWN")}}
 
     # ------------------------------------------------------------ save_context (mot cho duy nhat doi ngu canh)
@@ -230,7 +286,31 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
 
     return {"start_turn": start_turn, "pick_choice": pick_node, "router": router_node, "merge": merge_node,
             "run_tools": run_tools, "check_status": check_status, "clarification": clarification,
-            "announcement": announcement, "fallback": fallback, "answer": answer, "save_context": save_context}
+            "announcement": announcement, "fallback": fallback, "generate": generate, "verify": verify_node,
+            "template_answer": template_node, "save_context": save_context}
+
+
+def _tuition_to_rag(t: dict) -> list[dict] | None:
+    """Hoc phi KHONG gan nganh / nhom (sinh vien nuoc ngoai, hoc lai, hoc ky he) nam trong van ban quy dinh hoc phi:
+    lenh tuition_fees bi invalid vi thieu pham vi -> doi sang rag_search voi `need` cua Router (luon tieng Viet).
+    Chuyen tat dinh bang code thay vi day Router them quy tac (S29). Da co rag_search thi chi bo lenh hoc phi.
+    Tra None neu khong co gi de doi."""
+    calls, res = t.get("calls") or [], t.get("results") or []
+    bad = {i for i, (c, r) in enumerate(zip(calls, res))
+           if c["tool"] == "tuition_fees" and r.get("status") == "invalid" and r.get("message") == NEED_SCOPE_MESSAGE}
+    if not bad:
+        return None
+    has_rag = any(c["tool"] == "rag_search" for c in calls)
+    query = (t.get("router") or {}).get("need") or t["question"]
+    out = []
+    for i, (c, r) in enumerate(zip(calls, res)):
+        if i not in bad:
+            out.append({**c, "done": r})
+        elif not has_rag:
+            out.append({"tool": "rag_search", "args": RagSearchInput(query=query).model_dump(),
+                        "done": None})
+            has_rag = True
+    return out
 
 
 def _channels(t: dict) -> list[tuple[str, str]]:
@@ -243,15 +323,6 @@ def _channels(t: dict) -> list[tuple[str, str]]:
             if f.get("official_channel_url"):
                 out.append((f.get("faculty_name", ""), f["official_channel_url"]))
     return out
-
-
-def _compact(x):
-    """Bo truong rong cho ban nhap gon."""
-    if isinstance(x, dict):
-        return {k: _compact(v) for k, v in x.items() if v not in (None, [], {}, "")}
-    if isinstance(x, list):
-        return [_compact(v) for v in x]
-    return x
 
 
 __all__ = ["GraphDeps", "make_nodes", "calls_as_dicts"]
