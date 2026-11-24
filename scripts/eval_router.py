@@ -106,7 +106,7 @@ async def run_once(cases, picks, ctx, known, client, today):
                 allowed = {x["code"] for x in c["pending"]["candidates"]}
             t = time.perf_counter()
             try:
-                out = await route(question, c, today=today, client=client)
+                out = await route(question, c, today=today, client=client, tctx=ctx)   # bo quet + kiem sau (buoc 3)
             except RouterError as e:
                 return {"id": r["id"], "error": str(e)[:200], "s": time.perf_counter() - t}
             calls = calls_as_dicts(out)
@@ -114,7 +114,7 @@ async def run_once(cases, picks, ctx, known, client, today):
                     "language": out.language, "scope": out.scope_note,
                     "refers": out.refers_to_context, "pick_status": out.pick_status, "picked": out.picked,
                     "missing": out.missing_info, "calls": calls, "s": time.perf_counter() - t,
-                    "guess": guessed_codes(calls, question, known, allowed)}
+                    "guess": guessed_codes(calls, question, known, allowed), "fixes": out.fixes}
 
     jobs = [one("case", r) for r in cases] + [one("pick", r) for r in picks]
     return await asyncio.gather(*jobs)
@@ -146,6 +146,7 @@ def score_run(cases, picks, res):
     scoped = [r for r in cases if r["scope_note"]]
     m["scope"] = (sum(by[r["id"]].get("scope") == r["scope_note"] for r in scoped), len(scoped))
     m["guess"] = [(r["id"], by[r["id"]]["guess"]) for r in cases + picks if by[r["id"]].get("guess")]
+    m["fixes"] = [(r["id"], by[r["id"]]["fixes"]) for r in cases + picks if by[r["id"]].get("fixes")]
     t7_en = [(r["id"], c["args"]["query"]) for r in en for c in by[r["id"]].get("calls", [])
              if c["tool"] == "rag_search"]
     m["t7_vi"] = (sum(bool(VI_CHARS.search(q)) for _, q in t7_en), len(t7_en))
@@ -169,8 +170,8 @@ def report(cases, picks, runs, usage, n_runs):
     lines = [f"# Đo AC3 Router — {date.today()}", "",
              f"Sinh bởi `scripts/eval_router.py` (PLAN - Router (v1), mục 5). Model `gpt-4o-mini`, nhiệt độ 0, "
              f"{n_runs} lần chạy, {len(cases)} ca `router_cases.csv` + {len(picks)} ca `router_pick_cases.csv`.", "",
-             "**Lưu ý:** cột `duyet` của cả hai file ca **chưa được người dùng điền** khi đo, nên AC3 chính thức "
-             "(tính trên ca đã duyệt) chưa có; mọi con số dưới đây tính trên **nhãn nháp**.", ""]
+             "Nhãn cả hai file đã được người dùng duyệt (cột `duyet`). Router chạy KÈM bộ quét gợi ý và kiểm sau "
+             "(PLAN - Sua loi sau chay thu Synthesizer (v1), bước 3); mục 6 liệt kê mọi chỗ code đã sửa.", ""]
     scores = [score_run(cases, picks, r) for r in runs]
     n = len(cases)
     lines += ["## 1. Chỉ số theo từng lần chạy", "",
@@ -183,7 +184,8 @@ def report(cases, picks, runs, usage, n_runs):
             ("Ngôn ngữ (cả bộ)", lambda m: pct(m["language"], n)),
             ("Ngôn ngữ trên ca en / other / Việt chèn Anh", lambda m: pct(*m["language_focus"])),
             ("`scope_note` trên ca có nhãn", lambda m: pct(*m["scope"])),
-            ("**Đoán mã** (ngưỡng 0)", lambda m: str(len(m["guess"]))),
+            ("**Đoán mã** (ngưỡng 0, sau kiểm sau Router)", lambda m: str(len(m["guess"]))),
+            ("Router điền chữ không có trong câu → code sửa (bước 3b; số ca)", lambda m: str(len(m["fixes"]))),
             ("`query` T7 tiếng Việt ở câu tiếng Anh", lambda m: pct(*m["t7_vi"])),
             ("`pick_status` đúng", lambda m: pct(m["pick"], len(picks))),
             ("`picked` đúng (ca picked)", lambda m: pct(*m["picked"])),
@@ -239,13 +241,15 @@ def report(cases, picks, runs, usage, n_runs):
             calls = "<br>".join(fmt_call(c) for c in g["calls"]) or "—"
             lines.append(f"| {r['id']} | {r['question']} | {r['required_tools'] or '—'} / {r['optional_tools'] or '—'} | {calls} |")
 
-    lines += ["", "## 6. Ngôn ngữ, đoán mã, query T7 (lần 1)", ""]
+    lines += ["", "## 6. Ngôn ngữ, đoán mã, kiểm sau Router, query T7 (lần 1)", ""]
     for r in cases:
         g = first[r["id"]]
         if g.get("language") != r["language"]:
             lines.append(f"- Ngôn ngữ sai {r['id']} \"{r['question']}\": nhãn {r['language']}, Router {g.get('language')}")
     for i, gs in scores[0]["guess"]:
         lines.append(f"- Đoán mã {i}: {gs}")
+    for i, fx in scores[0]["fixes"]:
+        lines.append(f"- Kiểm sau Router sửa {i}: " + "; ".join(fx))
     for i, q in scores[0]["t7_not_vi"]:
         lines.append(f"- `query` T7 không phải tiếng Việt {i}: {q}")
 
