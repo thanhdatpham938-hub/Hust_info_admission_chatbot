@@ -14,3 +14,9 @@ data/processed/*
 !data/processed/linking
 data/processed/linking/*
 !data/processed/linking/*.csv
+
+# Ghi chú đo đạc và kế hoạch làm việc: tài liệu nội bộ, không đưa lên git
+docs/ghi_chu/
+docs/PLAN*.md
+
+.claude/CLAUDE.md
