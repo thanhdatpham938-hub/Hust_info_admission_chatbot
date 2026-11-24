@@ -47,6 +47,22 @@ class ToolContext:
         self.combinations = {r["combination_code"] for r in T["combinations"]}
         # ma nganh -> nhom chuong trinh (chuan / elitech / pfiev / lien_ket): pick_choice buoc 5b ("hệ chuẩn")
         self.program_group = {r["program_code"]: r["program_group_code"] for r in T["programs"]}
+        # ma nganh -> (ten tieng Viet chinh thuc, ten tieng Anh) cho Synthesizer (PLAN Synthesizer Q6 = C): ten Anh
+        # lay tu alias `en`, uu tien ten RIENG cua nganh (khong dung chung voi nganh khac), vd TE-E2 lay
+        # "Automotive Engineering (Advanced Program)" chu khong lay "Automotive Engineering" (chung voi TE1)
+        en: dict[str, list[str]] = defaultdict(list)
+        for r in T["entity_aliases"]:
+            if r["entity_type"] == "program" and r["alias_type"] == "en":
+                en[r["entity_code"]].append(r["alias"])
+        owners: dict[str, set[str]] = defaultdict(set)
+        for code, names in en.items():
+            for n in names:
+                owners[n.lower()].add(code)
+        self.program_names: dict[str, tuple[str, str | None]] = {}
+        for r in T["programs"]:
+            names = en.get(r["program_code"], [])
+            own = [n for n in names if len(owners[n.lower()]) == 1]
+            self.program_names[r["program_code"]] = (r["program_name"], (own or names or [None])[0])
         # (nganh, nam) -> phuong thuc: T3 gan cong thuc DGTD/XTTN theo phuong thuc cua nganh
         self.program_methods: dict[tuple[str, int], set[str]] = defaultdict(set)
         for r in T["program_methods"]:

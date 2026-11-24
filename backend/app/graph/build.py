@@ -10,7 +10,7 @@ from langgraph.graph import END, START, StateGraph
 from app.graph.nodes import GraphDeps, make_nodes
 from app.graph.state import ChatState
 
-ANSWER_NODES = ("clarification", "announcement", "fallback", "answer")
+ANSWER_NODES = ("clarification", "announcement", "fallback", "template_answer")
 
 
 def _route(s: ChatState) -> str:
@@ -30,7 +30,10 @@ def build_graph(deps: GraphDeps, checkpointer=None):
     g.add_conditional_edges("router", _route, ["merge", "clarification", "fallback"])
     g.add_conditional_edges("merge", _route, ["run_tools", "fallback"])
     g.add_edge("run_tools", "check_status")
-    g.add_conditional_edges("check_status", _route, ["clarification", "announcement", "fallback", "answer"])
+    g.add_conditional_edges("check_status", _route,
+                            ["clarification", "announcement", "fallback", "generate", "run_tools"])
+    g.add_conditional_edges("generate", _route, ["verify", "template_answer"])
+    g.add_conditional_edges("verify", _route, ["save_context", "generate", "template_answer"])
     for name in ANSWER_NODES:
         g.add_edge(name, "save_context")
     g.add_edge("save_context", END)
@@ -46,5 +49,6 @@ async def chat(graph, thread_id: str, question: str, choice: str | None = None) 
             "clarification": t.get("clarification"),
             "metadata": {"intent": t.get("intent_final"), "language": t.get("language"),
                          "error_code": t.get("error_code"), "draft": bool(t.get("draft")),
+                         "rewrites": t.get("retry", 0), "used_template": bool(t.get("used_template")),
                          "fallback_reason": t.get("fallback_reason")},
             "_state": state}                                   # cho test; API se bo truong nay

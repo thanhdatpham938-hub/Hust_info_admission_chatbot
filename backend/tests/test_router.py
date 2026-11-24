@@ -7,13 +7,24 @@ from datetime import date
 from types import SimpleNamespace
 
 import pytest
-from openai.lib._pydantic import to_strict_json_schema
-
 from app.core.config import ROOT
 from app.entity_resolution.normalize import normalize
-from app.graph.router import (CALL_MODELS, TOPIC_TO_INTENT, RouterError, RouterLLMOutput, RouterOutput, Topic,
-                              build_messages, calls_as_dicts, postprocess, route, system_prompt, to_output)
+from app.graph.router import (
+    CALL_MODELS,
+    TOPIC_TO_INTENT,
+    RouterError,
+    RouterLLMOutput,
+    RouterOutput,
+    Topic,
+    build_messages,
+    calls_as_dicts,
+    postprocess,
+    route,
+    system_prompt,
+    to_output,
+)
 from app.graph.state import empty_context
+from openai.lib._pydantic import to_strict_json_schema
 
 EVAL = ROOT / "backend" / "tests" / "eval"
 
@@ -253,3 +264,63 @@ def test_huy_va_khong_ro_khi_dang_cho_thi_unknown():
 def test_chinh_sach_intent_nam_o_code(topic, intent):
     """Bang 3.2 plan Tuan 4 (nguoi dung duyet): hoc phi -> ADMISSION, chuan dau ra / hoc bong -> REGULATION."""
     assert to_output(llm(topic=topic)).intent == intent
+
+
+# ---------------------------------------------------------------- bo quet + kiem sau (PLAN Sua loi, buoc 3)
+async def test_route_co_tctx_goi_y_va_sua_ma(ctx):
+    seen = []
+    client, comp = fake_client(llm(calls=[{"tool": "admission_scores", "args": {"programs": ["Khoa học máy tính"]}}]))
+    orig = comp.parse
+
+    async def spy(**kw):
+        seen.append(kw["messages"][1]["content"])
+        return await orig(**kw)
+    comp.parse = spy
+    r = await route("Điểm chuẩn ngành Khoa học máy tính (IT1) năm 2025?", empty_context(), client=client, model="x",
+                    tctx=ctx)
+    assert "# Từ điển nhận ra trong câu: \"IT1\" (ngành)" in seen[0]
+    assert r.calls[0].args.programs == ["IT1"] and r.fixes
+
+
+async def test_route_dang_cho_chon_khong_goi_y(ctx):
+    """Do 2026-10-21: P015 bi goi y keo thanh new_question."""
+    seen = []
+    client, comp = fake_client(llm(pick_status="picked", picked=["TE1"]))
+    orig = comp.parse
+
+    async def spy(**kw):
+        seen.append(kw["messages"][1]["content"])
+        return await orig(**kw)
+    comp.parse = spy
+    await route("Kỹ thuật Ô tô (TE1)", {**empty_context(), "pending": PENDING}, client=client, model="x", tctx=ctx)
+    assert "Từ điển nhận ra" not in seen[0]
+
+
+async def test_n2_cau_tieng_anh_query_tim_van_ban_doi_sang_need_tieng_viet():   # S29
+    rag = {"tool": "rag_search", "args": {"query": "Do self-funded international students pay a different tuition fee?"}}
+    client, _ = fake_client(llm(language="en", need="học phí của sinh viên nước ngoài tự túc", topic="hoc_phi",
+                                calls=[rag]))
+    r = await route("Do self-funded international students pay a different tuition fee?", empty_context(),
+                    client=client, model="x")
+    assert r.calls[0].args.query == "học phí của sinh viên nước ngoài tự túc"
+    assert any("rag_search.query" in f for f in r.fixes)
+
+
+async def test_n2_query_da_tieng_viet_giu_nguyen():
+    rag = {"tool": "rag_search", "args": {"query": "Quy định GPA dẫn đến cảnh báo học tập"}}
+    client, _ = fake_client(llm(language="en", need="điều kiện cảnh báo học tập", topic="hoc_vu", calls=[rag]))
+    r = await route("What GPA leads to an academic warning?", empty_context(), client=client, model="x")
+    assert r.calls[0].args.query == "Quy định GPA dẫn đến cảnh báo học tập" and r.fixes == []
+
+
+@pytest.mark.parametrize("status", ["cancel", "new_question"])
+async def test_n4_tu_chi_tro_khi_dang_cho_luon_unclear(status):      # P010: Router ghi cancel cho "cái kia"
+    client, _ = fake_client(llm(pick_status=status, picked=[]))
+    r = await route("cái kia", {**empty_context(), "pending": PENDING}, client=client, model="x")
+    assert r.pick_status == "unclear" and r.calls == []
+
+
+async def test_n4_huy_ro_rang_van_la_cancel():
+    client, _ = fake_client(llm(pick_status="cancel", picked=[]))
+    r = await route("thôi không cần nữa", {**empty_context(), "pending": PENDING}, client=client, model="x")
+    assert r.pick_status == "cancel"

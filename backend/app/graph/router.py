@@ -15,7 +15,7 @@ import typing
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from openai import AsyncOpenAI
 from pydantic import BaseModel
@@ -23,6 +23,7 @@ from pydantic import BaseModel
 from app.core.config import get_settings
 from app.core.llm import get_llm
 from app.entity_resolution.normalize import normalize
+from app.graph.router_check import hint_line, reconcile
 from app.graph.state import ConvContext, Pending
 from app.schemas.admission import AdmissionScoresInput, ListProgramsInput
 from app.schemas.certificate import CertificateInput
@@ -30,6 +31,9 @@ from app.schemas.program_info import ProgramInfoInput
 from app.schemas.rag import RagSearchInput
 from app.schemas.tuition import TuitionInput
 from app.schemas.university_info import UniversityInfoInput
+
+if TYPE_CHECKING:
+    from app.tools.context import ToolContext
 
 PROMPT_PATH = Path(__file__).parent / "prompts" / "router.md"
 EXAMPLES_PATH = Path(__file__).parent / "prompts" / "router_examples.json"
@@ -160,6 +164,7 @@ class RouterOutput(BaseModel):
     missing_info: str | None
     pick_status: Literal["picked", "new_question", "cancel", "unclear"] | None
     picked: list[str]
+    fixes: list[str] = []          # thay doi do router_check.reconcile lam (bao cao / do, khong anh huong luong)
 
 
 def to_output(llm: RouterLLMOutput) -> RouterOutput:
@@ -205,6 +210,19 @@ def looks_english(text: str) -> bool:
     if VI_LETTERS.search(text):
         return False
     return len(set(normalize(text).split()) & EN_FUNCTION_WORDS) >= 2
+
+
+def vietnamese_rag_queries(out: "RouterOutput") -> list[str]:
+    """N2 (S29): tai lieu toan tieng Viet; query T7 con tieng Anh thi tim hut (S29 duoi nguong 0,40 du du lieu CO quy
+    dinh x1,5). Prompt da dan dich ma Router van quen -> code thay bang `need` (luon tieng Viet). Sua tai cho."""
+    fixes = []
+    if out.language != "en" or not out.need or not VI_LETTERS.search(out.need):
+        return fixes
+    for c in out.calls:
+        if c.tool == "rag_search" and not VI_LETTERS.search(c.args.query):
+            fixes.append(f"rag_search.query: \"{c.args.query}\" → \"{out.need}\" (query tiếng Anh, dùng need)")
+            c.args.query = out.need
+    return fixes
 
 
 def is_deictic_only(text: str) -> bool:
@@ -262,9 +280,11 @@ def system_prompt() -> str:
             .replace("{{EXAMPLES}}", render_examples()))
 
 
-def context_block(ctx: ConvContext, today: date) -> str:
+def context_block(ctx: ConvContext, today: date, hint: str | None = None) -> str:
     """Phan thay doi moi luot: dat SAU phan co dinh de cache trung."""
     lines = [f"# Hôm nay: {today.isoformat()} (năm nay = {today.year}, năm ngoái = {today.year - 1})"]
+    if hint:                                     # buoc 3a (PLAN Sua loi): cum tu dien nhan ra, ~30-50 token
+        lines.append(hint)
     known = {"ngành": ctx.get("programs"), "năm": ctx.get("years"), "phương thức": ctx.get("methods"),
              "Trường/Khoa": ctx.get("faculties"), "khoá": ctx.get("cohort"), "tool lượt trước": ctx.get("last_tool")}
     known = {k: v for k, v in known.items() if v}
@@ -286,9 +306,10 @@ def context_block(ctx: ConvContext, today: date) -> str:
     return "\n".join(lines)
 
 
-def build_messages(question: str, ctx: ConvContext, history: list[dict], today: date) -> list[dict]:
+def build_messages(question: str, ctx: ConvContext, history: list[dict], today: date,
+                   hint: str | None = None) -> list[dict]:
     return [{"role": "system", "content": system_prompt()},
-            {"role": "system", "content": context_block(ctx, today)},
+            {"role": "system", "content": context_block(ctx, today, hint)},
             *history,
             {"role": "user", "content": question}]
 
@@ -320,10 +341,16 @@ def calls_as_dicts(out: RouterOutput) -> list[dict]:
 
 
 async def route(question: str, ctx: ConvContext, history: list[dict] | None = None, today: date | None = None,
-                client: AsyncOpenAI | None = None, model: str | None = None) -> RouterOutput:
+                client: AsyncOpenAI | None = None, model: str | None = None,
+                tctx: "ToolContext | None" = None) -> RouterOutput:
+    """`tctx` (co thi dung): bo quet goi y truoc LLM va reconcile sau LLM (PLAN Sua loi, buoc 3)."""
     client = client or get_llm()
     model = model or get_settings().chat_model
-    messages = build_messages(question, ctx, history or [], today or date.today())
+    scan = tctx.scanner.scan(question) if tctx else None
+    # Dang cho chon thi KHONG goi y: do 2026-10-21 P015 "Khoa hoc may tinh voi Viet Nhat" thanh new_question vi goi y
+    # liet ke hai cum nhu nganh moi; lua chon do pick_choice / merge_pick lo
+    hint = hint_line(scan, question) if scan and not ctx.get("pending") else None
+    messages = build_messages(question, ctx, history or [], today or date.today(), hint)
     last: Exception | None = None
     for _ in range(2):                           # thu lai dung 1 lan
         try:
@@ -338,9 +365,17 @@ async def route(question: str, ctx: ConvContext, history: list[dict] | None = No
                 out = out.model_copy(update={"language": "en"})
             if looks_like_injection(question):
                 out = out.model_copy(update={"topic": "ngoai_chu_de", "intent": "GENERAL_OFF_TOPIC", "calls": []})
-            if ctx.get("pending") and out.pick_status == "picked" and is_deictic_only(question):
+            # N4: moi pick_status (ca cancel: P010 do 2026-10-21), khong chi picked
+            if ctx.get("pending") and out.pick_status != "unclear" and is_deictic_only(question):
                 out = out.model_copy(update={"pick_status": "unclear", "picked": []})
-            return postprocess(out, bool(ctx.get("pending")))
+            out = postprocess(out, bool(ctx.get("pending")))
+            fixes = vietnamese_rag_queries(out)
+            # Dang chon (picked): calls chi la phan hoi THEM, lua chon do merge_pick lo -> khong dung
+            if scan is not None and not (ctx.get("pending") and out.pick_status == "picked"):
+                fixes += reconcile(out.calls, question, scan, tctx.aliases)
+            if fixes:
+                out.fixes = fixes
+            return out
         except Exception as e:                   # noqa: BLE001 — loi mang/timeout/parse deu thu lai 1 lan
             last = e
     raise RouterError(str(last)) from last
