@@ -1,21 +1,21 @@
 id,pending_mention,pending_candidates,pending_call,message,expected_pick_status,expected_picked,expected_intent,note,duyet
-P001,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"TE-E2, năm 2024",picked,TE-E2,ADMISSION_QUERY,chọn kèm đổi năm (M20),
-P002,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"cái tiên tiến, so với IT1 luôn",picked,TE-E2,ADMISSION_QUERY,chọn bằng đặc điểm + thêm ngành (M21),
-P003,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"TE1, học phí bao nhiêu?",picked,TE1,ADMISSION_QUERY,chọn + câu hỏi mới khác tool; câu hỏi gốc vẫn chạy (M22),
-P004,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cả hai năm 2024 nhé,picked,TE1;TE-E2,ADMISSION_QUERY,cả hai kèm đổi năm (M32),
-P005,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cái học bằng tiếng Anh ấy,picked,TE-E2,ADMISSION_QUERY,code không khớp (không có chữ trong tên/nhóm) nên Router chọn,
-P006,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],Học phí ngành IT1 bao nhiêu?,new_question,,ADMISSION_QUERY,đổi chủ đề (M6),
-P007,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],điều kiện nhận học bổng là gì?,new_question,,REGULATION_QUERY,đổi chủ đề có từ huỷ: vẫn là câu mới vì có nội dung hỏi,
-P008,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],thôi không cần nữa,cancel,,,huỷ không kèm câu hỏi (M28),
-P009,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],bỏ qua đi,cancel,,,huỷ,
-P010,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cái kia,unclear,,,không chỉ được lựa chọn nào (M29),
-P011,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cái nào cũng được,unclear,,,không tự chọn thay người dùng,
-P012,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],ừ,unclear,,,,
-P013,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],Thế điểm chuẩn UET thì sao?,new_question,,OTHER_UNIVERSITY,"có cả lựa chọn lẫn câu trường khác: intent từ chối, pending giữ (M25); chấm theo intent",
-P014,chuẩn đầu ra (khoá),K71+;K70-,certificate_lookup purpose=chuan_dau_ra certificate=TOEIC,"em khoá 70, còn IELTS thì sao?",picked,K70-,REGULATION_QUERY,chọn khoá + đổi chứng chỉ,
-P015,Bách khoa CNTT,IT1;IT2;IT-E10;IT-E15;IT-E7;IT-E6;IT-EP,admission_scores years=[2025],Khoa học máy tính với Việt Nhật,picked,IT1;IT-E6,ADMISSION_QUERY,chọn 2 trong danh sách dài,
-P016,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"the advanced one, for 2024 please",picked,TE-E2,ADMISSION_QUERY,tiếng Anh: chọn + đổi năm,
-P017,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"TE1, and how much is its tuition?",picked,TE1,ADMISSION_QUERY,tiếng Anh: chọn + câu hỏi khác tool,
-P018,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],never mind,cancel,,,tiếng Anh: huỷ,
-P019,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],hmm I'm not sure,unclear,,,tiếng Anh: không rõ,
-P020,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],What is the tuition fee for IT1?,new_question,,ADMISSION_QUERY,tiếng Anh: đổi chủ đề,
+P001,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"TE-E2, năm 2024",picked,TE-E2,ADMISSION_QUERY,chọn kèm đổi năm (M20),duyet
+P002,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"cái tiên tiến, so với IT1 luôn",picked,TE-E2,ADMISSION_QUERY,chọn bằng đặc điểm + thêm ngành (M21),duyet
+P003,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"TE1, học phí bao nhiêu?",picked,TE1,ADMISSION_QUERY,chọn + câu hỏi mới khác tool; câu hỏi gốc vẫn chạy (M22),duyet
+P004,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cả hai năm 2024 nhé,picked,TE1;TE-E2,ADMISSION_QUERY,cả hai kèm đổi năm (M32),duyet
+P005,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cái học bằng tiếng Anh ấy,picked,TE-E2,ADMISSION_QUERY,code không khớp (không có chữ trong tên/nhóm) nên Router chọn,duyet
+P006,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],Học phí ngành IT1 bao nhiêu?,new_question,,ADMISSION_QUERY,đổi chủ đề (M6),duyet
+P007,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],điều kiện nhận học bổng là gì?,new_question,,REGULATION_QUERY,đổi chủ đề có từ huỷ: vẫn là câu mới vì có nội dung hỏi,duyet
+P008,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],thôi không cần nữa,cancel,,,huỷ không kèm câu hỏi (M28),duyet
+P009,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],bỏ qua đi,cancel,,,huỷ,duyet
+P010,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cái kia,unclear,,,không chỉ được lựa chọn nào (M29),duyet
+P011,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],cái nào cũng được,unclear,,,không tự chọn thay người dùng,duyet
+P012,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],ừ,unclear,,,,duyet
+P013,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],Thế điểm chuẩn UET thì sao?,new_question,,OTHER_UNIVERSITY,"có cả lựa chọn lẫn câu trường khác: intent từ chối, pending giữ (M25); chấm theo intent",duyet
+P014,chuẩn đầu ra (khoá),K71+;K70-,certificate_lookup purpose=chuan_dau_ra certificate=TOEIC,"em khoá 70, còn IELTS thì sao?",picked,K70-,REGULATION_QUERY,chọn khoá + đổi chứng chỉ,duyet
+P015,Bách khoa CNTT,IT1;IT2;IT-E10;IT-E15;IT-E7;IT-E6;IT-EP,admission_scores years=[2025],Khoa học máy tính với Việt Nhật,picked,IT1;IT-E6,ADMISSION_QUERY,chọn 2 trong danh sách dài,duyet
+P016,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"the advanced one, for 2024 please",picked,TE-E2,ADMISSION_QUERY,tiếng Anh: chọn + đổi năm,duyet
+P017,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],"TE1, and how much is its tuition?",picked,TE1,ADMISSION_QUERY,tiếng Anh: chọn + câu hỏi khác tool,duyet
+P018,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],never mind,cancel,,,tiếng Anh: huỷ,duyet
+P019,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],hmm I'm not sure,unclear,,,tiếng Anh: không rõ,duyet
+P020,kỹ thuật ô tô,TE1;TE-E2,admission_scores years=[2025],What is the tuition fee for IT1?,new_question,,ADMISSION_QUERY,tiếng Anh: đổi chủ đề,duyet

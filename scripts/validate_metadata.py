@@ -27,7 +27,7 @@ MANIFEST = NORM / "_chunk_ids.txt"
 DATASET_VERSION = "2026.1"
 
 FIELDS = ["chunk_id", "document_title", "document_type", "source_kind", "source_url",
-          "document_no", "year", "cohort", "program_code", "faculty_code", "chuong",
+          "document_no", "year", "cohort", "bac_dao_tao", "program_code", "faculty_code", "chuong",
           "dieu_no", "khoan_no", "muc_no", "heading", "page_no", "verification_status",
           "collection_date", "dataset_version", "text"]
 GROUP_A = ["chunk_id", "document_title", "document_type", "source_kind", "source_url",
@@ -36,6 +36,7 @@ DOCUMENT_TYPES = {"quy_che_dao_tao", "so_tay_sinh_vien", "de_an_tuyen_sinh", "qu
                   "quy_dinh_ngoai_ngu", "quy_che_thi_tsa", "gioi_thieu_nganh",
                   "gioi_thieu_don_vi", "tin_tuyen_sinh"}
 SOURCE_KINDS = {"pdf_text", "pdf_scan", "web"}
+BAC_VALUES = {"", "chung", "dai_hoc", "ky_su", "thac_si", "tien_si"}   # normalize_chunks.BAC_BY_CHUONG
 STATUSES = {"vision_extracted", "vision_double_read", "pdf_text", "html_parsed", "web_extracted",
             "manual_verified", "manual_override", "rule_derived", "third_party"}
 COHORTS = {"", "K71+", "<=K70"}
@@ -96,6 +97,8 @@ def check(chunks, tables) -> list[tuple[str, str, str]]:
             add("E", "E4 verification_status ngoài từ vựng", f"{cid}: {c.get('verification_status')}")
         if c.get("cohort", "") not in COHORTS:
             add("E", "E4 cohort ngoài từ vựng", f"{cid}: {c.get('cohort')}")
+        if c.get("bac_dao_tao", "") not in BAC_VALUES:
+            add("E", "E4 bac_dao_tao ngoài từ vựng", f"{cid}: {c.get('bac_dao_tao')}")
         if not URL_RE.match(str(c.get("source_url", ""))):
             add("E", "E5 source_url không phải link", f"{cid}: {c.get('source_url')!r}")
         for k in ("text", "heading", "document_title"):

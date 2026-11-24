@@ -13,6 +13,7 @@ from typing import Literal, NotRequired, TypedDict
 
 MAX_HISTORY_TURNS = 3          # plan Tuan 4 Q8: 3 luot gan nhat, khong tom tat bang LLM
 MAX_UNCLEAR = 2                # 4.3c: Router xep `unclear` lien tiep den muc nay thi tha pending
+MAX_CHARS = {"assistant": 500, "user": 1000}   # cat tin nhan khi luu lich su (PLAN StateGraph 8)
 
 PickStatus = Literal["picked", "new_question", "cancel", "unclear"]
 
@@ -32,6 +33,7 @@ class Pending(TypedDict):
     entity_type: str           # program | faculty | method | certificate | cohort | purpose
     candidates: list[dict]     # {"code", "name"}
     retries: int               # so lan LIEN TIEP Router xep `unclear` (4.3c)
+    intent: NotRequired[str]   # intent cua cau hoi goc: duong tat pick_choice khong goi Router van biet intent
 
 
 class ConvContext(TypedDict, total=False):
@@ -42,6 +44,7 @@ class ConvContext(TypedDict, total=False):
     cohort: str | None
     last_tool: str | None      # tool dau tien cua luot da tra loi gan nhat (C2/C3 so theo tool)
     last_intent: str | None
+    last_language: str         # ngon ngu luot truoc: duong tat pick_choice khong goi Router (PLAN StateGraph 9)
     pending: Pending | None
 
 
@@ -51,7 +54,14 @@ class Turn(TypedDict, total=False):
     router: dict               # RouterOutput.model_dump()
     calls: list[ToolCall]      # lenh goi sau khi ghep ngu canh
     results: list[dict]        # ToolResult.model_dump() theo thu tu calls
-    route: str
+    route: str                 # node ke tiep do node hien tai chon (dieu kien cua canh)
+    language: str              # vi | en | other
+    intent: str                # intent cua luot (Router, hoac intent cau hoi goc o duong tat)
+    outcome: str               # answered | clarify | refused | cancel | released -> save_context (PLAN StateGraph 3)
+    clarification: dict | None # {"mention", "choices": [{"code", "name"}]} cho nut bam Tuan 5
+    pending_new: Pending | None
+    error_code: str | None
+    draft: bool                # True: cau tra loi la ban nhap tu du lieu tho (chua co Synthesizer)
     intent_final: str
     fallback_reason: str | None
     answer: str
@@ -69,7 +79,7 @@ class ChatState(TypedDict):
 
 def empty_context() -> ConvContext:
     return ConvContext(programs=[], years=[], methods=[], faculties=[], cohort=None,
-                       last_tool=None, last_intent=None, pending=None)
+                       last_tool=None, last_intent=None, last_language="vi", pending=None)
 
 
 def empty_state() -> ChatState:
@@ -83,5 +93,11 @@ def new_turn(question: str, choice: str | None = None) -> Turn:
 
 
 def append_message(messages: list[dict], role: str, content: str) -> list[dict]:
-    """Them tin nhan, cat con MAX_HISTORY_TURNS luot (moi luot = 1 user + 1 assistant)."""
+    """Them tin nhan, cat con MAX_HISTORY_TURNS luot (moi luot = 1 user + 1 assistant).
+
+    Moi tin nhan cat con MAX_CHARS[role] ky tu (PLAN StateGraph 8, nguoi dung chot 2026-10-19): Router chi can biet
+    luot truoc noi chu de gi; bang diem dai lam phinh prompt. Ban day du van nam trong turn.answer tra cho API."""
+    limit = MAX_CHARS.get(role)
+    if limit and len(content) > limit:
+        content = content[:limit] + "…"
     return (messages + [{"role": role, "content": content}])[-2 * MAX_HISTORY_TURNS:]
