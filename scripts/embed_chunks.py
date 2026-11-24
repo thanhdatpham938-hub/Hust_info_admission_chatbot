@@ -105,6 +105,7 @@ def ensure_collection(client: QdrantClient, name: str, recreate: bool) -> None:
         ("program_code", models.PayloadSchemaType.KEYWORD),
         ("faculty_code", models.PayloadSchemaType.KEYWORD),
         ("cohort", models.PayloadSchemaType.KEYWORD),
+        ("bac_dao_tao", models.PayloadSchemaType.KEYWORD),
         ("dieu_no", models.PayloadSchemaType.KEYWORD),
         ("chunk_id", models.PayloadSchemaType.KEYWORD),
         ("is_latest", models.PayloadSchemaType.BOOL),

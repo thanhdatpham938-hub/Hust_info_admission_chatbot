@@ -17,6 +17,7 @@ from openai import AsyncOpenAI
 from qdrant_client import AsyncQdrantClient, models
 
 from app.core.config import get_settings
+from app.entity_resolution.normalize import normalize
 from app.rag.phrases import Phrase, extract_phrases
 
 F = models.FieldCondition
@@ -34,6 +35,7 @@ class SearchSpec:
     program_codes: list[str] = field(default_factory=list)
     faculty_codes: list[str] = field(default_factory=list)
     top_k: int = 5
+    graduate: bool | None = None              # None = tu nhan tu cau hoi (wants_graduate)
 
 
 @dataclass
@@ -49,6 +51,27 @@ class SearchResult:
     top_dense_score: float
 
 
+# Buoc 6 (PLAN - Sua loi sau chay thu Synthesizer (v1)): Quy che dao tao gop dai hoc / ky su / thac si / tien si.
+# Mac dinh BO chunk thac si, tien si (S17: hoi bao luu cua sinh vien bi tra Dieu 35 danh cho hoc vien thac si); cau
+# hoi neu ro sau dai hoc thi khong loc. Loc o du lieu thi doan sai khong toi LLM va cho trong top-k cho doan dung.
+GRADUATE_LEVELS = ["thac_si", "tien_si"]
+GRADUATE_WORDS = ("thac si", "cao hoc", "hoc vien", "nghien cuu sinh", "tien si", "master", "phd", "doctoral",
+                  "doctorate", "postgraduate", "graduate student")
+
+
+ENGINEER_WORDS = ("ky su", "engineer", "engineering degree")
+
+
+def wants_engineer(query: str) -> bool:
+    q = f" {normalize(query)} "
+    return any(f" {w} " in q for w in ENGINEER_WORDS)
+
+
+def wants_graduate(query: str) -> bool:
+    q = f" {normalize(query)} "
+    return any(f" {w} " in q for w in GRADUATE_WORDS)
+
+
 def base_filter(spec: SearchSpec) -> models.Filter:
     """Loc cung dung chung moi nhanh."""
     must: list = []
@@ -62,6 +85,11 @@ def base_filter(spec: SearchSpec) -> models.Filter:
                                           F(key="cohort", match=models.MatchValue(value=spec.cohort))]))
     if spec.document_types:
         must.append(F(key="document_type", match=models.MatchAny(any=spec.document_types)))
+    graduate = spec.graduate if spec.graduate is not None else wants_graduate(spec.query)
+    if not graduate:                          # chunk khong co nhan ("") van giu: must_not chi bo dung cac nhan nay
+        # N5 (S17): chuong III viet cho "hoc vien" chuong trinh ky su; sinh vien cu nhan hoi bao luu phai nhan Dieu 16
+        levels = GRADUATE_LEVELS + ([] if wants_engineer(spec.query) else ["ky_su"])
+        must.append(models.Filter(must_not=[F(key="bac_dao_tao", match=models.MatchAny(any=levels))]))
     return models.Filter(must=must)
 
 

@@ -1,7 +1,14 @@
 """T7 — phan khong can mang (PLAN - T7 retrieval (v2), muc 7): tach cum tu, dung bo loc, khoa, trich dan."""
 
+import pytest
 from app.rag.phrases import extract_phrases
-from app.rag.retriever import LATEST, SearchSpec, base_filter, faculty_branches, general_branches
+from app.rag.retriever import (
+    LATEST,
+    SearchSpec,
+    base_filter,
+    faculty_branches,
+    general_branches,
+)
 from app.tools.rag_tool import citation_of, cohort_label
 
 
@@ -74,3 +81,39 @@ def test_trich_dan_van_ban_va_trang_web():
     web = citation_of({"document_title": "Công bố điểm chuẩn đại học 2026", "heading": "Cách tính điểm",
                        "source_url": "https://ts.hust.edu.vn/b", "year": 2026})
     assert web.title == "Công bố điểm chuẩn đại học 2026 — Cách tính điểm" and web.url
+
+
+def _bac_cond(spec):
+    return [c for c in base_filter(spec).must if getattr(c, "must_not", None)]
+
+
+def test_mac_dinh_bo_chunk_thac_si_tien_si():
+    """Buoc 6 (PLAN Sua loi, S17): hoi bao luu cua sinh vien khong nhan Dieu 35 (thac si)."""
+    cond = _bac_cond(SearchSpec(query="Thủ tục bảo lưu kết quả học tập để đi nghĩa vụ quân sự"))
+    assert len(cond) == 1 and cond[0].must_not[0].key == "bac_dao_tao"
+    assert set(cond[0].must_not[0].match.any) == {"ky_su", "thac_si", "tien_si"}     # ky_su: N5
+
+
+@pytest.mark.parametrize("q", ["Học viên cao học bảo lưu thế nào?", "Điều kiện bảo vệ luận án tiến sĩ",
+                               "nghien cuu sinh duoc nghi hoc tam thoi khong", "Master students deferral"])
+def test_cau_hoi_sau_dai_hoc_khong_loc(q):
+    assert _bac_cond(SearchSpec(query=q)) == []
+
+
+def test_chi_dinh_ro_graduate_thang_nhan_dien():
+    assert _bac_cond(SearchSpec(query="tiến sĩ", graduate=False))
+    assert _bac_cond(SearchSpec(query="bảo lưu", graduate=True)) == []
+
+
+def _excluded(q):
+    cond = _bac_cond(SearchSpec(query=q))
+    return set(cond[0].must_not[0].match.any) if cond else set()
+
+
+def test_n5_mac_dinh_bo_ca_ky_su():                    # S17: tra Dieu 25 (hoc vien ky su) thay vi Dieu 16 (cu nhan)
+    assert _excluded("Thủ tục bảo lưu kết quả học tập để đi nghĩa vụ quân sự") == {"ky_su", "thac_si", "tien_si"}
+
+
+@pytest.mark.parametrize("q", ["Thời gian tối đa của chương trình Cử nhân và Kỹ sư?", "ky su chuyen sau nghi hoc"])
+def test_n5_cau_neu_ky_su_thi_lay_ky_su(q):
+    assert _excluded(q) == {"thac_si", "tien_si"}

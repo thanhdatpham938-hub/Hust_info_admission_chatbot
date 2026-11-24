@@ -9,7 +9,7 @@ Viec lam theo thu tu (moi buoc co ly do o PLAN v2):
   2. gan page_no cho 80 chunk PDF thieu trang                     -> PLAN muc 7
   3. tach chunk > 2.500 ky tu                                     -> loi N2
   4. sinh chunk_id <doc>::<locator>                               -> PLAN muc 3
-  5. gan source_kind, verification_status, collection_date, dataset_version, cohort
+  5. gan source_kind, verification_status, collection_date, dataset_version, cohort, bac_dao_tao
   6. gop document_type 13 -> 9                                    -> PLAN muc 5
   7. bu year (50 chunk), faculty_code (151 chunk trang nganh), tach muc_no (de an)
   8. chuan NFC lan cuoi, xep thu tu truong
@@ -131,9 +131,25 @@ FACULTY_CODE = {
 
 DROP_KEYS = {"stop_at", "layout", "program_name"}   # program_name: ten nganh chi song o bang danh muc
 FIELD_ORDER = ["chunk_id", "document_title", "document_type", "source_kind", "source_url",
-               "document_no", "year", "cohort", "program_code", "faculty_code", "chuong",
+               "document_no", "year", "cohort", "bac_dao_tao", "program_code", "faculty_code", "chuong",
                "dieu_no", "khoan_no", "muc_no", "heading", "page_no", "verification_status",
                "collection_date", "dataset_version", "text"]
+
+# Bac dao tao (PLAN - Sua loi sau chay thu Synthesizer (v1), buoc 6): Quy che dao tao 2025 gop dai hoc, ky su,
+# thac si, tien si trong MOT van ban, chia theo chuong. Khong gan thi T7 tra Dieu 35 (thac si) cho cau hoi bao luu
+# cua sinh vien (S17). Chi van ban nay chia theo bac; van ban khac de "" (khong loc).
+BAC_BY_CHUONG = {"I": "chung", "II": "dai_hoc", "III": "ky_su", "IV": "thac_si", "V": "tien_si", "VI": "chung"}
+BAC_VALUES = {"", "chung", "dai_hoc", "ky_su", "thac_si", "tien_si"}
+
+
+def bac_dao_tao(name: str, c: dict) -> str:
+    if name != "QCDT_2025_5445_QD-DHBK":
+        return ""
+    parts = (c.get("chuong") or "").split()
+    roman = parts[1] if len(parts) > 1 and parts[0].upper() == "CHƯƠNG" else ""
+    if roman not in BAC_BY_CHUONG:
+        raise SystemExit(f"{c.get('chunk_id')}: không đọc được chương '{c.get('chuong')}' để gắn bậc đào tạo")
+    return BAC_BY_CHUONG[roman]
 
 MUC_RE = re.compile(r"^\s*((?:[IVX]+|\d+(?:\.\d+)*[a-z]?))\.\s")
 # Muc "(2) Xet tuyen..."/"(3) Xet tuyen..." (de an 2024/25/26, sua trong de_an_to_rag.py
@@ -310,6 +326,7 @@ def normalize_source(name: str, cfg: dict, fac_by_prog: dict, overrides: set[int
         c["collection_date"] = cfg["collected"]
         c["dataset_version"] = DATASET_VERSION
         c["cohort"] = cfg.get("cohort", "")
+        c["bac_dao_tao"] = bac_dao_tao(name, c)
         status = cfg["status"]
         if name == "So_tay_sinh_vien_2026":
             pages = [int(x) for x in str(c["page_no"]).split("-")]
