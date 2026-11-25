@@ -46,6 +46,17 @@ def known_names(ev: dict) -> list[str]:
     return out
 
 
+CITATION_ISSUE = ("Thông tin lấy từ văn bản phải ghi trích dẫn [n] ngay sau câu, với n là id của đoạn văn bản "
+                  "trong evidence.")
+
+
+def text_only_missing_citation(issues: list[str], ev: dict) -> bool:
+    """N13 (S17): cau CHI dung van ban (khong bang so) ma loi duy nhat con lai la thieu trich dan.
+    Khi do ban dung tu du lieu chi dan cac doan tho khong lien quan -> noi that "khong tim thay" tot hon."""
+    only_text = bool(ev["payload"]["evidence"]) and all(it["tool"] == "rag_search" for it in ev["payload"]["evidence"])
+    return only_text and not ev.get("tables") and issues == [CITATION_ISSUE]
+
+
 def verify(text: str, ev: dict) -> tuple[str, list[str], set[int]]:
     """Tra (cau tra loi da xoa [n] sai, danh sach loi can viet lai, cac nguon duoc trich)."""
     valid = {s["n"] for s in ev["sources"]}
@@ -56,11 +67,17 @@ def verify(text: str, ev: dict) -> tuple[str, list[str], set[int]]:
     issues = []
     rag_ids = {c["id"] for it in ev["payload"]["evidence"] for c in it.get("chunks") or []}
     if ev["rag_used"] and not used & rag_ids:
-        issues.append("Thông tin lấy từ văn bản phải ghi trích dẫn [n] ngay sau câu, với n là id của đoạn văn bản "
-                      "trong evidence.")
+        issues.append(CITATION_ISSUE)
     bad = strange_numbers(text, set(ev["allowed"]))
     if bad:
         issues.append("Các số sau KHÔNG có trong dữ liệu, phải bỏ hoặc sửa đúng theo evidence: " + ", ".join(bad))
+    elif used & rag_ids and ev.get("chunk_numbers"):
+        # N15 (S12): so co trong du lieu nhung o doan khac (vd. nguong CPA cua Dieu 12 gan vao Dieu 19)
+        cited = set(ev["allowed_base"]).union(*[set(ev["chunk_numbers"].get(str(i), [])) for i in used & rag_ids])
+        wrong_place = strange_numbers(text, cited)
+        if wrong_place:
+            issues.append("Các số sau không có trong những đoạn văn bản bạn đã trích dẫn: " + ", ".join(wrong_place)
+                          + ". Chỉ dùng số có trong đoạn đã trích, hoặc trích dẫn đúng đoạn chứa số đó, hoặc bỏ số.")
     if ev["tuition_used"] and MONEY.search(text) and not (UNIT.search(text) and YEAR.search(text)):
         issues.append("Học phí phải ghi rõ đơn vị (/năm hoặc /học kỳ) và năm áp dụng.")
     if ev["payload"].get("language") == "en":

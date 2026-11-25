@@ -219,12 +219,19 @@ def build_evidence(question: str, intent: str, language: str, scope_note: str | 
     if language == "en" and program_names:
         payload["program_names"] = {c: {"en": program_names[c][1], "vi": program_names[c][0]}
                                     for c in codes if c in program_names}
-    allowed = numbers_in([r.get("data") for r in results] + [r.get("missing") for r in results]
-                         + [s["location"] for s in sources] + tables)
-    allowed |= question_numbers(question, advice=scope_note == "advice")
+    # N15 (S12): so thuoc DOAN VAN BAN chi duoc dung khi chinh doan do duoc trich. `allowed_base` = moi so KHONG nam
+    # trong doan van ban (du lieu bang, thieu, vi tri nguon, bang do code dung, so trong cau hoi, nam nay / ngoai);
+    # `chunk_numbers[id]` = so cua tung doan. `allowed` (toan cuc) = base + moi doan, giu de kiem so la nhu cu.
+    base = numbers_in([r.get("data") for call, r in zip(calls, results) if call["tool"] != "rag_search"]
+                      + [r.get("missing") for r in results] + [s["location"] for s in sources] + tables)
+    base |= question_numbers(question, advice=scope_note == "advice")
     if today:
-        allowed |= {float(today.year), float(today.year - 1)}
+        base |= {float(today.year), float(today.year - 1)}
+    chunk_numbers = {str(ch["id"]): sorted(numbers_in([ch.get("text"), ch.get("heading"), ch.get("document")]))
+                     for it in evidence for ch in it.get("chunks") or []}
+    allowed = set(base).union(*[set(v) for v in chunk_numbers.values()])
     return {"payload": payload, "sources": sources, "tables": tables, "allowed": sorted(allowed),
+            "allowed_base": sorted(base), "chunk_numbers": chunk_numbers,
             "rag_used": rag_used, "tuition_used": tuition_used,
             "table_source_ids": sorted({n for it in evidence for n in it.get("source_ids", [])})}
 

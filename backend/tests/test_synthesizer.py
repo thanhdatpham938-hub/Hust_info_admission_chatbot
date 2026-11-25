@@ -236,3 +236,44 @@ def test_n6_bang_dai_khong_cot_tho_va_nguon_gop():                # S09 khi nguo
     assert len(src) == 2                                   # "Nguồn:" + 1 dong gop
     assert src[1].startswith("[1]–[20] Trang ngành") and "20 trang" in src[1]
     assert len(cites) == 20                                # metadata API van du 20 trich dan (PRD 12)
+
+
+# ---------------------------------------------------------------- N15: so phai co trong dung doan duoc trich
+def two_chunks_evidence():
+    d19 = {**RAG_CHUNK, "dieu_no": "19", "heading": "Điều 19. Cảnh báo học tập", "page_no": "18",
+           "text": "Nâng một mức cảnh báo khi số TC không đạt lớn hơn 8; mức 3 khi nợ đọng lớn hơn 24 TC.",
+           "citation": {"title": "Quy chế đào tạo — Điều 19", "url": "https://x/qcdt"}}
+    d12 = {**RAG_CHUNK, "dieu_no": "12", "heading": "Điều 12. Xếp loại học lực", "page_no": "14",
+           "text": "Xếp loại yếu khi CPA dưới 2,5; trung bình khi CPA từ 2,5 đến dưới 3,2.",
+           "citation": {"title": "Quy chế đào tạo — Điều 12", "url": "https://x/qcdt"}}
+    return build_evidence("Cảnh báo học tập?", "REGULATION_QUERY", "vi", None, [RAG_CALL], [rag_result(d19, d12)])
+
+
+def test_n15_so_cua_doan_khong_duoc_trich_bi_bat():                                  # S12
+    ev = two_chunks_evidence()
+    ch = {c["heading"]: c["id"] for c in ev["payload"]["evidence"][0]["chunks"]}
+    a, b = ch["Điều 19. Cảnh báo học tập"], ch["Điều 12. Xếp loại học lực"]
+    assert a != b
+    # Chi trich Dieu 19 nhung dung 2,5 va 3,2 cua Dieu 12 (cac so CO trong du lieu, nhung sai doan)
+    _, issues, _ = verify(f"Nợ đọng lớn hơn 24 TC thì cảnh báo mức 3. CPA dưới 2,5 là yếu, từ 3,2 là khá [{a}].", ev)
+    assert any("2,5" in i and "3,2" in i for i in issues)
+
+
+def test_n15_so_dung_doan_duoc_trich_thi_dat():
+    ev = two_chunks_evidence()
+    ch = {c["heading"]: c["id"] for c in ev["payload"]["evidence"][0]["chunks"]}
+    a, b = ch["Điều 19. Cảnh báo học tập"], ch["Điều 12. Xếp loại học lực"]
+    assert verify(f"Nợ đọng lớn hơn 24 TC thì cảnh báo mức 3 [{a}]. CPA dưới 2,5 là yếu [{b}].", ev)[1] == []
+
+
+def test_n15_so_cua_cau_hoi_va_so_nho_van_duoc_phep():
+    ev = build_evidence("Năm 2025 cảnh báo thế nào?", "REGULATION_QUERY", "vi", None, [RAG_CALL], [rag_result()])
+    cid = ev["payload"]["evidence"][0]["chunks"][0]["id"]
+    assert verify(f"Năm 2025 có 2 mức cảnh báo [{cid}].", ev)[1] == []
+
+
+def test_n15_van_kiem_so_la_toan_cuc_nhu_cu():
+    ev = two_chunks_evidence()
+    cid = ev["payload"]["evidence"][0]["chunks"][0]["id"]
+    _, issues, _ = verify(f"Nợ đọng lớn hơn 99 TC [{cid}].", ev)
+    assert any("KHÔNG có trong dữ liệu" in i for i in issues)

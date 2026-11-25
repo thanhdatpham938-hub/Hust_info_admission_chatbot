@@ -528,3 +528,32 @@ async def test_n10_ca_graph_hoi_ca_nhom_khong_noi_bang_dai():
     g = build_graph(GraphDeps(route=router, tools={"tuition_fees": (t4, TuitionInput)}, synthesize=fake_synth))
     r = await chat(g, str(uuid.uuid4()), q)
     assert "| P19 |" not in r["answer"] and r["answer"].count("\n[") == 1
+
+
+# ---------------------------------------------------------------- N13: khong dan doan van ban tho khi khong trich dan duoc
+async def test_n13_van_ban_thieu_trich_dan_sau_viet_lai_thi_noi_that_khong_dan_doan_tho():     # S17
+    async def synth(payload, issues):
+        return "Nội dung quy chế."                       # luon thieu [n] -> sai ca 3 lan
+    g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("bảo lưu")], language="vi")}, synth)
+    r = await chat(g, tid, "q")
+    assert r["metadata"]["rewrites"] == 2 and r["metadata"]["fallback_reason"] == "low_confidence"
+    assert "không tìm thấy thông tin đủ tin cậy" in r["answer"] and "ts.hust.edu.vn" in r["answer"]
+    assert "Nội dung quy chế" not in r["answer"] and "Điều 19" not in r["answer"]      # khong dan doan tho
+    assert r["metadata"]["used_template"] is False and r["citations"] == []
+
+
+async def test_n13_cau_tieng_anh_dung_cau_mau_tieng_anh():
+    async def synth(payload, issues):
+        return "Regulation text."
+    g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("bảo lưu")], language="en")}, synth)
+    r = await chat(g, tid, "q")
+    assert "couldn't find reliable enough information" in r["answer"]
+
+
+async def test_n13_co_bang_so_thi_van_dan_ban_dung_tu_du_lieu():
+    """Ban dung tu du lieu chi bo khi cau CHI dung van ban; co bang so dung thi van dan (so la du lieu that)."""
+    async def synth(payload, issues):
+        return "Điểm chuẩn IT1 năm 2025 là 15,5."        # so la, sai ca 3 lan
+    g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025]), T7("quy chế")])}, synth)
+    r = await chat(g, tid, "q")
+    assert r["metadata"]["used_template"] is True and "Dưới đây là dữ liệu tra được" in r["answer"]

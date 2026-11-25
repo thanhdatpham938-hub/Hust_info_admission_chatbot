@@ -23,7 +23,7 @@ from app.graph.context_rules import (
     update_context,
 )
 from app.graph.dispatch import TOOL_TIMEOUT_S, run_calls
-from app.graph.guardrails.check import finalize, verify
+from app.graph.guardrails.check import finalize, text_only_missing_citation, verify
 from app.graph.prefilter import GATE_INTENT, prefilter
 from app.graph.router import RouterError, calls_as_dicts, looks_english
 from app.graph.state import (
@@ -273,6 +273,9 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
         if t.get("retry", 0) < MAX_REWRITES:               # Q7: viet lai toi da 2 lan
             return {"turn": {**t, "verify_issues": issues, "retry": t.get("retry", 0) + 1, "verify_log": log_,
                              "route": "generate"}}
+        if text_only_missing_citation(issues, ev):         # N13: noi that, khong dan doan van ban tho
+            return {"turn": {**t, "verify_issues": issues, "verify_log": log_, "route": "fallback",
+                             "fallback_reason": "low_confidence"}}
         return {"turn": {**t, "verify_issues": issues, "verify_log": log_, "route": "template_answer"}}
 
     # ------------------------------------------------------------ template_answer (code dung tu du lieu tho)

@@ -33,7 +33,7 @@ def build_graph(deps: GraphDeps, checkpointer=None):
     g.add_conditional_edges("check_status", _route,
                             ["clarification", "announcement", "fallback", "generate", "run_tools"])
     g.add_conditional_edges("generate", _route, ["verify", "template_answer"])
-    g.add_conditional_edges("verify", _route, ["save_context", "generate", "template_answer"])
+    g.add_conditional_edges("verify", _route, ["save_context", "generate", "template_answer", "fallback"])
     for name in ANSWER_NODES:
         g.add_edge(name, "save_context")
     g.add_edge("save_context", END)
