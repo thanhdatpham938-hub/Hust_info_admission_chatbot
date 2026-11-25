@@ -354,3 +354,41 @@ async def test_n4_huy_ro_rang_van_la_cancel():
     client, _ = fake_client(llm(pick_status="cancel", picked=[]))
     r = await route("thôi không cần nữa", {**empty_context(), "pending": PENDING}, client=client, model="x")
     assert r.pick_status == "cancel"
+
+
+# ---------------------------------------------------------------- N14: need tieng Anh -> goi lai Router mot lan
+RAG_EN = {"tool": "rag_search", "args": {"query": "Do self-funded international students pay a different tuition fee?"}}
+VI_NEED = "học phí của sinh viên nước ngoài tự túc"
+
+
+async def test_n14_need_tieng_anh_goi_lai_mot_lan_va_lay_ban_tieng_viet():             # S29
+    client, comp = fake_client(llm(language="en", need="Do self-funded students pay more?", topic="hoc_phi", calls=[RAG_EN]),
+                               llm(language="en", need=VI_NEED, topic="hoc_phi", calls=[RAG_EN]))
+    r = await route("Do self-funded international students pay a different tuition fee?", empty_context(),
+                    client=client, model="x")
+    assert comp.n == 2 and r.need == VI_NEED
+    assert r.calls[0].args.query == VI_NEED                       # N2 thay query bang need tieng Viet
+
+
+async def test_n14_van_tieng_anh_sau_khi_goi_lai_thi_giu_nguyen_khong_goi_lan_ba():
+    bad = llm(language="en", need="Do self-funded students pay more?", topic="hoc_phi", calls=[RAG_EN])
+    client, comp = fake_client(bad, bad)
+    r = await route("Do self-funded international students pay a different tuition fee?", empty_context(),
+                    client=client, model="x")
+    assert comp.n == 2 and r.need == "Do self-funded students pay more?"
+
+
+@pytest.mark.parametrize("kw", [dict(language="vi", need="điểm chuẩn IT1"),                # cau tieng Viet
+                                dict(language="en", need=VI_NEED),                          # need da tieng Viet
+                                dict(language="en", need="", topic="hoc_phi")])             # khong co need
+async def test_n14_khong_goi_lai_khi_khong_can(kw):
+    client, comp = fake_client(llm(calls=[RAG_EN], **{"topic": "hoc_phi", **kw}))
+    await route("Do self-funded international students pay a different tuition fee?", empty_context(),
+                client=client, model="x")
+    assert comp.n == 1
+
+
+async def test_n14_tu_choi_khong_goi_lai():
+    client, comp = fake_client(llm(language="en", need="What is the weather?", topic="ngoai_chu_de", calls=[]))
+    await route("What is the weather in Hanoi today?", empty_context(), client=client, model="x")
+    assert comp.n == 1

@@ -348,10 +348,21 @@ def calls_as_dicts(out: RouterOutput) -> list[dict]:
     return [{"tool": c.tool, "args": c.args.model_dump()} for c in out.calls]
 
 
+VI_NEED_REMINDER = ("Nhắc lại: `need` và mọi `query` của rag_search PHẢI viết bằng tiếng Việt, kể cả khi câu hỏi là "
+                    "tiếng Anh (tài liệu tra cứu toàn tiếng Việt).")
+
+
+def need_not_vietnamese(out: "RouterOutput") -> bool:
+    """N14 (S29): cau tieng Anh co lenh goi ma `need` khong co chu cai tieng Viet nao. Cau tu choi (khong lenh goi)
+    khong can, tranh goi lai vo ich."""
+    return out.language == "en" and bool(out.calls) and bool(out.need) and not VI_LETTERS.search(out.need)
+
+
 async def route(question: str, ctx: ConvContext, history: list[dict] | None = None, today: date | None = None,
                 client: AsyncOpenAI | None = None, model: str | None = None,
                 tctx: "ToolContext | None" = None) -> RouterOutput:
-    """`tctx` (co thi dung): bo quet goi y truoc LLM va reconcile sau LLM (PLAN Sua loi, buoc 3)."""
+    """`tctx` (co thi dung): bo quet goi y truoc LLM va reconcile sau LLM (PLAN Sua loi, buoc 3).
+    N14: `need` van tieng Anh thi goi lai DUNG MOT lan kem loi nhac; van tieng Anh thi giu ban dau (code N2 xu ly)."""
     client = client or get_llm()
     model = model or get_settings().chat_model
     scan = tctx.scanner.scan(question) if tctx else None
@@ -359,8 +370,21 @@ async def route(question: str, ctx: ConvContext, history: list[dict] | None = No
     # liet ke hai cum nhu nganh moi; lua chon do pick_choice / merge_pick lo
     hint = hint_line(scan, question) if scan and not ctx.get("pending") else None
     messages = build_messages(question, ctx, history or [], today or date.today(), hint)
+    out = await _route_once(client, model, messages, question, ctx, scan, tctx)
+    if need_not_vietnamese(out):
+        try:
+            again = await _route_once(client, model, [*messages, {"role": "system", "content": VI_NEED_REMINDER}],
+                                      question, ctx, scan, tctx)
+        except RouterError:
+            again = None
+        if again is not None and not need_not_vietnamese(again):
+            out = again
+    return out
+
+
+async def _route_once(client, model, messages, question, ctx, scan, tctx) -> RouterOutput:
     last: Exception | None = None
-    for _ in range(2):                           # thu lai dung 1 lan
+    for _ in range(2):                           # thu lai dung 1 lan khi loi mang / parse
         try:
             r = await client.chat.completions.parse(model=model, temperature=ROUTER_TEMPERATURE,
                                                     max_tokens=ROUTER_MAX_TOKENS, response_format=RouterLLMOutput,

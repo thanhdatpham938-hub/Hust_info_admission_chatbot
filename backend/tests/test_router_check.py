@@ -150,3 +150,32 @@ def test_n3_hai_ten_cung_doan_chi_ten_sat_ngoac_doi_ma(ctx):
     calls, _ = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
         programs=["Cơ điện tử", "Kỹ thuật Ô tô"]))])
     assert calls[0].args.programs == ["Cơ điện tử", "TE1"]
+
+
+# ---------------------------------------------------------------- N16: gia tri Router dien DA CHUA "(MA)"
+@pytest.mark.parametrize("value, code", [
+    ("Khoa học máy tính (IT1)", "IT1"),                                            # S01 do 2026-11-26
+    ("Cơ điện tử hợp tác với ĐH Leibniz Hannover (ME-LUH)", "ME-LUH"),             # S37 do 2026-10-21
+])
+def test_n16_gia_tri_chua_ma_trong_ngoac_doi_ra_ma(ctx, value, code):
+    q = f"Điểm chuẩn ngành {value} năm 2025 là bao nhiêu?"
+    calls, fixes = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
+        programs=[value], years=[2025]))])
+    assert calls[0].args.programs == [code]
+    assert fixes == [f'admission_scores.programs: "{value}" → "{code}"']
+
+
+def test_n16_ngoac_khong_phai_ma_giu_nguyen(ctx):
+    """Ten nganh that co ngoac ("(CT tiên tiến)") khong phai ma: giu nguyen de tool phan giai."""
+    v = "Kỹ thuật Thực phẩm (CT tiên tiến)"
+    calls, fixes = run(ctx, f"Điểm chuẩn {v} năm 2025?", [AdmissionScoresCall(
+        tool="admission_scores", args=AdmissionScoresInput(programs=[v]))])
+    assert calls[0].args.programs == [v] and fixes == []
+
+
+def test_n16_ma_sai_loai_khong_doi(ctx):
+    """Ma Truong/Khoa (SOICT) trong o nganh: khong doi (khong dung loai)."""
+    v = "Trường CNTT (SOICT)"
+    calls, _ = run(ctx, f"Các ngành của {v}?", [AdmissionScoresCall(
+        tool="admission_scores", args=AdmissionScoresInput(programs=[v]))])
+    assert calls[0].args.programs == [v]

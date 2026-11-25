@@ -106,6 +106,16 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
         norms = [normalize(v) for v in values]
         rows = []
         for v, n in zip(values, norms):
+            # N16 (S01 do 2026-11-26): Router chep CA CUM co ma "Khoa hoc may tinh (IT1)" -> lay ma trong ngoac,
+            # neu dung loai. Ngoac khong phai ma ("(CT tien tien)") hoac ma sai loai thi bo qua
+            own = next((m.group(1).strip() for m in PAREN.finditer(v)
+                        if _code_types(m.group(1).strip(), aliases) & accepted), None)
+            if own:
+                for pre, c, _t in pairs:
+                    if c == own:
+                        coded[pre] = field
+                rows.append((v, own, False))
+                continue
             hit = next(((pre, c) for pre, c, t in pairs if t & accepted and n and (pre == n or pre.endswith(" " + n))),
                        None)
             if hit is None:
