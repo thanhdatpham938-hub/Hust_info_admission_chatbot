@@ -24,6 +24,7 @@ from app.graph.context_rules import (
 )
 from app.graph.dispatch import TOOL_TIMEOUT_S, run_calls
 from app.graph.guardrails.check import finalize, verify
+from app.graph.prefilter import GATE_INTENT, prefilter
 from app.graph.router import RouterError, calls_as_dicts, looks_english
 from app.graph.state import (
     ChatState,
@@ -45,7 +46,8 @@ REFUSAL = {"OTHER_UNIVERSITY": "other_university", "GENERAL_OFF_TOPIC": "off_top
 # nho nganh da xac nhan cho luot sau (PLAN StateGraph 3). Tu choi va loi he thong giu nguyen ngu canh.
 OUTCOME = {"other_university": "refused", "off_topic": "refused", "other_language": "refused",
            "no_tool": "refused", "too_many": "refused", "llm_error": "refused", "database_error": "refused",
-           "internal_error": "refused", "cancel": "cancel", "released": "released",
+           "internal_error": "refused", "cancel": "cancel", "released": "released", "empty_input": "refused",
+           "too_long": "refused",
            "not_found": "answered", "low_confidence": "answered"}
 ERROR_REASON = {"DATABASE_ERROR": "database_error", "LLM_ERROR": "llm_error", "INTERNAL_ERROR": "internal_error"}
 
@@ -90,9 +92,25 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
         return {"turn": {**t, "route": "router"}}
 
     # ------------------------------------------------------------ router (LLM)
+    def unclear_turn(ctx: ConvContext, t: dict) -> dict:
+        """Dang cho chon ma khong ro chon gi (PLAN State 4.3c): hoi lai, den MAX_UNCLEAR thi tha pending."""
+        new_ctx, released = register_unclear(ctx)
+        if released:
+            return {"context": new_ctx, "turn": {**t, "route": "fallback", "fallback_reason": "released",
+                                                 "released_pending": ctx["pending"]}}
+        return {"context": new_ctx, "turn": {**t, "intent": "CLARIFICATION_NEEDED", "route": "clarification",
+                                             "fallback_reason": "unclear"}}
+
     async def router_node(s: ChatState) -> dict:
         ctx, t = _ctx(s), s["turn"]
         q = t["question"]
+        gate = prefilter(q, ctx)                           # PLAN Toi uu Router A: code tu quyet -> khong goi LLM
+        if gate:
+            lang = "en" if looks_english(q) else ctx.get("last_language", "vi")
+            if gate == "unclear":
+                return unclear_turn(ctx, {**t, "language": lang})
+            return {"turn": {**t, "language": lang, "intent": GATE_INTENT.get(gate, "UNKNOWN"), "route": "fallback",
+                             "fallback_reason": gate}}
         history = (s.get("messages") or [])[:-1]          # tin nhan cuoi la cau hien tai: route() tu them
         # Co ToolContext thi Router dung bo quet goi y + kiem sau (PLAN Sua loi, buoc 3); test gia khong truyen
         kw = {"tctx": await deps.tool_ctx()} if deps.tool_ctx else {}
@@ -109,12 +127,7 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
             if out.pick_status == "cancel":
                 return {"turn": {**t, "route": "fallback", "fallback_reason": "cancel"}}
             if out.pick_status == "unclear":
-                new_ctx, released = register_unclear(ctx)
-                if released:
-                    return {"context": new_ctx, "turn": {**t, "route": "fallback", "fallback_reason": "released",
-                                                         "released_pending": pending}}
-                return {"context": new_ctx, "turn": {**t, "intent": "CLARIFICATION_NEEDED",
-                                                     "route": "clarification", "fallback_reason": "unclear"}}
+                return unclear_turn(ctx, t)
             if out.pick_status == "picked":
                 return {"turn": {**t, "route": "merge"}}
         if out.language == "other":

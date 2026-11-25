@@ -20,6 +20,13 @@ TEMPLATES: dict[str, dict[str, str]] = {
     "other_language": {
         "vi": "Mình hỗ trợ tiếng Việt và tiếng Anh. Bạn vui lòng hỏi lại bằng một trong hai ngôn ngữ này.",
         "en": "I support Vietnamese and English. Please ask again in one of these languages."},
+    "empty_input": {                                  # PLAN Toi uu Router A (nguoi dung duyet 2026-11-25)
+        "vi": "Bạn chưa nhập câu hỏi. Bạn muốn hỏi gì về tuyển sinh hoặc học vụ của HUST?",
+        "en": "You haven't entered a question. What would you like to know about HUST admissions or academics?"},
+    "too_long": {
+        "vi": "Câu hỏi hơi dài. Bạn vui lòng tóm tắt trong vài câu (dưới 1.000 ký tự) để mình tra cứu chính xác hơn.",
+        "en": "Your question is a bit long. Please summarize it in a few sentences (under 1,000 characters) so I can "
+              "look it up more accurately."},
     "missing_info": {
         "vi": "Bạn muốn hỏi về {missing_info} nào? Ví dụ: \"Điểm chuẩn ngành IT1 năm 2025?\"",
         "en": "Could you be more specific about what you'd like to know? For example: \"What was the 2025 cut-off "
