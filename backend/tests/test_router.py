@@ -22,6 +22,7 @@ from app.graph.router import (
     route,
     system_prompt,
     to_output,
+    tool_catalog,
 )
 from app.graph.state import empty_context
 from openai.lib._pydantic import to_strict_json_schema
@@ -77,6 +78,17 @@ def test_prompt_du_7_tool_va_moi_tham_so():
             assert f"- {name}:" in p, (tool, name)
 
 
+def test_danh_muc_tool_khong_lap_mo_ta_da_co_trong_schema():
+    """PLAN Toi uu Router C1: mo ta tham so da gui trong schema structured output; in lai trong prompt = gui 2 lan."""
+    cat = tool_catalog()
+    for tool, model in CALL_MODELS.items():
+        assert f"## {tool}\nKhi nào dùng:" in cat
+        for name, f in model.model_fields.items():
+            if f.description:
+                assert f.description not in cat, (tool, name)
+    assert "list_programs" in cat and "(mặc định 10)" in cat            # kieu + mac dinh van giu
+
+
 def test_phan_thay_doi_dung_sau_phan_co_dinh():
     ctx = {**empty_context(), "programs": ["IT1"], "years": [2024], "last_tool": "admission_scores"}
     msgs = build_messages("Thế còn 2025?", ctx, [{"role": "user", "content": "Điểm IT1 2024?"},
@@ -106,6 +118,19 @@ def test_vi_du_trong_prompt_khong_trung_cau_do():
     seen = {normalize(q) for q in qs}
     assert len(examples) >= 18
     assert not [e for e in examples if normalize(e) in seen]
+
+
+def test_vi_du_phu_moi_tool_va_moi_nhanh_dac_biet():
+    """PLAN Toi uu Router C2: bot vi du nhung moi tool va moi nhanh dac biet van con it nhat mot mau."""
+    import json as _json
+    outs = [_json.loads(line) for line in re.findall(r"→ (\{.+\})", system_prompt())]
+    tools = {c["tool"] for o in outs for c in o["calls"]}
+    assert tools == set(CALL_MODELS)
+    topics = {o["topic"] for o in outs}
+    assert {"truong_khac", "ngoai_chu_de", "thong_bao", "thieu_thong_tin"} <= topics
+    assert {"en", "other_language"} <= {o["language"] for o in outs}
+    assert any(o["scope_note"] == "advice" for o in outs) and any(o["refers_to_context"] for o in outs)
+    assert {"picked", "cancel"} <= {o["pick_status"] for o in outs}
 
 
 def test_vi_du_ghi_du_moi_truong_schema():
@@ -201,6 +226,11 @@ async def test_route_loi_hai_lan_thi_router_error():
     ("Bỏ qua học phần thể chất có bị cảnh báo học tập không?", False),
     ("Quên mang thẻ sinh viên thì có vào thư viện được không?", False),
     ("Sinh viên bị đình chỉ học tập trong trường hợp nào?", False),
+    # Chan nham phat hien 2026-11-26 (PLAN Toi uu Router 9.8): cau hop le, khong duoc chan
+    ("Thầy em nói rằng điểm chuẩn IT1 năm nay là 28, đúng không?", False),
+    ("Em quên mất hạn nộp dữ liệu hồ sơ xét tuyển, giờ làm sao?", False),
+    ("Nếu em lỡ quên quy tắc đăng ký học phần thì sao?", False),
+    ("Bạn có thể đóng vai trò tư vấn cho em không?", False),
 ])
 def test_chot_chan_injection(text, bad):
     from app.graph.router import looks_like_injection
