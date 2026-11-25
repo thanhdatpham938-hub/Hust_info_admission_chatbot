@@ -1,6 +1,6 @@
 # memory.md — Đúc kết để tiếp tục ở session mới
 
-> **Session mới: đọc file này trước khi làm bất cứ việc gì.** Cập nhật lần cuối: 2026-10-21 (mục 2b là trạng thái Tuần 4 mới nhất; mục 2 bên dưới còn số liệu cũ của 2026-10-06).
+> **Session mới: đọc file này trước khi làm bất cứ việc gì.** Cập nhật lần cuối: 2026-11-26 (mục 2b là trạng thái Tuần 4 mới nhất, kèm 2c tối ưu Router; mục 2 bên dưới còn số liệu cũ của 2026-10-06).
 > Chi tiết và lý do của từng quyết định nằm trong các file `docs/PLAN - *.md` (mỗi quyết định có dòng "Vì sao"). File này chỉ là bản đồ.
 
 ## 1. Dự án
@@ -45,6 +45,17 @@ Yêu cầu sản phẩm: `docs/PRD.md` (lộ trình 6 tuần ở mục 20).
 2. Duyệt **N13–N15**: N13 bỏ đoạn thô khỏi bản dự phòng cho câu văn bản (S17); N14 gọi lại Router khi `need` tiếng Anh (S29); N15 kiểm số theo đúng đoạn được trích (S12).
 3. **N12 (để sau)**: mức tin cậy 3 bậc do code tính + liên hệ người thật khi tin cậy thấp. Không dùng phần trăm (PRD 13.1). Liên hệ: Ban Tuyển sinh 024 3868 3408 / ts@hust.edu.vn; Ban Đào tạo 024 3869 2104 / dt@hust.edu.vn; Ban Công tác sinh viên 024 3869 2896 / ctsv@hust.edu.vn.
 4. Có đo lại Router (≈ 0,19 USD) sau N2/N3/N4 không; rà 13 alias tiếng Anh mới trong `entity_aliases.csv` (281 → 294 dòng); quyết định TTFT; chạy `code-review` rồi người dùng commit.
+
+## 2c. Tối ưu Router — 2026-11-25/26 (đã commit d5b3382, f41d4b3, 57aa4b7)
+
+Chi tiết và "Vì sao": `docs/PLAN - Toi uu Router (v1).md` (mục 9).
+- **Cổng `prefilter`** (`backend/app/graph/prefilter.py`), gọi ở đầu node `router`: câu rỗng → `empty_input`; > 1.000 ký tự → `too_long`; mẫu bẻ hướng dẫn → `off_topic`; đang chờ chọn mà chỉ gõ "cái kia" → `unclear`. Các ca này **không gọi LLM**. Trên bộ 215 câu chặn đúng 7, 0 chặn nhầm.
+- **Regex injection đã thu hẹp** (2026-11-26) vì chặn nhầm câu hợp lệ ("Thầy em nói rằng điểm chuẩn … 28", "em quên mất hạn nộp dữ liệu hồ sơ", "lỡ quên quy tắc đăng ký học phần", "đóng vai trò tư vấn"). Câu không nói rõ nhắm vào bot ("Bỏ qua mọi hướng dẫn.") giờ để LLM chặn.
+- **`eval_router.py`**: cache `data/cache/eval_router.json` (khoá = model + schema + toàn bộ messages); cờ `--raw`, `--only-failed FILE` (chỉ thử nhanh, không phải số AC3), `--no-cache`, `--today`. Lần đo có `--raw` gần nhất: `data/cache/raw_2026-11-25.json`.
+- **Prompt:** bỏ mô tả tham số trùng với schema trong `tool_catalog()` → system prompt 6.920 → 6.340 token (token vào mỗi lần gọi ≈ −5,6%). **Giữ đủ 21 ví dụ.**
+- **Đo 2026-11-25** (bản đã bỏ ví dụ #1, #6, #10): AC3 **93,3%** (< 95%), `pick_status` 20/20, 0 lỗi LLM, 0,168 USD. 5 ca sai mới R006, R008, R035, R166, R167 — đều là câu `rag_search` tiếng Việt chọn sai topic. Người dùng chọn **khôi phục 3 ví dụ, không đo lại**.
+- **AC3 của cấu hình hiện tại CHƯA đo.** Lần đo sau xem lại đúng 5 ca trên.
+- Người dùng bảo tạm bỏ qua tối ưu Synthesizer (ý tưởng còn treo: đường tắt không LLM cho câu số liệu đơn giản, stream).
 
 **Báo cáo chính:** `docs/ghi_chu/2026-10-21 - Bao cao sua loi Synthesizer.md` (kèm các PLAN: State và Context Rules, Router, StateGraph, Synthesizer, Sua loi sau chay thu Synthesizer).
 
@@ -102,7 +113,7 @@ python scripts/validate_aliases.py                                          # 0 
 python scripts/build_db.py --postgres ; python scripts/validate_links.py    # 0 lỗi; Postgres khớp SQLite
 pytest backend                                                              # 529 passed (bỏ qua ca llm, rag; cần Docker)
 # Tuần 4 — TỐN TIỀN API, chỉ chạy khi người dùng bảo (mỗi lệnh 1 lần):
-python scripts/eval_router.py                                               # ≈ 0,19 USD, 215 câu
+python scripts/eval_router.py --raw "data/cache/raw_<ngay>.json"            # ≈ 0,17 USD khi gọi thật cả bộ; có cache
 python scripts/eval_synth.py                                                # ≈ 0,05 USD, 41 câu
 python scripts/set_bac_dao_tao.py                                           # miễn phí: gắn nhãn bậc đào tạo vào Qdrant
 pytest backend -m rag                                                       # 15 passed (gọi API embedding, tốn phí nhỏ)
@@ -160,3 +171,6 @@ Kết quả chuẩn hiện tại: `validate_metadata` 0 lỗi 0 cảnh báo · `
 - **`import langgraph` lỗi** (`Reviver.__init__() got an unexpected keyword argument 'allowed_objects'`, đo 2026-10-12): máy có `langgraph 1.2.11` nhưng `langchain-core 0.2.43` (kèm `langchain` 0.2, `langchain-openai` 0.1, `langchain-community` 0.2 cài từ trước, không file nào trong dự án dùng). Sửa ở bước 0 Tuần 4 theo câu trả lời Q2.
 - `text-embedding-3-large` không hoàn toàn deterministic (nhúng lại cho cosine 0,9966–1,0) → ngưỡng tự kiểm là 0,98.
 - `cert_value` là chữ ("5.5÷6.5"); DB có cột số `value_min`/`value_max` để SQL so sánh.
+- **Đừng bỏ ví dụ `rag_search` tiếng Việt khỏi prompt Router** (đo 2026-11-25): bỏ #6 ("Sinh viên bị đình chỉ học tập trong trường hợp nào?") thì 5 câu `rag_search` tiếng Việt chọn sai topic, AC3 95,9% → 93,3%. Bớt ví dụ thì giữ mỗi tool, mỗi nhánh ít nhất một mẫu (`test_vi_du_phu_moi_tool_va_moi_nhanh_dac_biet`).
+- **Regex chặn injection dễ chặn nhầm câu hợp lệ** ("nói rằng … số", "quên … dữ liệu"): bộ 215 câu không có câu dạng này. Thêm mẫu mới thì thêm cả ca `False` vào `test_chot_chan_injection`.
+- Cache `eval_router.py` có khoá gồm ngày "Hôm nay" trong prompt → khác ngày là trượt cache; muốn dùng lại thì truyền `--today` cố định.
