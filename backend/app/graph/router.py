@@ -352,10 +352,20 @@ VI_NEED_REMINDER = ("Nhắc lại: `need` và mọi `query` của rag_search PH�
                     "tiếng Anh (tài liệu tra cứu toàn tiếng Việt).")
 
 
+NEED_TOOLS = {"rag_search", "tuition_fees"}     # `need` chi duoc dung o day (query T7; hoc phi khong gan nganh -> T7)
+
+
 def need_not_vietnamese(out: "RouterOutput") -> bool:
-    """N14 (S29): cau tieng Anh co lenh goi ma `need` khong co chu cai tieng Viet nao. Cau tu choi (khong lenh goi)
-    khong can, tranh goi lai vo ich."""
-    return out.language == "en" and bool(out.calls) and bool(out.need) and not VI_LETTERS.search(out.need)
+    """N14 (S29): cau tieng Anh co lenh goi CAN `need` ma `need` khong co chu cai tieng Viet nao. Cau chi goi tool
+    bang so, hoac cau tu choi (khong lenh goi) thi khong goi lai (code-review 2026-11-26: tranh ton gap doi)."""
+    return (out.language == "en" and any(c.tool in NEED_TOOLS for c in out.calls) and bool(out.need)
+            and not VI_LETTERS.search(out.need))
+
+
+def better_retry(again: "RouterOutput") -> bool:
+    """Ban goi lai chi duoc nhan khi THAT SU tot hon: van co lenh goi va `need` co chu tieng Viet. Ban thanh hoi lai,
+    tu choi hay `need` rong thi giu ban dau (code-review 2026-11-26)."""
+    return bool(again.calls) and bool(again.need) and bool(VI_LETTERS.search(again.need))
 
 
 async def route(question: str, ctx: ConvContext, history: list[dict] | None = None, today: date | None = None,
@@ -377,7 +387,7 @@ async def route(question: str, ctx: ConvContext, history: list[dict] | None = No
                                       question, ctx, scan, tctx)
         except RouterError:
             again = None
-        if again is not None and not need_not_vietnamese(again):
+        if again is not None and better_retry(again):
             out = again
     return out
 

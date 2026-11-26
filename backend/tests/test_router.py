@@ -392,3 +392,24 @@ async def test_n14_tu_choi_khong_goi_lai():
     client, comp = fake_client(llm(language="en", need="What is the weather?", topic="ngoai_chu_de", calls=[]))
     await route("What is the weather in Hanoi today?", empty_context(), client=client, model="x")
     assert comp.n == 1
+
+
+# ---------------------------------------------------------------- loi code-review 2026-11-26 (N14)
+async def test_review4_cau_tieng_anh_chi_dung_bang_so_khong_goi_lai():
+    """`need` chi dung cho rag_search / chuyen hoc phi sang rag: cau chi goi tool bang so khong can goi lai."""
+    t1 = {"tool": "admission_scores", "args": {"programs": ["IT1"], "years": [2025]}}
+    client, comp = fake_client(llm(language="en", need="Cutoff score of IT1 in 2025", calls=[t1]))
+    await route("What is the cutoff score of IT1 in 2025?", empty_context(), client=client, model="x")
+    assert comp.n == 1
+
+
+@pytest.mark.parametrize("second", [
+    dict(language="en", need=VI_NEED, topic="thieu_thong_tin", calls=[], missing_info="ngành"),   # thanh hoi lai
+    dict(language="en", need="", topic="hoc_phi", calls=[RAG_EN]),                                 # need rong
+])
+async def test_review5_ban_goi_lai_te_hon_thi_giu_ban_dau(second):
+    first = llm(language="en", need="Do self-funded students pay more?", topic="hoc_phi", calls=[RAG_EN])
+    client, comp = fake_client(first, llm(**second))
+    r = await route("Do self-funded international students pay a different tuition fee?", empty_context(),
+                    client=client, model="x")
+    assert comp.n == 2 and r.calls and r.calls[0].tool == "rag_search" and r.need == "Do self-funded students pay more?"

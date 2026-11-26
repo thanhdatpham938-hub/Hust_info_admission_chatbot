@@ -179,3 +179,11 @@ def test_n16_ma_sai_loai_khong_doi(ctx):
     calls, _ = run(ctx, f"Các ngành của {v}?", [AdmissionScoresCall(
         tool="admission_scores", args=AdmissionScoresInput(programs=[v]))])
     assert calls[0].args.programs == [v]
+
+
+def test_review3_ma_trong_ngoac_khong_co_trong_cau_thi_khong_tin(ctx):
+    """Router tu doan "(IT1)" ma nguoi dung khong go -> khong doi ra ma (tranh tra diem nganh khac)."""
+    q = "Điểm chuẩn Kỹ thuật máy tính năm 2025?"
+    calls, _ = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
+        programs=["Kỹ thuật máy tính (IT1)"], years=[2025]))])
+    assert calls[0].args.programs == ["Kỹ thuật máy tính"]          # chu nguoi dung go, de tool tu phan giai
