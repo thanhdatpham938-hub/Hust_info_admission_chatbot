@@ -227,9 +227,15 @@ def build_evidence(question: str, intent: str, language: str, scope_note: str | 
     base |= question_numbers(question, advice=scope_note == "advice")
     if today:
         base |= {float(today.year), float(today.year - 1)}
-    chunk_numbers = {str(ch["id"]): sorted(numbers_in([ch.get("text"), ch.get("heading"), ch.get("document")]))
-                     for it in evidence for ch in it.get("chunks") or []}
-    allowed = set(base).union(*[set(v) for v in chunk_numbers.values()])
+    # Gop (khong ghi de): nhieu doan cung url + vi tri dung chung mot [n] (source_id). Kem `year`, `cohort` vi hai
+    # truong nay gui cho LLM trong payload (code-review 2026-11-26)
+    per_chunk: dict[str, set[float]] = {}
+    for it in evidence:
+        for ch in it.get("chunks") or []:
+            per_chunk.setdefault(str(ch["id"]), set()).update(numbers_in(
+                [ch.get("text"), ch.get("heading"), ch.get("document"), ch.get("year"), ch.get("cohort")]))
+    chunk_numbers = {k: sorted(v) for k, v in per_chunk.items()}
+    allowed = set(base).union(*per_chunk.values())
     return {"payload": payload, "sources": sources, "tables": tables, "allowed": sorted(allowed),
             "allowed_base": sorted(base), "chunk_numbers": chunk_numbers,
             "rag_used": rag_used, "tuition_used": tuition_used,

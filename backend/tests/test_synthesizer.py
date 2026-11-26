@@ -277,3 +277,32 @@ def test_n15_van_kiem_so_la_toan_cuc_nhu_cu():
     cid = ev["payload"]["evidence"][0]["chunks"][0]["id"]
     _, issues, _ = verify(f"Nợ đọng lớn hơn 99 TC [{cid}].", ev)
     assert any("KHÔNG có trong dữ liệu" in i for i in issues)
+
+
+# ---------------------------------------------------------------- loi code-review 2026-11-26
+def test_review1_hai_doan_chung_id_khong_mat_so_cua_doan_dau():
+    """Hai doan cung url + vi tri -> cung [n]; so cua ca hai doan deu duoc phep (truoc: doan sau ghi de)."""
+    a = {**RAG_CHUNK, "text": "Mức 1 khi nợ hơn 24 tín chỉ."}
+    b = {**RAG_CHUNK, "text": "Mức 3 khi nợ hơn 36 tín chỉ."}
+    ev = build_evidence("q", "REGULATION_QUERY", "vi", None, [RAG_CALL], [rag_result(a, b)])
+    ids = {c["id"] for c in ev["payload"]["evidence"][0]["chunks"]}
+    assert len(ids) == 1
+    cid = ids.pop()
+    assert verify(f"Nợ hơn 24 tín chỉ thì cảnh báo mức 1 [{cid}].", ev)[1] == []
+
+
+def test_review2_nam_va_khoa_cua_doan_duoc_phep():
+    """`year` cua doan gui cho LLM nen LLM duoc phep ghi nam do (truoc: bi bao so la)."""
+    ch = {**RAG_CHUNK, "year": 2023, "text": "Quy định về cảnh báo học tập."}
+    ev = build_evidence("q", "REGULATION_QUERY", "vi", None, [RAG_CALL], [rag_result(ch)])
+    cid = ev["payload"]["evidence"][0]["chunks"][0]["id"]
+    assert verify(f"Theo quy chế năm 2023, sinh viên bị cảnh báo [{cid}].", ev)[1] == []
+
+
+def test_review7_so_la_va_so_sai_doan_bao_cung_mot_lan():
+    ev = two_chunks_evidence()
+    ch = {c["heading"]: c["id"] for c in ev["payload"]["evidence"][0]["chunks"]}
+    a = ch["Điều 19. Cảnh báo học tập"]
+    _, issues, _ = verify(f"Nợ hơn 99 TC thì cảnh báo. CPA dưới 2,5 là yếu [{a}].", ev)
+    assert any("99" in i and "KHÔNG có trong dữ liệu" in i for i in issues)
+    assert any("2,5" in i and "đã trích dẫn" in i for i in issues)

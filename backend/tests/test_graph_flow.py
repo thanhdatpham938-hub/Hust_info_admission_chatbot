@@ -557,3 +557,13 @@ async def test_n13_co_bang_so_thi_van_dan_ban_dung_tu_du_lieu():
     g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025]), T7("quy chế")])}, synth)
     r = await chat(g, tid, "q")
     assert r["metadata"]["used_template"] is True and "Dưới đây là dữ liệu tra được" in r["answer"]
+
+
+async def test_review6_van_ban_sai_bat_ky_loi_nao_sau_viet_lai_cung_noi_that():
+    """N13 mo rong (anh chot 2026-11-26): cau chi dung van ban, sau 2 lan viet lai van sai (vd. so la) -> cau mau."""
+    async def synth(payload, issues):
+        ch = payload["evidence"][0]["chunks"][0]
+        return f"Quy chế quy định 99 tín chỉ [{ch['id']}]."   # so la ca 3 lan
+    g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("quy chế")])}, synth)
+    r = await chat(g, tid, "q")
+    assert r["metadata"]["fallback_reason"] == "low_confidence" and "Nội dung quy chế" not in r["answer"]
