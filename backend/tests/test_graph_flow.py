@@ -143,7 +143,7 @@ def chunk(text):
             "citation": {"title": "Quy chế đào tạo 2025", "url": "https://ctt.hust.edu.vn/qcdt"}}
 
 
-async def fake_synth(payload, issues):
+async def fake_synth(payload, issues, on_token=None):
     """Synthesizer gia: khong goi OpenAI. Trich dan doan van ban dau tien neu co."""
     parts = []
     for item in payload["evidence"]:
@@ -470,7 +470,7 @@ def env_synth(script, synth):
 async def test_so_la_viet_lai_mot_lan_roi_dat():
     seen = []
 
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         seen.append(issues)
         return "Điểm chuẩn IT1 năm 2025 là 29,93." if not issues else "Đã có kết quả tra cứu IT1 năm 2025."
     g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025])])}, synth)
@@ -482,7 +482,7 @@ async def test_so_la_viet_lai_mot_lan_roi_dat():
 async def test_sai_ba_lan_thi_dung_ban_dung_tu_du_lieu():
     n = []
 
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         n.append(1)
         return "Điểm chuẩn IT1 là 99,99."
     g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025])])}, synth)
@@ -495,7 +495,7 @@ async def test_sai_ba_lan_thi_dung_ban_dung_tu_du_lieu():
 async def test_loi_openai_hai_lan_thi_dung_ban_dung_tu_du_lieu():
     from app.graph.synthesizer import SynthError
 
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         raise SynthError("timeout")
     g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025])])}, synth)
     r = await chat(g, tid, "q")
@@ -503,7 +503,7 @@ async def test_loi_openai_hai_lan_thi_dung_ban_dung_tu_du_lieu():
 
 
 async def test_van_ban_khong_trich_dan_phai_viet_lai():
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         ch = payload["evidence"][0]["chunks"][0]
         return "Nội dung quy chế." + (f" [{ch['id']}]" if issues else "")
     g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("cảnh báo học tập")])}, synth)
@@ -532,7 +532,7 @@ async def test_n10_ca_graph_hoi_ca_nhom_khong_noi_bang_dai():
 
 # ---------------------------------------------------------------- N13: khong dan doan van ban tho khi khong trich dan duoc
 async def test_n13_van_ban_thieu_trich_dan_sau_viet_lai_thi_noi_that_khong_dan_doan_tho():     # S17
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         return "Nội dung quy chế."                       # luon thieu [n] -> sai ca 3 lan
     g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("bảo lưu")], language="vi")}, synth)
     r = await chat(g, tid, "q")
@@ -543,7 +543,7 @@ async def test_n13_van_ban_thieu_trich_dan_sau_viet_lai_thi_noi_that_khong_dan_d
 
 
 async def test_n13_cau_tieng_anh_dung_cau_mau_tieng_anh():
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         return "Regulation text."
     g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("bảo lưu")], language="en")}, synth)
     r = await chat(g, tid, "q")
@@ -552,7 +552,7 @@ async def test_n13_cau_tieng_anh_dung_cau_mau_tieng_anh():
 
 async def test_n13_co_bang_so_thi_van_dan_ban_dung_tu_du_lieu():
     """Ban dung tu du lieu chi bo khi cau CHI dung van ban; co bang so dung thi van dan (so la du lieu that)."""
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         return "Điểm chuẩn IT1 năm 2025 là 15,5."        # so la, sai ca 3 lan
     g, tid = env_synth({"q": ro(calls=[T1(["IT1"], [2025]), T7("quy chế")])}, synth)
     r = await chat(g, tid, "q")
@@ -561,7 +561,7 @@ async def test_n13_co_bang_so_thi_van_dan_ban_dung_tu_du_lieu():
 
 async def test_review6_van_ban_sai_bat_ky_loi_nao_sau_viet_lai_cung_noi_that():
     """N13 mo rong (anh chot 2026-11-26): cau chi dung van ban, sau 2 lan viet lai van sai (vd. so la) -> cau mau."""
-    async def synth(payload, issues):
+    async def synth(payload, issues, on_token=None):
         ch = payload["evidence"][0]["chunks"][0]
         return f"Quy chế quy định 99 tín chỉ [{ch['id']}]."   # so la ca 3 lan
     g, tid = env_synth({"q": ro(intent="REGULATION_QUERY", calls=[T7("quy chế")])}, synth)

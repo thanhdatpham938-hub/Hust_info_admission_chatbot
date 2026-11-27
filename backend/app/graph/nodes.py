@@ -23,6 +23,7 @@ from app.graph.context_rules import (
     update_context,
 )
 from app.graph.dispatch import TOOL_TIMEOUT_S, run_calls
+from app.graph.events import emit
 from app.graph.guardrails.check import finalize, text_only, verify
 from app.graph.prefilter import GATE_INTENT, prefilter
 from app.graph.router import RouterError, calls_as_dicts, looks_english
@@ -60,7 +61,8 @@ class GraphDeps:
     program_group: Mapping[str, str] = field(default_factory=dict)   # pick_choice buoc 5b
     today: Callable[[], date] = date.today
     tool_timeout: float = TOOL_TIMEOUT_S
-    synthesize: Callable[..., Awaitable[str]] | None = None   # (payload, issues) -> van ban; None = OpenAI that
+    # (payload, issues, on_token=None) -> van ban; None = OpenAI that. on_token chi truyen khi luot chi dung van ban
+    synthesize: Callable[..., Awaitable[str]] | None = None
     program_names: Mapping[str, tuple[str, str | None]] = field(default_factory=dict)   # Q6 = C
 
 
@@ -114,6 +116,7 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
         history = (s.get("messages") or [])[:-1]          # tin nhan cuoi la cau hien tai: route() tu them
         # Co ToolContext thi Router dung bo quet goi y + kiem sau (PLAN Sua loi, buoc 3); test gia khong truyen
         kw = {"tctx": await deps.tool_ctx()} if deps.tool_ctx else {}
+        emit("status", {"step": "routing"})                # sau prefilter: chi bao khi thuc su goi LLM
         try:
             out = await deps.route(q, ctx, history, deps.today(), **kw)
         except RouterError as e:
@@ -159,6 +162,7 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
     # ------------------------------------------------------------ run_tools
     async def run_tools(s: ChatState) -> dict:
         t = s["turn"]
+        emit("status", {"step": "searching"})
         tctx = await deps.tool_ctx() if deps.tool_ctx else None
         results = await run_calls(t["calls"], tctx, deps.tools, deps.tool_timeout)
         return {"turn": {**t, "results": results}}
@@ -248,13 +252,29 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
             t["question"], t.get("intent", "UNKNOWN"), t.get("language", "vi"),
             (t.get("router") or {}).get("scope_note"), t["calls"], t["results"], deps.program_names, deps.today())
         synth = deps.synthesize or generate_text
+        emit("status", {"step": "writing"})
+        # PLAN - API muc 5 (stream da chot o PLAN Synthesizer Q2): chi luot CHI dung van ban moi stream chu; co bang
+        # so thi dem ca cau, verify dat moi gui. Ban truoc da stream ma bi verify loai -> bao frontend xoa.
+        stream = text_only(ev)
+        if stream and t.get("retry", 0) > 0:
+            emit("replace", {"reason": "verify_failed"})
         text = None
         for _ in range(2):                                  # loi goi OpenAI: thu lai 1 lan (muc 4.4)
+            streamed = False
+
+            def on_token(piece: str) -> None:
+                nonlocal streamed
+                streamed = True
+                emit("token", {"text": piece})
+
             try:
-                text = await synth(ev["payload"], t.get("verify_issues") or None)
+                text = await synth(ev["payload"], t.get("verify_issues") or None,
+                                   **({"on_token": on_token} if stream else {}))
                 break
             except SynthError as e:
                 log.warning("Synthesizer loi: %s", e)
+                if streamed:                                # dut giua chung: xoa phan da hien truoc khi thu lai
+                    emit("replace", {"reason": "llm_error"})
         if text is None:
             return {"turn": {**t, "evidence": ev, "route": "template_answer", "synth_error": True}}
         return {"turn": {**t, "evidence": ev, "draft_text": text, "route": "verify"}}
@@ -263,6 +283,7 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
     async def verify_node(s: ChatState) -> dict:
         t = s["turn"]
         ev, lang = t["evidence"], t.get("language", "vi")
+        emit("status", {"step": "checking"})
         text, issues, used = verify(t["draft_text"], ev)
         log_ = (t.get("verify_log") or []) + [issues]
         if not issues:

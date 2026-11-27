@@ -6,7 +6,7 @@ tieng Anh do code chon (Q6 = C), LLM chi chep.
 
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -262,15 +262,27 @@ def build_messages(payload: dict, issues: list[str] | None = None) -> list[dict]
 
 
 async def generate(payload: dict, issues: list[str] | None = None, client: AsyncOpenAI | None = None,
-                   model: str | None = None) -> str:
+                   model: str | None = None, on_token: Callable[[str], None] | None = None) -> str:
+    """Co `on_token` thi stream (PLAN - API (v1) muc 5): goi on_token moi manh chu, van tra ca cau de verify kiem."""
     client = client or get_llm()
     model = model or get_settings().chat_model
+    kw = {"model": model, "temperature": SYNTH_TEMPERATURE, "max_tokens": SYNTH_MAX_TOKENS,
+          "messages": build_messages(payload, issues)}
     try:
-        r = await client.chat.completions.create(model=model, temperature=SYNTH_TEMPERATURE,
-                                                 max_tokens=SYNTH_MAX_TOKENS, messages=build_messages(payload, issues))
-    except Exception as e:                                       # noqa: BLE001 — loi mang/timeout
+        if on_token is None:
+            r = await client.chat.completions.create(**kw)
+            text = r.choices[0].message.content or ""
+        else:
+            parts = []
+            async for chunk in await client.chat.completions.create(**kw, stream=True):
+                piece = chunk.choices[0].delta.content if chunk.choices else None
+                if piece:
+                    parts.append(piece)
+                    on_token(piece)
+            text = "".join(parts)
+    except Exception as e:                                       # noqa: BLE001 — loi mang/timeout, ca khi dang stream
         raise SynthError(str(e)) from e
-    text = (r.choices[0].message.content or "").strip()
+    text = text.strip()
     if not text:
         raise SynthError("Synthesizer trả rỗng")
     return text

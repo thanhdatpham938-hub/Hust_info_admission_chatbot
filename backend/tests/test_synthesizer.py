@@ -1,8 +1,11 @@
 """build_evidence, verify, finalize, template_answer (PLAN - Synthesizer (v1)). Khong mang."""
 
+from types import SimpleNamespace
+
+import pytest
 from app.graph.guardrails.check import finalize, verify
 from app.graph.render import template_answer
-from app.graph.synthesizer import build_evidence
+from app.graph.synthesizer import SynthError, build_evidence, generate
 
 SRC = {"title": "Điểm chuẩn 2025", "url": "https://ts.hust.edu.vn/dc2025"}
 
@@ -306,3 +309,40 @@ def test_review7_so_la_va_so_sai_doan_bao_cung_mot_lan():
     _, issues, _ = verify(f"Nợ hơn 99 TC thì cảnh báo. CPA dưới 2,5 là yếu [{a}].", ev)
     assert any("99" in i and "KHÔNG có trong dữ liệu" in i for i in issues)
     assert any("2,5" in i and "đã trích dẫn" in i for i in issues)
+
+
+# ---------------------------------------------------------------- stream (PLAN - API (v1) buoc A2)
+class StreamClient:
+    """Client OpenAI gia: create(stream=True) tra tung manh delta; `fail_after` manh thi nem loi mang."""
+
+    def __init__(self, pieces, fail_after=None):
+        self.pieces, self.fail_after, self.kwargs = pieces, fail_after, None
+        self.chat = SimpleNamespace(completions=self)
+
+    async def create(self, **kw):
+        self.kwargs = kw
+
+        async def gen():
+            for i, p in enumerate(self.pieces):
+                if self.fail_after is not None and i == self.fail_after:
+                    raise ConnectionError("mat mang")
+                yield SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=p))])
+            yield SimpleNamespace(choices=[])                     # manh cuoi khong co choices
+        return gen()
+
+
+PAYLOAD = {"language": "vi", "evidence": []}
+
+
+async def test_generate_stream_goi_on_token_tung_manh_va_tra_ca_cau():
+    got = []
+    client = StreamClient(["Sinh viên", " được", None, " bảo lưu [1]."])
+    text = await generate(PAYLOAD, client=client, model="m", on_token=got.append)
+    assert got == ["Sinh viên", " được", " bảo lưu [1]."]
+    assert text == "Sinh viên được bảo lưu [1]." and client.kwargs["stream"] is True
+
+
+async def test_generate_stream_dut_giua_chung_bao_synth_error():
+    client = StreamClient(["Sinh viên", " được"], fail_after=1)
+    with pytest.raises(SynthError):
+        await generate(PAYLOAD, client=client, model="m", on_token=lambda _: None)

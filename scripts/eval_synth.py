@@ -74,7 +74,7 @@ async def run(limit: int | None):
         async def router(q, c, history, today, **kw):          # kw: tctx (bo quet + kiem sau Router, buoc 3)
             return await route(q, c, history, today, client=client, **kw)
 
-        async def synth(payload, issues):
+        async def synth(payload, issues, on_token=None):         # do chat luong: khong stream (Usage can r.usage)
             return await generate(payload, issues, client=client)
 
         async def tool_ctx():
