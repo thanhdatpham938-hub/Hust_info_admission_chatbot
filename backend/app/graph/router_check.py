@@ -74,6 +74,12 @@ def paren_codes(question: str, aliases: AliasIndex) -> list[tuple[str, str, set[
     return out
 
 
+def _typed_with(before: str, code: str, pairs: list[tuple[str, str, set[str]]]) -> bool:
+    """Nguoi dung go "(code)" NGAY SAU cum `before` (da chuan hoa)? `before` rong (gia tri chi la "(MA)") hoac la duoi
+    cua cum truoc ngoac trong cau ("Khoa hoc may tinh" trong "So sanh diem chuan khoa hoc may tinh (IT1)")."""
+    return any(c == code and (not before or pre == before or pre.endswith(" " + before)) for pre, c, _t in pairs)
+
+
 def _pool(scan: ScanResult, question: str) -> list[Mention]:
     """Cum bo quet tim duoc; bo TEN dung ngay truoc "(MA)" — cap ten + ma chi lay ma."""
     ms = scan.mentions
@@ -110,22 +116,31 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
             # neu dung loai VA chinh nguoi dung go ma do (co trong `pairs`, tuc "(MA)" co trong cau). Router tu doan
             # "(IT1)" cho "Ky thuat may tinh" thi khong tin (code-review 2026-11-26): roi xuong luat chep nguyen chu.
             # Ngoac khong phai ma ("(CT tien tien)") hoac ma sai loai thi bo qua
-            typed = {c for _pre, c, _t in pairs}
+            # Review 2026-11-27 (#5): ma phai di voi DUNG ten nguoi dung go truoc no. "(IT1)" go cho "Khoa hoc may
+            # tinh" ma Router chep sang "Ky thuat may tinh (IT1)" thi khong tin (truoc day ca hai thanh IT1, mat mot nganh)
             own = next((m.group(1).strip() for m in PAREN.finditer(v)
-                        if m.group(1).strip() in typed and _code_types(m.group(1).strip(), aliases) & accepted), None)
+                        if _code_types(m.group(1).strip(), aliases) & accepted
+                        and _typed_with(normalize(v[:m.start()]), m.group(1).strip(), pairs)), None)
             if own:
                 for pre, c, _t in pairs:
                     if c == own:
                         coded[pre] = field
                 rows.append((v, own, False))
                 continue
-            # "(MA)" Router tu them (nguoi dung khong go) -> bo phan ngoac do, xet tiep bang chu con lai
-            eff = v
+            # "(MA)" khong thuoc ten nay (Router tu them, hoac chep tu ten khac) -> bo phan ngoac, xet tiep bang chu con lai
+            eff, dropped = v, []
             for m in PAREN.finditer(v):
                 inner = m.group(1).strip()
-                if inner not in typed and _code_types(inner, aliases) & accepted:
+                if _code_types(inner, aliases) & accepted:
                     eff = eff.replace(m.group(0), " ")
+                    dropped.append(inner)
             eff = " ".join(eff.split())
+            if not eff and dropped:
+                # #6: gia tri CHI la "(MA)". Bo ngoac xong rong -> truoc day dua "" vao tool. Nguoi dung go ma (khong
+                # ngoac) thi giu ma; khong thi de bo quet thay cum cung loai, khong co thi bo gia tri
+                code = next((c for c in dropped if f" {normalize(c)} " in qn), None)
+                rows.append((v, code, code is None))
+                continue
             if eff != v:
                 n = normalize(eff)
             hit = next(((pre, c) for pre, c, t in pairs if t & accepted and n and (pre == n or pre.endswith(" " + n))),
@@ -161,7 +176,8 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
             if replace:
                 cand = next((m for m in pool if m.entity_types & FIELDS[field] and compact(m.text) not in used), None)
                 new = cand.text if cand else new
-                used.add(compact(new))
+                if new is not None:                       # #6: khong co cum thay -> None = bo gia tri
+                    used.add(compact(new))
             if new is not None and compact(new) not in {compact(k) for k in kept}:
                 kept.append(new)
             if new != v:

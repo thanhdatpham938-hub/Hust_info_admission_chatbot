@@ -187,3 +187,28 @@ def test_review3_ma_trong_ngoac_khong_co_trong_cau_thi_khong_tin(ctx):
     calls, _ = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
         programs=["Kỹ thuật máy tính (IT1)"], years=[2025]))])
     assert calls[0].args.programs == ["Kỹ thuật máy tính"]          # chu nguoi dung go, de tool tu phan giai
+
+
+def test_review5_ma_nguoi_dung_go_cho_nganh_nay_khong_gan_cho_nganh_khac(ctx):
+    """Review 2026-11-27 (#5): Router chep "(IT1)" sang ca nganh thu hai. Ma co trong cau nhung di voi ten KHAC ->
+    khong tin; truoc day ca hai thanh IT1, bo trung con mot, mat Ky thuat may tinh ma khong bao gi."""
+    q = "So sánh điểm chuẩn Khoa học máy tính (IT1) với Kỹ thuật máy tính năm 2025"
+    calls, _ = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
+        programs=["Khoa học máy tính (IT1)", "Kỹ thuật máy tính (IT1)"], years=[2025]))])
+    assert calls[0].args.programs == ["IT1", "Kỹ thuật máy tính"]
+
+
+def test_review6_chi_co_ma_trong_ngoac_nguoi_dung_go_ma_khong_ngoac_thi_giu_ma(ctx):
+    """Review 2026-11-27 (#6): gia tri chi la "(IT1)"; bo ngoac xong con rong -> truoc day dua "" vao tool."""
+    q = "Điểm chuẩn IT1 năm 2025?"
+    calls, _ = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
+        programs=["(IT1)"], years=[2025]))])
+    assert calls[0].args.programs == ["IT1"]
+
+
+def test_review6_chi_co_ma_router_tu_doan_thi_bo_khong_dua_chuoi_rong(ctx):
+    q = "Điểm chuẩn năm 2025 là bao nhiêu?"
+    calls, fixes = run(ctx, q, [AdmissionScoresCall(tool="admission_scores", args=AdmissionScoresInput(
+        programs=["(IT1)"], years=[2025]))])
+    assert calls[0].args.programs == []
+    assert fixes == ['admission_scores.programs: "(IT1)" → bỏ']
