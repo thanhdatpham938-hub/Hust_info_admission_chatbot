@@ -6,7 +6,7 @@ tieng Anh do code chon (Q6 = C), LLM chi chep.
 
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -219,12 +219,25 @@ def build_evidence(question: str, intent: str, language: str, scope_note: str | 
     if language == "en" and program_names:
         payload["program_names"] = {c: {"en": program_names[c][1], "vi": program_names[c][0]}
                                     for c in codes if c in program_names}
-    allowed = numbers_in([r.get("data") for r in results] + [r.get("missing") for r in results]
-                         + [s["location"] for s in sources] + tables)
-    allowed |= question_numbers(question, advice=scope_note == "advice")
+    # N15 (S12): so thuoc DOAN VAN BAN chi duoc dung khi chinh doan do duoc trich. `allowed_base` = moi so KHONG nam
+    # trong doan van ban (du lieu bang, thieu, vi tri nguon, bang do code dung, so trong cau hoi, nam nay / ngoai);
+    # `chunk_numbers[id]` = so cua tung doan. `allowed` (toan cuc) = base + moi doan, giu de kiem so la nhu cu.
+    base = numbers_in([r.get("data") for call, r in zip(calls, results) if call["tool"] != "rag_search"]
+                      + [r.get("missing") for r in results] + [s["location"] for s in sources] + tables)
+    base |= question_numbers(question, advice=scope_note == "advice")
     if today:
-        allowed |= {float(today.year), float(today.year - 1)}
+        base |= {float(today.year), float(today.year - 1)}
+    # Gop (khong ghi de): nhieu doan cung url + vi tri dung chung mot [n] (source_id). Kem `year`, `cohort` vi hai
+    # truong nay gui cho LLM trong payload (code-review 2026-11-26)
+    per_chunk: dict[str, set[float]] = {}
+    for it in evidence:
+        for ch in it.get("chunks") or []:
+            per_chunk.setdefault(str(ch["id"]), set()).update(numbers_in(
+                [ch.get("text"), ch.get("heading"), ch.get("document"), ch.get("year"), ch.get("cohort")]))
+    chunk_numbers = {k: sorted(v) for k, v in per_chunk.items()}
+    allowed = set(base).union(*per_chunk.values())
     return {"payload": payload, "sources": sources, "tables": tables, "allowed": sorted(allowed),
+            "allowed_base": sorted(base), "chunk_numbers": chunk_numbers,
             "rag_used": rag_used, "tuition_used": tuition_used,
             "table_source_ids": sorted({n for it in evidence for n in it.get("source_ids", [])})}
 
@@ -249,15 +262,27 @@ def build_messages(payload: dict, issues: list[str] | None = None) -> list[dict]
 
 
 async def generate(payload: dict, issues: list[str] | None = None, client: AsyncOpenAI | None = None,
-                   model: str | None = None) -> str:
+                   model: str | None = None, on_token: Callable[[str], None] | None = None) -> str:
+    """Co `on_token` thi stream (PLAN - API (v1) muc 5): goi on_token moi manh chu, van tra ca cau de verify kiem."""
     client = client or get_llm()
     model = model or get_settings().chat_model
+    kw = {"model": model, "temperature": SYNTH_TEMPERATURE, "max_tokens": SYNTH_MAX_TOKENS,
+          "messages": build_messages(payload, issues)}
     try:
-        r = await client.chat.completions.create(model=model, temperature=SYNTH_TEMPERATURE,
-                                                 max_tokens=SYNTH_MAX_TOKENS, messages=build_messages(payload, issues))
-    except Exception as e:                                       # noqa: BLE001 — loi mang/timeout
+        if on_token is None:
+            r = await client.chat.completions.create(**kw)
+            text = r.choices[0].message.content or ""
+        else:
+            parts = []
+            async for chunk in await client.chat.completions.create(**kw, stream=True):
+                piece = chunk.choices[0].delta.content if chunk.choices else None
+                if piece:
+                    parts.append(piece)
+                    on_token(piece)
+            text = "".join(parts)
+    except Exception as e:                                       # noqa: BLE001 — loi mang/timeout, ca khi dang stream
         raise SynthError(str(e)) from e
-    text = (r.choices[0].message.content or "").strip()
+    text = text.strip()
     if not text:
         raise SynthError("Synthesizer trả rỗng")
     return text

@@ -8,6 +8,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
 from app.graph.nodes import GraphDeps, make_nodes
+from app.graph.run import config_of, run_turn
 from app.graph.state import ChatState
 
 ANSWER_NODES = ("clarification", "announcement", "fallback", "template_answer")
@@ -33,7 +34,7 @@ def build_graph(deps: GraphDeps, checkpointer=None):
     g.add_conditional_edges("check_status", _route,
                             ["clarification", "announcement", "fallback", "generate", "run_tools"])
     g.add_conditional_edges("generate", _route, ["verify", "template_answer"])
-    g.add_conditional_edges("verify", _route, ["save_context", "generate", "template_answer"])
+    g.add_conditional_edges("verify", _route, ["save_context", "generate", "template_answer", "fallback"])
     for name in ANSWER_NODES:
         g.add_edge(name, "save_context")
     g.add_edge("save_context", END)
@@ -41,9 +42,11 @@ def build_graph(deps: GraphDeps, checkpointer=None):
 
 
 async def chat(graph, thread_id: str, question: str, choice: str | None = None) -> dict:
-    """Mot luot hoi. Tra dang gan voi API PRD 19: answer, citations, clarification, metadata."""
-    state = await graph.ainvoke({"turn": {"question": question, "choice": choice}},
-                                config={"configurable": {"thread_id": thread_id}})
+    """Mot luot hoi cho test va script (eval_synth.py): chay qua run_turn() nhu API, them `_state` va `draft`.
+    API dung run.response_of() (khong co hai truong nay)."""
+    async for _ in run_turn(graph, thread_id, question, choice):
+        pass
+    state = (await graph.aget_state(config_of(thread_id))).values
     t = state["turn"]
     return {"answer": t.get("answer", ""), "citations": t.get("citations") or [],
             "clarification": t.get("clarification"),

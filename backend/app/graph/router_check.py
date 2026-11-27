@@ -106,6 +106,28 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
         norms = [normalize(v) for v in values]
         rows = []
         for v, n in zip(values, norms):
+            # N16 (S01 do 2026-11-26): Router chep CA CUM co ma "Khoa hoc may tinh (IT1)" -> lay ma trong ngoac,
+            # neu dung loai VA chinh nguoi dung go ma do (co trong `pairs`, tuc "(MA)" co trong cau). Router tu doan
+            # "(IT1)" cho "Ky thuat may tinh" thi khong tin (code-review 2026-11-26): roi xuong luat chep nguyen chu.
+            # Ngoac khong phai ma ("(CT tien tien)") hoac ma sai loai thi bo qua
+            typed = {c for _pre, c, _t in pairs}
+            own = next((m.group(1).strip() for m in PAREN.finditer(v)
+                        if m.group(1).strip() in typed and _code_types(m.group(1).strip(), aliases) & accepted), None)
+            if own:
+                for pre, c, _t in pairs:
+                    if c == own:
+                        coded[pre] = field
+                rows.append((v, own, False))
+                continue
+            # "(MA)" Router tu them (nguoi dung khong go) -> bo phan ngoac do, xet tiep bang chu con lai
+            eff = v
+            for m in PAREN.finditer(v):
+                inner = m.group(1).strip()
+                if inner not in typed and _code_types(inner, aliases) & accepted:
+                    eff = eff.replace(m.group(0), " ")
+            eff = " ".join(eff.split())
+            if eff != v:
+                n = normalize(eff)
             hit = next(((pre, c) for pre, c, t in pairs if t & accepted and n and (pre == n or pre.endswith(" " + n))),
                        None)
             if hit is None:
@@ -119,10 +141,10 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
                 rows.append((v, hit[1], False))
             elif field in SELF_FIELDS and n in SELF_NAMES:
                 rows.append((v, None, False))
-            elif n and (f" {n} " in qn or compact(v) in scanned):
-                rows.append((v, v, False))
+            elif n and (f" {n} " in qn or compact(eff) in scanned):
+                rows.append((v, eff, False))
             else:
-                rows.append((v, None, True))
+                rows.append((v, eff, True))                  # `eff`: giu lai neu bo quet khong thay cum thay
         plan[field] = rows
     # N3: gia tri o THAM SO KHAC nam trong doan da doi ra ma (S37 nhom "Leibniz") -> bo: nguoi dung da noi ro bang ma.
     # Cung tham so thi giu ("Co dien tu va Ky thuat O to (TE1)": "Co dien tu" la nganh khac)
@@ -130,7 +152,7 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
         plan[field] = [(v, None, False) if new == v and any(f" {normalize(v)} " in f" {pre} " and f != field
                                                             for pre, f in coded.items())
                        else (v, new, rep) for v, new, rep in rows]
-        used |= {compact(new) for _, new, _ in plan[field] if new}
+        used |= {compact(new) for _, new, rep in plan[field] if new and not rep}
     for field, rows in plan.items():
         if not rows:
             continue
@@ -138,7 +160,7 @@ def reconcile_args(args: dict, question: str, scan: ScanResult, aliases: AliasIn
         for v, new, replace in rows:
             if replace:
                 cand = next((m for m in pool if m.entity_types & FIELDS[field] and compact(m.text) not in used), None)
-                new = cand.text if cand else v
+                new = cand.text if cand else new
                 used.add(compact(new))
             if new is not None and compact(new) not in {compact(k) for k in kept}:
                 kept.append(new)
