@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     langfuse_public_key: SecretStr | None = None
     langfuse_secret_key: SecretStr | None = None
     langfuse_host: str = "https://cloud.langfuse.com"
+    # API (PLAN - API (v1) muc 7). Origin la chuoi trinh duyet gui nen dung "localhost" duoc; nhieu origin cach dau phay
+    cors_origins: str = "http://localhost:3000"
+    rate_limit_per_min: int = 20          # plan Tuan 4 Q7: dem trong bo nho theo IP
+    turn_timeout_s: float = 60            # PLAN - API Q7: chan ca luot (Router + tool + Synthesizer viet lai)
 
 
 @lru_cache

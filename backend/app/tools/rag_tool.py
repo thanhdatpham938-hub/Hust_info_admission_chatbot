@@ -25,6 +25,14 @@ def get_retriever() -> Retriever:
     return _retriever
 
 
+async def close_retriever() -> None:
+    """Tat server (Runtime.close): dong client Qdrant + OpenAI embedding."""
+    global _retriever
+    if _retriever is not None:
+        await _retriever.close()
+        _retriever = None
+
+
 def cohort_label(cohort: str | None) -> str | None:
     """'K71' / 'khoá 2026' -> 'K71+'; 'K70' / 'K68' -> '<=K70' (dung gia tri payload cohort)."""
     if not cohort:
