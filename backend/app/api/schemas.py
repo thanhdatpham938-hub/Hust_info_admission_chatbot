@@ -21,7 +21,7 @@ class ChatRequest(BaseModel):
 
 
 class Citation(BaseModel):
-    n: int
+    n: int | None = None       # so [n] trong cau tra loi; None: kenh cua node announcement (khong danh so)
     title: str
     url: str
     location: str | None = None

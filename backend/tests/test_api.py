@@ -9,7 +9,8 @@ import uuid
 from contextlib import asynccontextmanager
 
 import httpx
-from app.api.main import create_app
+import pytest
+from app.api.main import create_app, with_deadline
 from app.core.config import Settings
 from app.graph.build import build_graph
 from app.graph.nodes import GraphDeps
@@ -17,6 +18,7 @@ from test_graph_flow import (
     ASK,
     GROUPS,
     T1,
+    T6,
     FakeRouter,
     Tools,
     ask_script,
@@ -222,3 +224,31 @@ async def test_cors_chi_cho_origin_da_khai_bao():
         stranger = await c.options("/api/chat", headers={"Origin": "https://evil.example", **pre})
     assert ok.status_code == 200 and ok.headers["access-control-allow-origin"] == "https://hust-chat.vercel.app"
     assert "access-control-allow-origin" not in stranger.headers
+
+
+async def test_cau_thong_bao_tra_trich_dan_kenh_khong_danh_so():
+    """Review 2026-11-27: node announcement dua trich dan {title, url} khong co `n` -> Citation bat buoc n gay 500."""
+    q = "Viện CNTT có thông báo gì?"
+    script = {q: ro(intent="ANNOUNCEMENT_QUERY", calls=[T6(["Viện CNTT"])])}
+    async with client_for(FakeRuntime(script)) as c:
+        r = await c.post("/api/chat", json={"message": q})
+        s = await c.post("/api/chat/stream", json={"message": q})
+    assert r.status_code == 200 and r.json()["metadata"]["intent"] == "ANNOUNCEMENT_QUERY"
+    assert r.json()["citations"] == [{"n": None, "title": "Trường CNTT&TT", "url": "https://soict.hust.edu.vn/",
+                                      "location": None}]
+    assert [e for e, _ in sse(s.text)][-2:] == ["final", "done"]
+
+
+async def test_het_gio_khi_dang_cho_ben_nhan_van_bao_timeout_khong_huy_ca_task():
+    """Review 2026-11-27: asyncio.timeout boc qua `yield` thi het gio luc ben nhan dang ban (vd. Starlette dang send)
+    se HUY task ngoai generator -> CancelledError khong duoc doi thanh TimeoutError, luong SSE dut khong co error/done."""
+    async def two_events():
+        yield 1
+        await asyncio.sleep(0.01)
+        yield 2
+
+    gen = with_deadline(two_events(), 0.05)
+    assert await anext(gen) == 1
+    await asyncio.sleep(0.1)                          # ben nhan cham: het gio xay ra NGOAI generator
+    with pytest.raises(TimeoutError):
+        await anext(gen)

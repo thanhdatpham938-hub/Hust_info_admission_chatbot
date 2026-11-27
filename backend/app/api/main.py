@@ -36,6 +36,27 @@ def error(status: int, code: str, message: str, answer: str | None = None,
     return JSONResponse(body, status_code=status, headers=headers)
 
 
+async def with_deadline(agen: AsyncIterator, seconds: float) -> AsyncIterator:
+    """Gioi han CA luot (Q7). Chi boc timeout quanh tung lan cho phan tu ke tiep, KHONG boc qua `yield`: neu boc qua
+    yield, het gio luc ben nhan dang ban (Starlette dang send) se huy task o ngoai generator -> CancelledError khong
+    duoc doi thanh TimeoutError, luong SSE dut khong co error/done (review 2026-11-27)."""
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + seconds
+    try:
+        while True:
+            remaining = deadline - loop.time()
+            if remaining <= 0:
+                raise TimeoutError
+            try:
+                async with asyncio.timeout(remaining):
+                    x = await anext(agen)
+            except StopAsyncIteration:
+                return
+            yield x
+    finally:
+        await agen.aclose()
+
+
 def sse_line(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
@@ -82,11 +103,10 @@ def create_app(runtime_factory: RuntimeFactory, settings: Settings | None = None
             return error(409, "THREAD_BUSY", "Câu trước trong cuộc trò chuyện này chưa trả lời xong.")
         return None
 
-    async def events(request: Request, tid: str, req: ChatRequest) -> AsyncIterator[dict]:
-        """run_turn() co gioi han ca luot (Q7: 60 s). Loi/qua gio -> nem ra de route doi thanh 500."""
-        async with asyncio.timeout(s.turn_timeout_s):
-            async for ev in run_turn(request.app.state.runtime.graph, tid, req.message, req.choice):
-                yield ev
+    def events(request: Request, tid: str, req: ChatRequest) -> AsyncIterator[dict]:
+        """run_turn() co gioi han ca luot (Q7: 60 s). Loi/qua gio -> nem ra de route doi thanh 500 / su kien error."""
+        return with_deadline(run_turn(request.app.state.runtime.graph, tid, req.message, req.choice),
+                             s.turn_timeout_s)
 
     @app.post("/api/chat", response_model=ChatResponse)
     async def chat(req: ChatRequest, request: Request):
@@ -105,8 +125,8 @@ def create_app(runtime_factory: RuntimeFactory, settings: Settings | None = None
     @app.post("/api/chat/stream")
     async def chat_stream(req: ChatRequest, request: Request):
         """SSE (muc 4.2): meta -> status/token/replace... -> final -> done. Loi sau khi da mo luong -> error -> done.
-        Nguoi dung dong trang thi Starlette huy generator: luot dang chay bi huy, an toan vi ngu canh chi ghi o
-        save_context cuoi cung."""
+        Nguoi dung dong trang thi Starlette huy generator: luot dang chay bi huy, khong ghi checkpoint (run_turn dung
+        durability="exit"); cau hoi treo neu co do start_turn bo o luot sau."""
         tid = str(req.thread_id or uuid.uuid4())
         if (no := refuse(request, tid)) is not None:
             return no
