@@ -75,8 +75,11 @@ def make_nodes(deps: GraphDeps) -> dict[str, Callable]:
     async def start_turn(s: ChatState) -> dict:
         incoming = s.get("turn") or {}
         q = incoming.get("question", "")
+        msgs = s.get("messages") or []
+        if msgs and msgs[-1]["role"] == "user":           # luot truoc dut giua chung (loi / het gio / nguoi dung
+            msgs = msgs[:-1]                               # dong trang): bo cau hoi khong co tra loi (review 2026-11-27)
         return {"turn": new_turn(q, incoming.get("choice")), "context": _ctx(s),
-                "messages": append_message(s.get("messages") or [], "user", q)}
+                "messages": append_message(msgs, "user", q)}
 
     # ------------------------------------------------------------ pick_choice (duong tat, khong LLM)
     async def pick_node(s: ChatState) -> dict:

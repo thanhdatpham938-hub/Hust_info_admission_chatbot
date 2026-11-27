@@ -2,9 +2,11 @@
 
 - Pool RIENG, ghi duoc, search_path = langgraph. Pool cua tool (app/db/pool.py) giu chi doc, schema hust.
   Vi sao schema rieng: build_db.py --postgres xoa va dung lai `hust`, hoi thoai khong mat theo.
-- Ba tuy chon ket noi AsyncPostgresSaver can: autocommit (setup() co CREATE INDEX CONCURRENTLY, khong chay trong
-  transaction), row_factory=dict_row (saver doc cot theo ten), prepare_threshold=0 (khong dung prepared statement:
-  thieu thi loi khi nhieu luot dung lai ket noi).
+- Ba tuy chon ket noi theo tai lieu LangGraph cho AsyncPostgresSaver: autocommit (setup() co CREATE INDEX
+  CONCURRENTLY, khong chay trong transaction), row_factory=dict_row (saver doc cot theo ten), prepare_threshold=0.
+  Luu y psycopg: 0 = prepare NGAY lan chay dau; None moi la TAT prepared statement. Deploy sau PgBouncer che do
+  transaction (vd. mot so goi Postgres tren Render) thi phai doi thanh None, neu khong se loi
+  'prepared statement ... does not exist' (review 2026-11-27).
 - Lan dau: CREATE SCHEMA IF NOT EXISTS langgraph roi setup() tao bang; chay lai khong sao.
 """
 

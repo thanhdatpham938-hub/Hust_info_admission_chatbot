@@ -30,9 +30,12 @@ def config_of(thread_id: str) -> dict:
 
 
 async def run_turn(graph, thread_id: str, question: str, choice: str | None = None) -> AsyncIterator[dict]:
+    """durability="exit": chi ghi checkpoint khi graph ket thuc (mac dinh ghi sau MOI buoc, ~9 lan/luot o A8). Luot bi
+    huy (het gio, dong trang) khong ghi gi. Luot LOI van ghi state luc loi: cau hoi treo do start_turn bo o luot sau."""
     state = None
     async for mode, chunk in graph.astream({"turn": {"question": question, "choice": choice}},
-                                           config=config_of(thread_id), stream_mode=["custom", "values"]):
+                                           config=config_of(thread_id), stream_mode=["custom", "values"],
+                                           durability="exit"):
         if mode == "custom":
             yield chunk
         else:

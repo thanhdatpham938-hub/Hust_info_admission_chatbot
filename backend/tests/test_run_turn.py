@@ -3,8 +3,10 @@
 Router gia + tool gia + Synthesizer gia + InMemorySaver: khong goi OpenAI, khong can Postgres/Qdrant.
 """
 
+import json
 import uuid
 
+import pytest
 from app.graph.build import build_graph
 from app.graph.nodes import GraphDeps
 from app.graph.run import run_turn
@@ -80,3 +82,25 @@ async def test_ban_da_stream_bi_verify_loai_thi_bao_xoa_roi_stream_ban_moi():
     assert after == "Sinh viên bị cảnh báo khi điểm thấp [1]."
     final = events[-1]["data"]
     assert "99" not in final["answer"] and final["metadata"]["rewrites"] == 1
+
+
+async def test_luot_loi_giua_chung_khong_de_lai_cau_hoi_treo_trong_lich_su():
+    """Review 2026-11-27: LangGraph luu checkpoint sau MOI buoc. Luot loi/het gio/bi huy giua chung (sau start_turn)
+    de lai cau hoi trong `messages` ma khong co cau tra loi -> luot sau Router thay hai cau hoi lien tiep."""
+    q1, q2, q3 = "Điểm IT1 2025?", "Điểm IT2 2025?", "Điểm IT1 2024?"
+    router = FakeRouter({q1: ro(calls=[T1(["IT1"], [2025])]), q2: ro(calls=[T1(["IT2"], [2025])]),
+                         q3: ro(calls=[T1(["IT1"], [2024])])})
+
+    async def synth(payload, issues, on_token=None):
+        if "IT2" in json.dumps(payload, ensure_ascii=False):
+            raise RuntimeError("loi ngoai du kien")          # khong phai SynthError -> thoat khoi graph
+        return await fake_synth(payload, issues)
+
+    g = build_graph(GraphDeps(route=router, tools=Tools().table(), program_group=GROUPS, synthesize=synth))
+    tid = str(uuid.uuid4())
+    await collect(g, q1, thread_id=tid)
+    with pytest.raises(RuntimeError):
+        await collect(g, q2, thread_id=tid)
+    await collect(g, q3, thread_id=tid)
+    history = router.seen[-1]["history"]
+    assert [m["content"] for m in history if m["role"] == "user"] == [q1]
